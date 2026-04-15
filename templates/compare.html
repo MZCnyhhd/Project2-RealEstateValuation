@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>房源对比</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .compare-table th, .compare-table td { vertical-align: middle; }
+        .compare-img { width: 180px; height: 120px; object-fit: cover; border-radius: .5rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-house-heart-fill"></i> 房地产智能Agent</a>
+            <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-outline-light btn-sm" href="/favorites"><i class="bi bi-heart"></i> 收藏</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">房源对比 ({{ listings|length }})</h3>
+            <a href="/" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> 返回首页</a>
+        </div>
+
+        {% if listings %}
+        <div class="table-responsive">
+            <table class="table table-bordered bg-white compare-table">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">字段</th>
+                        {% for l in listings %}
+                        <th>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <a href="{{ url_for('listing_detail', listing_id=l.id) }}" class="text-decoration-none">{{ l.id }}</a>
+                                <a class="btn btn-outline-primary btn-sm" href="{{ url_for('toggle_compare', listing_id=l.id, next=request.full_path) }}">移出</a>
+                            </div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>图片</th>
+                        {% for l in listings %}
+                        <td><img class="compare-img" src="{{ l.image_url }}" alt="{{ l.title }}"></td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>标题</th>
+                        {% for l in listings %}
+                        <td>{{ l.title }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>小区</th>
+                        {% for l in listings %}
+                        <td>{{ l.community }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>价格(万)</th>
+                        {% for l in listings %}
+                        <td class="fw-bold text-danger">{{ l.price }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>面积(㎡)</th>
+                        {% for l in listings %}
+                        <td>{{ l.area }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>户型</th>
+                        {% for l in listings %}
+                        <td>{{ l.layout }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>标签</th>
+                        {% for l in listings %}
+                        <td>
+                            {% for tag in l.tags %}
+                            <span class="badge bg-primary bg-opacity-75">{{ tag }}</span>
+                            {% endfor %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">你还没有选择任何房源进行对比。</div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

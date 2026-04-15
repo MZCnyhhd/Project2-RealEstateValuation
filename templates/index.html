@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>房地产智能Agent</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card-title { font-weight: bold; }
+        .card-subtitle { color: #6c757d; }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-house-heart-fill"></i> 房地产智能Agent</a>
+            <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-outline-light btn-sm" href="/favorites"><i class="bi bi-heart"></i> 收藏</a>
+                <a class="btn btn-outline-light btn-sm" href="/compare"><i class="bi bi-columns-gap"></i> 对比</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 搜索表单 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">搜索房源</h5>
+                <form action="/" method="get">
+                    <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                    <input type="hidden" name="page_size" value="{{ page_size }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="q" class="form-label">关键词</label>
+                            <input type="text" class="form-control" id="q" name="q" value="{{ q }}" placeholder="小区/标题/地址">
+                        </div>
+                        <div class="col-md">
+                            <label for="min_price" class="form-label">最低价格 (万)</label>
+                            <input type="number" class="form-control" id="min_price" name="min_price" value="{{ url_params.get('min_price', '') }}">
+                        </div>
+                        <div class="col-md">
+                            <label for="max_price" class="form-label">最高价格 (万)</label>
+                            <input type="number" class="form-control" id="max_price" name="max_price" value="{{ url_params.get('max_price', '') }}">
+                        </div>
+                        <div class="col-md">
+                            <label for="min_area" class="form-label">最小面积 (㎡)</label>
+                            <input type="number" class="form-control" id="min_area" name="min_area" value="{{ url_params.get('min_area', '') }}">
+                        </div>
+                        <div class="col-md">
+                            <label for="max_area" class="form-label">最大面积 (㎡)</label>
+                            <input type="number" class="form-control" id="max_area" name="max_area" value="{{ url_params.get('max_area', '') }}">
+                        </div>
+                        <div class="col-md-auto d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2"><i class="bi bi-search"></i> 搜索</button>
+                            <a href="/" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i> 重置</a>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-12">
+                            <label class="form-label">标签（多选）</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for tag in available_tags %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="tag_{{ loop.index }}" name="tags" value="{{ tag }}" {% if tag in selected_tags %}checked{% endif %}>
+                                    <label class="form-check-label" for="tag_{{ loop.index }}">{{ tag }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 排序和结果标题 -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>搜索结果 ({{ total_results }} 套)</h3>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    排序方式
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item {% if sort_by == 'price_asc' %}active{% endif %}" href="{{ sort_urls.price_asc }}">价格从低到高</a></li>
+                    <li><a class="dropdown-item {% if sort_by == 'price_desc' %}active{% endif %}" href="{{ sort_urls.price_desc }}">价格从高到低</a></li>
+                    <li><a class="dropdown-item {% if sort_by == 'area_asc' %}active{% endif %}" href="{{ sort_urls.area_asc }}">面积从小到大</a></li>
+                    <li><a class="dropdown-item {% if sort_by == 'area_desc' %}active{% endif %}" href="{{ sort_urls.area_desc }}">面积从大到小</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 搜索结果 -->
+        {% if listings %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for listing in listings %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ listing.image_url }}" class="card-img-top" alt="{{ listing.title }}">
+                        <div class="card-body">
+                        <a href="{{ url_for('listing_detail', listing_id=listing.id) }}" class="text-decoration-none text-dark">
+                            <h5 class="card-title">{{ listing.title }}</h5>
+                        </a>
+                            <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-building"></i> {{ listing.community }}</h6>
+                            <p class="card-text">
+                                <i class="bi bi-cash-coin"></i> <strong>价格:</strong> {{ listing.price }} 万<br>
+                                <i class="bi bi-rulers"></i> <strong>面积:</strong> {{ listing.area }} ㎡<br>
+                                <i class="bi bi-door-open"></i> <strong>户型:</strong> {{ listing.layout }}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between mb-2">
+                                <a class="btn btn-outline-danger btn-sm" href="{{ url_for('toggle_favorite', listing_id=listing.id, next=request.full_path) }}">
+                                    {% if listing.id in favorites %}
+                                    <i class="bi bi-heart-fill"></i> 已收藏
+                                    {% else %}
+                                    <i class="bi bi-heart"></i> 收藏
+                                    {% endif %}
+                                </a>
+                                <a class="btn btn-outline-primary btn-sm" href="{{ url_for('toggle_compare', listing_id=listing.id, next=request.full_path) }}">
+                                    <i class="bi bi-columns-gap"></i>
+                                    {% if listing.id in compare %}移出对比{% else %}加入对比{% endif %}
+                                </a>
+                            </div>
+                            {% for tag in listing.tags %}
+                            <span class="badge bg-primary bg-opacity-75">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if total_pages > 1 %}
+            <nav class="mt-4" aria-label="分页">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not page_urls.prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ page_urls.prev if page_urls.prev else '#' }}">上一页</a>
+                    </li>
+                    {% for p in page_urls.pages %}
+                        {% if p.num %}
+                        <li class="page-item {% if p.active %}active{% endif %}">
+                            <a class="page-link" href="{{ p.url }}">{{ p.num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">{{ p.label }}</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not page_urls.next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ page_urls.next if page_urls.next else '#' }}">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="py-4 mt-5 bg-light">
+        <div class="container text-center text-muted">
+            <p>&copy; 2026 房地产智能Agent. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

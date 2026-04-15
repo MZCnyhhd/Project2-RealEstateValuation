@@ -1,0 +1,1790 @@
+[
+  {
+    "id": "R001",
+    "title": "市中心精装两居，视野开阔，交通便利",
+    "community": "阳光都市",
+    "address": "人民路123号",
+    "layout": "2室1厅1卫",
+    "area": 88.5,
+    "price": 350,
+    "tags": [
+      "近地铁",
+      "精装修",
+      "随时看房"
+    ],
+    "description": "核心地段稀缺房源，黄金楼层，采光无遮挡。业主诚心出售，看房方便。生活配套齐全，步行5分钟可达地铁站和大型商场。",
+    "image_url": "https://images.unsplash.com/photo-1630699293388-0938c397106a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9042,
+    "longitude": 116.4074
+  },
+  {
+    "id": "R002",
+    "title": "翰林学府旁，南北通透大三居，家庭首选",
+    "community": "翰林世家",
+    "address": "文昌路88号",
+    "layout": "3室2厅2卫",
+    "area": 125.0,
+    "price": 520,
+    "tags": [
+      "学区房",
+      "满五唯一",
+      "南北通透"
+    ],
+    "description": "对口市重点小学，孩子上学无忧。小区环境优美，绿化率高。房型方正，全明格局，是改善型家庭的理想选择。",
+    "image_url": "https://images.unsplash.com/photo-1684928365167-e91916573122?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9342,
+    "longitude": 116.4174
+  },
+  {
+    "id": "R003",
+    "title": "新上！临湖景观大平层，豪华装修带地暖",
+    "community": "天鹅湖畔",
+    "address": "湖滨西路1号",
+    "layout": "4室2厅3卫",
+    "area": 210.0,
+    "price": 1150,
+    "tags": [
+      "新上",
+      "湖景房",
+      "豪华装修"
+    ],
+    "description": "一线湖景，270度观景阳台。全屋采用国际一线品牌装修，带中央空调和地暖。小区自带高端会所，私密性好。",
+    "image_url": "https://images.unsplash.com/photo-1562821696-c68d007f943b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8842,
+    "longitude": 116.3574
+  },
+  {
+    "id": "R004",
+    "title": "投资优选！低总价小户型，月租金可观",
+    "community": "青年公寓",
+    "address": "创业大街200号",
+    "layout": "1室1厅1卫",
+    "area": 45.0,
+    "price": 120,
+    "tags": [
+      "低总价",
+      "投资回报高"
+    ],
+    "description": "位于高新科技园区，租赁需求旺盛。总价低，易出手，是理想的投资入门产品。目前带租约出售，即买即收租。",
+    "image_url": "https://images.unsplash.com/photo-1563298723-dcfebaa392e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9842,
+    "longitude": 116.3074
+  },
+  {
+    "id": "R005",
+    "title": "降价急售！花园洋房一层带院子，老人小孩最爱",
+    "community": "四季花城",
+    "address": "花园路56号",
+    "layout": "3室2厅1卫",
+    "area": 110.0,
+    "price": 480,
+    "tags": [
+      "降价房",
+      "带花园",
+      "一层"
+    ],
+    "description": "业主因工作调动急售，价格可谈！赠送约50平米私家花园，已精心打理。小区人车分流，非常适合有老人和孩子的家庭。",
+    "image_url": "https://images.unsplash.com/photo-1597962261938-8714a29fa42c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8542,
+    "longitude": 116.4574
+  },
+  {
+    "id": "R006",
+    "title": "顶层复式，带超大露台，可观星空",
+    "community": "星空之城",
+    "address": "银河路99号",
+    "layout": "5室3厅3卫",
+    "area": 280.0,
+    "price": 1500,
+    "tags": [
+      "复式",
+      "带露台",
+      "视野无敌"
+    ],
+    "description": "顶层稀有复式结构，赠送超100平米大露台，可烧烤、派对。视野绝佳，可俯瞰全城夜景。身份的象征。",
+    "image_url": "https://images.unsplash.com/photo-1640109229792-a26a0ee366ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9142,
+    "longitude": 116.4874
+  },
+  {
+    "id": "R007",
+    "title": "地铁口温馨一居室，适合单身贵族",
+    "community": "都市驿站",
+    "address": "交通枢纽B座",
+    "layout": "1室0厅1卫",
+    "area": 38.0,
+    "price": 150,
+    "tags": [
+      "近地铁",
+      "小户型",
+      "拎包入住"
+    ],
+    "description": "出小区门就是地铁2号线入口，通勤时间大大缩短。房子虽小，五脏俱全。业主自住装修，保养非常好，可拎包入住。",
+    "image_url": "https://images.unsplash.com/photo-1556909211-36987daf7b4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9012,
+    "longitude": 116.3974
+  },
+  {
+    "id": "R008",
+    "title": "公园旁边的宁静三居，满五唯一税费低",
+    "community": "绿野仙踪",
+    "address": "公园东路18号",
+    "layout": "3室1厅2卫",
+    "area": 115.5,
+    "price": 495,
+    "tags": [
+      "公园房",
+      "满五唯一",
+      "安静"
+    ],
+    "description": "紧邻城市中央公园，是天然的氧吧。房子是满五年唯一的商品房，交易税费低。小区非常安静，适合喜欢宁静生活的您。",
+    "image_url": "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTh8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9242,
+    "longitude": 116.4574
+  },
+  {
+    "id": "R009",
+    "title": "商圈核心酒店式公寓，不限购不限贷",
+    "community": "环球贸易中心",
+    "address": "商业街1号",
+    "layout": "开放式",
+    "area": 55.0,
+    "price": 180,
+    "tags": [
+      "不限购",
+      "商住两用",
+      "繁华地段"
+    ],
+    "description": "位于最繁华的商圈，楼下就是购物中心。商业产权，不限购不限贷，可注册公司。既可自住，也可作为空中办公室。",
+    "image_url": "https://images.unsplash.com/photo-1633809365429-2fa048a02119?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9082,
+    "longitude": 116.4274
+  },
+  {
+    "id": "R010",
+    "title": "老洋房改造，体验历史与现代的碰撞",
+    "community": "梧桐里",
+    "address": "历史文化街区9号",
+    "layout": "2室2厅1卫",
+    "area": 95.0,
+    "price": 680,
+    "tags": [
+      "历史建筑",
+      "设计师改造",
+      "有故事的房子"
+    ],
+    "description": "由著名设计师操刀改造的百年老洋房，保留了原始的木质结构，又融入了现代化的生活设施。每一砖一瓦，都在讲述着过去的故事。",
+    "image_url": "https://images.unsplash.com/photo-1618221381711-42ca8ab6e908?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNjF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8942,
+    "longitude": 116.3874
+  },
+  {
+    "id": "R011",
+    "title": "公园旁三居，金茂府，南北通透",
+    "community": "金茂府",
+    "address": "花园路96号院",
+    "layout": "3室2厅2卫",
+    "area": 139.2,
+    "price": 560,
+    "tags": [
+      "近地铁",
+      "随时看房",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1706808849803-f61304e024ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5NjR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9525,
+    "longitude": 116.4491
+  },
+  {
+    "id": "R012",
+    "title": "视野开阔四居，金茂府，近地铁",
+    "community": "金茂府",
+    "address": "公园东路158号院",
+    "layout": "4室2厅2卫",
+    "area": 173.0,
+    "price": 690,
+    "tags": [
+      "视野无敌",
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。适合改善型家庭，空间尺度更从容。",
+    "image_url": "https://images.unsplash.com/photo-1602028617950-0ed35e50e460?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5NzB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8993,
+    "longitude": 116.3729
+  },
+  {
+    "id": "R013",
+    "title": "带露台一居，万科城，豪华装修",
+    "community": "万科城",
+    "address": "建国路6号院",
+    "layout": "1室1厅1卫",
+    "area": 44.3,
+    "price": 180,
+    "tags": [
+      "豪华装修",
+      "近地铁",
+      "人车分流"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。看房方便，欢迎随时预约。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1632120669818-ed5498030e32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5NzZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.934,
+    "longitude": 116.37
+  },
+  {
+    "id": "R014",
+    "title": "投资优选三居，绿野仙踪，近地铁",
+    "community": "绿野仙踪",
+    "address": "长安街268弄",
+    "layout": "3室2厅2卫",
+    "area": 128.6,
+    "price": 450,
+    "tags": [
+      "近地铁",
+      "次新房"
+    ],
+    "description": "看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1600493505371-f2f6153dbb29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9617,
+    "longitude": 116.4564
+  },
+  {
+    "id": "R015",
+    "title": "地铁口两居，华润置地，近地铁",
+    "community": "华润置地",
+    "address": "建国路16弄",
+    "layout": "2室2厅1卫",
+    "area": 77.0,
+    "price": 570,
+    "tags": [
+      "得房率高",
+      "近地铁",
+      "人车分流",
+      "复式"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1487700160041-babef9c3cb55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8747,
+    "longitude": 116.3428
+  },
+  {
+    "id": "R016",
+    "title": "改善两居，蓝湾国际，豪华装修",
+    "community": "蓝湾国际",
+    "address": "学院路240弄",
+    "layout": "2室2厅1卫",
+    "area": 73.9,
+    "price": 340,
+    "tags": [
+      "豪华装修",
+      "随时看房",
+      "精装修"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.858,
+    "longitude": 116.4455
+  },
+  {
+    "id": "R017",
+    "title": "精装三居，梧桐里，南北通透",
+    "community": "梧桐里",
+    "address": "文昌路266号楼",
+    "layout": "3室2厅2卫",
+    "area": 99.3,
+    "price": 650,
+    "tags": [
+      "低总价",
+      "随时看房",
+      "南北通透"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1494526585095-c41746248156?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8804,
+    "longitude": 116.3393
+  },
+  {
+    "id": "R018",
+    "title": "公园旁一居，天鹅湖畔，随时看房",
+    "community": "天鹅湖畔",
+    "address": "人民路193号",
+    "layout": "1室0厅1卫",
+    "area": 39.6,
+    "price": 310,
+    "tags": [
+      "随时看房",
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1709747820806-057272eddd5d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODh8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8615,
+    "longitude": 116.4977
+  },
+  {
+    "id": "R019",
+    "title": "采光充足四居，都市驿站，得房率高",
+    "community": "都市驿站",
+    "address": "公园东路172弄",
+    "layout": "4室2厅3卫",
+    "area": 197.9,
+    "price": 1390,
+    "tags": [
+      "得房率高",
+      "豪华装修"
+    ],
+    "description": "看房方便，欢迎随时预约。适合改善型家庭，空间尺度更从容。周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1618222155830-fcacd23874e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9407,
+    "longitude": 116.3849
+  },
+  {
+    "id": "R020",
+    "title": "改善四居，四季花城，公园房",
+    "community": "四季花城",
+    "address": "公园东路156号楼",
+    "layout": "4室2厅3卫",
+    "area": 181.5,
+    "price": 1630,
+    "tags": [
+      "随时看房",
+      "公园房",
+      "近地铁",
+      "精装修"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1721613883523-da9debc5f377?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8925,
+    "longitude": 116.4286
+  },
+  {
+    "id": "R021",
+    "title": "稀缺三居，梧桐里，投资回报高",
+    "community": "梧桐里",
+    "address": "长安街39号院",
+    "layout": "3室2厅2卫",
+    "area": 129.2,
+    "price": 860,
+    "tags": [
+      "投资回报高",
+      "精装修"
+    ],
+    "description": "看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9293,
+    "longitude": 116.4896
+  },
+  {
+    "id": "R022",
+    "title": "稀缺一居，融创壹号院，南北通透",
+    "community": "融创壹号院",
+    "address": "滨河路187号院",
+    "layout": "1室0厅1卫",
+    "area": 41.9,
+    "price": 130,
+    "tags": [
+      "低总价",
+      "南北通透",
+      "复式"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1615876063860-d971f6dca5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8865,
+    "longitude": 116.3328
+  },
+  {
+    "id": "R023",
+    "title": "地铁口一居，合生汇，公园房",
+    "community": "合生汇",
+    "address": "朝阳路69弄",
+    "layout": "1室1厅1卫",
+    "area": 47.1,
+    "price": 200,
+    "tags": [
+      "公园房",
+      "降价房",
+      "南北通透"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1556912102-ea493a2a5b93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8483,
+    "longitude": 116.3985
+  },
+  {
+    "id": "R024",
+    "title": "精装两居，万科城，精装修",
+    "community": "万科城",
+    "address": "滨河路121号院",
+    "layout": "2室2厅1卫",
+    "area": 81.6,
+    "price": 310,
+    "tags": [
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1634207521799-5616b235ac74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9155,
+    "longitude": 116.4253
+  },
+  {
+    "id": "R025",
+    "title": "带花园两居，青年公寓，南北通透",
+    "community": "青年公寓",
+    "address": "花园路90号",
+    "layout": "2室1厅1卫",
+    "area": 101.0,
+    "price": 650,
+    "tags": [
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1606744824163-985d376605aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8605,
+    "longitude": 116.3573
+  },
+  {
+    "id": "R026",
+    "title": "新上三居，世贸天阶，近地铁",
+    "community": "世贸天阶",
+    "address": "长安街155号",
+    "layout": "3室2厅2卫",
+    "area": 113.0,
+    "price": 570,
+    "tags": [
+      "湖景房",
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "看房方便，欢迎随时预约。步行可达地铁站，通勤更高效。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1686385798052-0e86d41b4a60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9438,
+    "longitude": 116.451
+  },
+  {
+    "id": "R027",
+    "title": "公园旁四居，云栖公馆，随时看房",
+    "community": "云栖公馆",
+    "address": "西直门外大街69号",
+    "layout": "4室2厅2卫",
+    "area": 191.6,
+    "price": 1140,
+    "tags": [
+      "豪华装修",
+      "近地铁",
+      "随时看房",
+      "南北通透"
+    ],
+    "description": "看房方便，欢迎随时预约。适合改善型家庭，空间尺度更从容。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1630699376167-3870469e7598?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.878,
+    "longitude": 116.4486
+  },
+  {
+    "id": "R028",
+    "title": "精装一居，雅居乐园，近地铁",
+    "community": "雅居乐园",
+    "address": "湖滨西路255号院",
+    "layout": "1室1厅1卫",
+    "area": 46.6,
+    "price": 370,
+    "tags": [
+      "随时看房",
+      "近地铁",
+      "精装修"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1628304502409-4d5dcdd7933d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8646,
+    "longitude": 116.4894
+  },
+  {
+    "id": "R029",
+    "title": "精装三居，梧桐里，低总价",
+    "community": "梧桐里",
+    "address": "创业大街105号楼",
+    "layout": "3室1厅1卫",
+    "area": 113.1,
+    "price": 500,
+    "tags": [
+      "低总价",
+      "近地铁",
+      "精装修"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1529423374493-8b2f78fd2437?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8632,
+    "longitude": 116.3854
+  },
+  {
+    "id": "R030",
+    "title": "投资优选一居，华润置地，南北通透",
+    "community": "华润置地",
+    "address": "花园路107号",
+    "layout": "1室0厅1卫",
+    "area": 36.8,
+    "price": 170,
+    "tags": [
+      "采光好",
+      "低总价",
+      "南北通透"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1659720879338-160d469a3b17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9284,
+    "longitude": 116.3086
+  },
+  {
+    "id": "R031",
+    "title": "安静舒适三居，青年公寓，随时看房",
+    "community": "青年公寓",
+    "address": "创业大街161弄",
+    "layout": "3室2厅2卫",
+    "area": 125.9,
+    "price": 650,
+    "tags": [
+      "近地铁",
+      "随时看房"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1586365116351-a2094a69e00e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9535,
+    "longitude": 116.4693
+  },
+  {
+    "id": "R032",
+    "title": "采光充足三居，世贸天阶，商住两用",
+    "community": "世贸天阶",
+    "address": "人民路125号楼",
+    "layout": "3室1厅1卫",
+    "area": 110.5,
+    "price": 850,
+    "tags": [
+      "带露台",
+      "商住两用"
+    ],
+    "description": "看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1513694203232-719a280e022f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8979,
+    "longitude": 116.3414
+  },
+  {
+    "id": "R033",
+    "title": "改善一居，雅居乐园，精装修",
+    "community": "雅居乐园",
+    "address": "滨河路100弄",
+    "layout": "1室1厅1卫",
+    "area": 45.8,
+    "price": 140,
+    "tags": [
+      "低总价",
+      "公园房",
+      "精装修"
+    ],
+    "description": "看房方便，欢迎随时预约。采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1593136573819-c3b57b8caf29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8898,
+    "longitude": 116.3697
+  },
+  {
+    "id": "R034",
+    "title": "视野开阔两居，雅居乐园，南北通透",
+    "community": "雅居乐园",
+    "address": "湖滨西路64号院",
+    "layout": "2室1厅1卫",
+    "area": 93.2,
+    "price": 440,
+    "tags": [
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1609740700123-1f8e327cb18f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8499,
+    "longitude": 116.4521
+  },
+  {
+    "id": "R035",
+    "title": "稀缺三居，保利天汇，近地铁",
+    "community": "保利天汇",
+    "address": "文昌路187号楼",
+    "layout": "3室2厅2卫",
+    "area": 112.6,
+    "price": 500,
+    "tags": [
+      "近地铁",
+      "精装修"
+    ],
+    "description": "看房方便，欢迎随时预约。采光充足，通风良好，装修维护到位。步行可达地铁站，通勤更高效。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1646592492037-a2a678ecd31a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9492,
+    "longitude": 116.4607
+  },
+  {
+    "id": "R036",
+    "title": "新上三居，绿野仙踪，随时看房",
+    "community": "绿野仙踪",
+    "address": "滨河路161弄",
+    "layout": "3室1厅1卫",
+    "area": 115.0,
+    "price": 870,
+    "tags": [
+      "低总价",
+      "近地铁",
+      "随时看房"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1632999101501-47bd016f7e46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTh8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9307,
+    "longitude": 116.4843
+  },
+  {
+    "id": "R037",
+    "title": "带花园三居，融创壹号院，近地铁",
+    "community": "融创壹号院",
+    "address": "文昌路31弄",
+    "layout": "3室1厅1卫",
+    "area": 119.6,
+    "price": 540,
+    "tags": [
+      "近地铁",
+      "精装修",
+      "南北通透",
+      "物业好"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1635247049915-dff57098ea0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8865,
+    "longitude": 116.4688
+  },
+  {
+    "id": "R038",
+    "title": "南北通透一居，星空之城，商住两用",
+    "community": "星空之城",
+    "address": "银河路253号",
+    "layout": "1室0厅1卫",
+    "area": 48.1,
+    "price": 320,
+    "tags": [
+      "安静",
+      "近地铁",
+      "商住两用"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1600512592336-7e1452b9743c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMjZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.898,
+    "longitude": 116.4836
+  },
+  {
+    "id": "R039",
+    "title": "稀缺两居，中海国际，豪华装修",
+    "community": "中海国际",
+    "address": "湖滨西路171号楼",
+    "layout": "2室1厅1卫",
+    "area": 101.2,
+    "price": 690,
+    "tags": [
+      "豪华装修",
+      "近地铁"
+    ],
+    "description": "看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMzN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.847,
+    "longitude": 116.4924
+  },
+  {
+    "id": "R040",
+    "title": "商圈核心一居，融创壹号院，随时看房",
+    "community": "融创壹号院",
+    "address": "银河路224弄",
+    "layout": "1室0厅1卫",
+    "area": 43.2,
+    "price": 220,
+    "tags": [
+      "随时看房",
+      "南北通透"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1643034738686-d69e7bc047e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwNDB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8613,
+    "longitude": 116.4941
+  },
+  {
+    "id": "R041",
+    "title": "改善一居，远洋山水，低总价",
+    "community": "远洋山水",
+    "address": "复兴路208弄",
+    "layout": "1室0厅1卫",
+    "area": 49.1,
+    "price": 170,
+    "tags": [
+      "低总价",
+      "不限购",
+      "精装修"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1723257132099-bf6b62b8a9e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwNDZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9372,
+    "longitude": 116.3246
+  },
+  {
+    "id": "R042",
+    "title": "带花园四居，华润置地，随时看房",
+    "community": "华润置地",
+    "address": "建国路209号楼",
+    "layout": "4室2厅2卫",
+    "area": 154.7,
+    "price": 710,
+    "tags": [
+      "电梯房",
+      "新上",
+      "随时看房"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。适合改善型家庭，空间尺度更从容。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1615529151169-7b1ff50dc7f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwNTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9159,
+    "longitude": 116.4727
+  },
+  {
+    "id": "R043",
+    "title": "采光充足三居，青年公寓，低总价",
+    "community": "青年公寓",
+    "address": "长安街55号",
+    "layout": "3室1厅1卫",
+    "area": 99.1,
+    "price": 630,
+    "tags": [
+      "低总价",
+      "带花园",
+      "随时看房",
+      "南北通透"
+    ],
+    "description": "一层带院子，适合有老人孩子的家庭。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1602028667128-a6cb1b40190d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwNTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9606,
+    "longitude": 116.4317
+  },
+  {
+    "id": "R044",
+    "title": "带花园一居，蓝湾国际，近地铁",
+    "community": "蓝湾国际",
+    "address": "西直门外大街132弄",
+    "layout": "1室1厅1卫",
+    "area": 48.7,
+    "price": 180,
+    "tags": [
+      "近地铁",
+      "人车分流"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。看房方便，欢迎随时预约。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1647996179012-66b87eba3d17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwNjV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9046,
+    "longitude": 116.4808
+  },
+  {
+    "id": "R045",
+    "title": "南北通透三居，华润置地，随时看房",
+    "community": "华润置地",
+    "address": "西直门外大街5号院",
+    "layout": "3室2厅2卫",
+    "area": 113.6,
+    "price": 570,
+    "tags": [
+      "商住两用",
+      "随时看房",
+      "人车分流"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1659720879449-486f7836c9aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwNzF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.958,
+    "longitude": 116.4553
+  },
+  {
+    "id": "R046",
+    "title": "带花园两居，云栖公馆，新上",
+    "community": "云栖公馆",
+    "address": "西直门外大街189弄",
+    "layout": "2室1厅1卫",
+    "area": 101.9,
+    "price": 600,
+    "tags": [
+      "新上",
+      "近地铁",
+      "随时看房"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1630699144429-c9912507ef53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwODZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8482,
+    "longitude": 116.4848
+  },
+  {
+    "id": "R047",
+    "title": "新上两居，阳光都市，随时看房",
+    "community": "阳光都市",
+    "address": "商业街9弄",
+    "layout": "2室1厅1卫",
+    "area": 72.8,
+    "price": 300,
+    "tags": [
+      "近地铁",
+      "随时看房",
+      "人车分流"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1612152605347-f93296cb657d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwOTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8545,
+    "longitude": 116.3951
+  },
+  {
+    "id": "R048",
+    "title": "南北通透两居，中海国际，精装修",
+    "community": "中海国际",
+    "address": "复兴路186号楼",
+    "layout": "2室1厅1卫",
+    "area": 81.3,
+    "price": 630,
+    "tags": [
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "步行可达地铁站，通勤更高效。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1556910602-38f53e68e15d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMDR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9506,
+    "longitude": 116.4522
+  },
+  {
+    "id": "R049",
+    "title": "带露台三居，翰林世家，精装修",
+    "community": "翰林世家",
+    "address": "银河路193号院",
+    "layout": "3室2厅2卫",
+    "area": 108.0,
+    "price": 540,
+    "tags": [
+      "商住两用",
+      "近地铁",
+      "精装修"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1615529151169-7b1ff50dc7f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMTF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9369,
+    "longitude": 116.3793
+  },
+  {
+    "id": "R050",
+    "title": "投资优选两居，翰林世家，近地铁",
+    "community": "翰林世家",
+    "address": "复兴路107号",
+    "layout": "2室1厅1卫",
+    "area": 101.7,
+    "price": 380,
+    "tags": [
+      "不限购",
+      "近地铁"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。步行可达地铁站，通勤更高效。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1608619769165-25647672335f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMTd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9194,
+    "longitude": 116.438
+  },
+  {
+    "id": "R051",
+    "title": "带露台一居，翰林世家，近地铁",
+    "community": "翰林世家",
+    "address": "公园东路267弄",
+    "layout": "1室0厅1卫",
+    "area": 45.7,
+    "price": 220,
+    "tags": [
+      "品牌开发商",
+      "带露台",
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1628744876497-eb30460be9f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMjR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9183,
+    "longitude": 116.5057
+  },
+  {
+    "id": "R052",
+    "title": "优选三居，远洋山水，近地铁",
+    "community": "远洋山水",
+    "address": "学院路128号院",
+    "layout": "3室2厅2卫",
+    "area": 125.2,
+    "price": 650,
+    "tags": [
+      "近地铁",
+      "随时看房",
+      "湖景房"
+    ],
+    "description": "看房方便，欢迎随时预约。采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1666608129935-8d01b4dbc875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMzB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8641,
+    "longitude": 116.4674
+  },
+  {
+    "id": "R053",
+    "title": "优选四居，云栖公馆，带花园",
+    "community": "云栖公馆",
+    "address": "银河路64号楼",
+    "layout": "4室2厅2卫",
+    "area": 181.7,
+    "price": 720,
+    "tags": [
+      "带花园",
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。适合改善型家庭，空间尺度更从容。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1706809019043-c16ada0165e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMzd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8903,
+    "longitude": 116.3948
+  },
+  {
+    "id": "R054",
+    "title": "新上三居，中央御景，豪华装修",
+    "community": "中央御景",
+    "address": "公园东路40号楼",
+    "layout": "3室2厅2卫",
+    "area": 110.9,
+    "price": 740,
+    "tags": [
+      "豪华装修",
+      "近地铁"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。步行可达地铁站，通勤更高效。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1589271243979-3153ef0dcbd7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxNDN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.877,
+    "longitude": 116.4107
+  },
+  {
+    "id": "R055",
+    "title": "投资优选四居，都市驿站，精装修",
+    "community": "都市驿站",
+    "address": "公园东路148号",
+    "layout": "4室2厅2卫",
+    "area": 162.8,
+    "price": 1570,
+    "tags": [
+      "安静",
+      "精装修"
+    ],
+    "description": "适合改善型家庭，空间尺度更从容。周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1600489000125-0345b89df4a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxNTB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9604,
+    "longitude": 116.4924
+  },
+  {
+    "id": "R056",
+    "title": "带露台三居，远洋山水，近地铁",
+    "community": "远洋山水",
+    "address": "公园东路194号楼",
+    "layout": "3室2厅2卫",
+    "area": 143.5,
+    "price": 940,
+    "tags": [
+      "公园房",
+      "近地铁",
+      "随时看房"
+    ],
+    "description": "步行可达地铁站，通勤更高效。周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1618222499121-d6528f6d9d77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxNTZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.87,
+    "longitude": 116.421
+  },
+  {
+    "id": "R057",
+    "title": "优选两居，梧桐里，不限购",
+    "community": "梧桐里",
+    "address": "人民路65号楼",
+    "layout": "2室2厅1卫",
+    "area": 72.0,
+    "price": 370,
+    "tags": [
+      "学区房",
+      "不限购",
+      "带露台",
+      "随时看房"
+    ],
+    "description": "对口学校资源优质，孩子上学更省心。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1593696140826-c58b021acf8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxNjN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8769,
+    "longitude": 116.3488
+  },
+  {
+    "id": "R058",
+    "title": "商圈核心一居，蓝湾国际，不限购",
+    "community": "蓝湾国际",
+    "address": "公园东路80号楼",
+    "layout": "1室1厅1卫",
+    "area": 43.1,
+    "price": 140,
+    "tags": [
+      "繁华地段",
+      "不限购",
+      "安静",
+      "低总价"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1618221710640-c0eaaa2adb49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxNjl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9095,
+    "longitude": 116.4956
+  },
+  {
+    "id": "R059",
+    "title": "优选两居，世贸天阶，湖景房",
+    "community": "世贸天阶",
+    "address": "文昌路248弄",
+    "layout": "2室1厅1卫",
+    "area": 91.5,
+    "price": 280,
+    "tags": [
+      "近地铁",
+      "随时看房",
+      "湖景房"
+    ],
+    "description": "看房方便，欢迎随时预约。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/flagged/photo-1573168750672-2ff2f682f241?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxNzV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9052,
+    "longitude": 116.4011
+  },
+  {
+    "id": "R060",
+    "title": "品质两居，四季花城，豪华装修",
+    "community": "四季花城",
+    "address": "复兴路110号院",
+    "layout": "2室1厅1卫",
+    "area": 80.1,
+    "price": 450,
+    "tags": [
+      "品牌开发商",
+      "豪华装修",
+      "南北通透"
+    ],
+    "description": "看房方便，欢迎随时预约。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1512918580421-b2feee3b85a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxODJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8566,
+    "longitude": 116.3478
+  },
+  {
+    "id": "R061",
+    "title": "视野开阔两居，龙湖天街，物业好",
+    "community": "龙湖天街",
+    "address": "学院路115号楼",
+    "layout": "2室2厅1卫",
+    "area": 73.8,
+    "price": 260,
+    "tags": [
+      "采光好",
+      "物业好"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9195,
+    "longitude": 116.3387
+  },
+  {
+    "id": "R062",
+    "title": "安静舒适两居，梧桐里，近地铁",
+    "community": "梧桐里",
+    "address": "创业大街12号",
+    "layout": "2室1厅1卫",
+    "area": 80.4,
+    "price": 300,
+    "tags": [
+      "随时看房",
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1609740700123-1f8e327cb18f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8932,
+    "longitude": 116.3549
+  },
+  {
+    "id": "R063",
+    "title": "带露台四居，星空之城，豪华装修",
+    "community": "星空之城",
+    "address": "湖滨西路90弄",
+    "layout": "4室2厅3卫",
+    "area": 190.8,
+    "price": 1780,
+    "tags": [
+      "新上",
+      "豪华装修",
+      "近地铁"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。适合改善型家庭，空间尺度更从容。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1602028617950-0ed35e50e460?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5NzB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9206,
+    "longitude": 116.4074
+  },
+  {
+    "id": "R064",
+    "title": "南北通透两居，远洋山水，精装修",
+    "community": "远洋山水",
+    "address": "朝阳路233号",
+    "layout": "2室2厅1卫",
+    "area": 71.0,
+    "price": 380,
+    "tags": [
+      "带花园",
+      "精装修"
+    ],
+    "description": "一层带院子，适合有老人孩子的家庭。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1666608129935-8d01b4dbc875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMzB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9397,
+    "longitude": 116.3719
+  },
+  {
+    "id": "R065",
+    "title": "新上一居，青年公寓，近地铁",
+    "community": "青年公寓",
+    "address": "朝阳路201弄",
+    "layout": "1室1厅1卫",
+    "area": 47.9,
+    "price": 290,
+    "tags": [
+      "近地铁",
+      "精装修"
+    ],
+    "description": "看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。步行可达地铁站，通勤更高效。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9426,
+    "longitude": 116.4476
+  },
+  {
+    "id": "R066",
+    "title": "新上一居，世贸天阶，低总价",
+    "community": "世贸天阶",
+    "address": "湖滨西路132弄",
+    "layout": "1室1厅1卫",
+    "area": 34.8,
+    "price": 200,
+    "tags": [
+      "低总价",
+      "精装修"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1609740700123-1f8e327cb18f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8592,
+    "longitude": 116.3477
+  },
+  {
+    "id": "R067",
+    "title": "投资优选三居，雅居乐园，近地铁",
+    "community": "雅居乐园",
+    "address": "学院路92号院",
+    "layout": "3室2厅2卫",
+    "area": 104.1,
+    "price": 410,
+    "tags": [
+      "视野无敌",
+      "近地铁",
+      "学区房"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。对口学校资源优质，孩子上学更省心。",
+    "image_url": "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTh8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8613,
+    "longitude": 116.4727
+  },
+  {
+    "id": "R068",
+    "title": "品质一居，中央御景，湖景房",
+    "community": "中央御景",
+    "address": "西直门外大街118号楼",
+    "layout": "1室1厅1卫",
+    "area": 39.8,
+    "price": 210,
+    "tags": [
+      "近地铁",
+      "湖景房"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1615876063860-d971f6dca5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9031,
+    "longitude": 116.3516
+  },
+  {
+    "id": "R069",
+    "title": "品质四居，龙湖天街，采光好",
+    "community": "龙湖天街",
+    "address": "学院路266弄",
+    "layout": "4室2厅2卫",
+    "area": 166.4,
+    "price": 1240,
+    "tags": [
+      "安静",
+      "满五唯一",
+      "采光好"
+    ],
+    "description": "适合改善型家庭，空间尺度更从容。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1608619769165-25647672335f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMTd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9418,
+    "longitude": 116.3549
+  },
+  {
+    "id": "R070",
+    "title": "采光充足三居，雅居乐园，精装修",
+    "community": "雅居乐园",
+    "address": "朝阳路134弄",
+    "layout": "3室1厅1卫",
+    "area": 113.3,
+    "price": 780,
+    "tags": [
+      "精装修",
+      "南北通透"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1563298723-dcfebaa392e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.86,
+    "longitude": 116.4196
+  },
+  {
+    "id": "R071",
+    "title": "品质三居，万科城，湖景房",
+    "community": "万科城",
+    "address": "商业街140号",
+    "layout": "3室2厅2卫",
+    "area": 132.7,
+    "price": 500,
+    "tags": [
+      "新上",
+      "降价房",
+      "湖景房"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1635247049915-dff57098ea0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8902,
+    "longitude": 116.427
+  },
+  {
+    "id": "R072",
+    "title": "优选一居，四季花城，南北通透",
+    "community": "四季花城",
+    "address": "湖滨西路145号楼",
+    "layout": "1室1厅1卫",
+    "area": 35.4,
+    "price": 150,
+    "tags": [
+      "近地铁",
+      "低总价",
+      "南北通透"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。步行可达地铁站，通勤更高效。",
+    "image_url": "https://images.unsplash.com/photo-1615876063860-d971f6dca5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8773,
+    "longitude": 116.4171
+  },
+  {
+    "id": "R073",
+    "title": "带露台一居，华润置地，近地铁",
+    "community": "华润置地",
+    "address": "银河路177号院",
+    "layout": "1室1厅1卫",
+    "area": 50.7,
+    "price": 280,
+    "tags": [
+      "安静",
+      "近地铁",
+      "采光好"
+    ],
+    "description": "看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1556910602-38f53e68e15d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMDR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9641,
+    "longitude": 116.4651
+  },
+  {
+    "id": "R074",
+    "title": "商圈核心三居，四季花城，低总价",
+    "community": "四季花城",
+    "address": "人民路258号院",
+    "layout": "3室2厅2卫",
+    "area": 115.0,
+    "price": 630,
+    "tags": [
+      "品牌开发商",
+      "带花园",
+      "低总价",
+      "拎包入住"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。看房方便，欢迎随时预约。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1706808849803-f61304e024ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5NjR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8675,
+    "longitude": 116.3565
+  },
+  {
+    "id": "R075",
+    "title": "商圈核心一居，天鹅湖畔，近地铁",
+    "community": "天鹅湖畔",
+    "address": "学院路78号",
+    "layout": "1室1厅1卫",
+    "area": 49.9,
+    "price": 250,
+    "tags": [
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1529423374493-8b2f78fd2437?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8603,
+    "longitude": 116.3744
+  },
+  {
+    "id": "R076",
+    "title": "地铁口三居，四季花城，精装修",
+    "community": "四季花城",
+    "address": "朝阳路73号楼",
+    "layout": "3室2厅2卫",
+    "area": 100.1,
+    "price": 560,
+    "tags": [
+      "带花园",
+      "带露台",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "一层带院子，适合有老人孩子的家庭。采光充足，通风良好，装修维护到位。赠送超大露台空间，可休闲娱乐。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1628744876497-eb30460be9f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMjR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9617,
+    "longitude": 116.3553
+  },
+  {
+    "id": "R077",
+    "title": "带露台三居，梧桐里，得房率高",
+    "community": "梧桐里",
+    "address": "湖滨西路38弄",
+    "layout": "3室2厅2卫",
+    "area": 132.8,
+    "price": 720,
+    "tags": [
+      "得房率高",
+      "精装修"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1633809365429-2fa048a02119?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9622,
+    "longitude": 116.3571
+  },
+  {
+    "id": "R078",
+    "title": "视野开阔一居，翰林世家，精装修",
+    "community": "翰林世家",
+    "address": "复兴路249号院",
+    "layout": "1室1厅1卫",
+    "area": 45.4,
+    "price": 170,
+    "tags": [
+      "电梯房",
+      "精装修"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1633809365429-2fa048a02119?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9561,
+    "longitude": 116.4063
+  },
+  {
+    "id": "R079",
+    "title": "改善两居，梧桐里，得房率高",
+    "community": "梧桐里",
+    "address": "银河路254号院",
+    "layout": "2室1厅1卫",
+    "area": 81.2,
+    "price": 380,
+    "tags": [
+      "得房率高",
+      "品牌开发商",
+      "次新房",
+      "南北通透"
+    ],
+    "description": "看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1609740700123-1f8e327cb18f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8524,
+    "longitude": 116.5002
+  },
+  {
+    "id": "R080",
+    "title": "新上三居，翰林世家，带花园",
+    "community": "翰林世家",
+    "address": "商业街133号",
+    "layout": "3室2厅2卫",
+    "area": 101.5,
+    "price": 730,
+    "tags": [
+      "带花园",
+      "随时看房",
+      "精装修"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。一层带院子，适合有老人孩子的家庭。",
+    "image_url": "https://images.unsplash.com/photo-1630699376167-3870469e7598?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9397,
+    "longitude": 116.3768
+  },
+  {
+    "id": "R081",
+    "title": "视野开阔三居，锦绣华庭，物业好",
+    "community": "锦绣华庭",
+    "address": "朝阳路59号院",
+    "layout": "3室2厅2卫",
+    "area": 116.4,
+    "price": 410,
+    "tags": [
+      "精装修",
+      "物业好"
+    ],
+    "description": "看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1597962261938-8714a29fa42c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8972,
+    "longitude": 116.4486
+  },
+  {
+    "id": "R082",
+    "title": "带花园一居，合生汇，近地铁",
+    "community": "合生汇",
+    "address": "学院路251号",
+    "layout": "1室0厅1卫",
+    "area": 42.0,
+    "price": 220,
+    "tags": [
+      "降价房",
+      "近地铁",
+      "人车分流"
+    ],
+    "description": "看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1529423374493-8b2f78fd2437?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8907,
+    "longitude": 116.3892
+  },
+  {
+    "id": "R083",
+    "title": "带花园三居，中央御景，视野无敌",
+    "community": "中央御景",
+    "address": "文昌路152号院",
+    "layout": "3室2厅2卫",
+    "area": 130.9,
+    "price": 460,
+    "tags": [
+      "视野无敌",
+      "湖景房",
+      "满五唯一",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1633809365429-2fa048a02119?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9519,
+    "longitude": 116.4071
+  },
+  {
+    "id": "R084",
+    "title": "公园旁三居，中海国际，近地铁",
+    "community": "中海国际",
+    "address": "银河路233号院",
+    "layout": "3室2厅2卫",
+    "area": 116.2,
+    "price": 400,
+    "tags": [
+      "近地铁",
+      "随时看房",
+      "物业好"
+    ],
+    "description": "看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1612152605347-f93296cb657d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwOTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9436,
+    "longitude": 116.3518
+  },
+  {
+    "id": "R085",
+    "title": "带露台三居，中海国际，南北通透",
+    "community": "中海国际",
+    "address": "建国路104号楼",
+    "layout": "3室1厅1卫",
+    "area": 134.0,
+    "price": 730,
+    "tags": [
+      "精装修",
+      "南北通透"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1608619769165-25647672335f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMTd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9444,
+    "longitude": 116.4179
+  },
+  {
+    "id": "R086",
+    "title": "投资优选一居，云栖公馆，近地铁",
+    "community": "云栖公馆",
+    "address": "复兴路59号",
+    "layout": "1室0厅1卫",
+    "area": 40.2,
+    "price": 280,
+    "tags": [
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1609740700123-1f8e327cb18f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMTR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8572,
+    "longitude": 116.4944
+  },
+  {
+    "id": "R087",
+    "title": "改善一居，天鹅湖畔，物业好",
+    "community": "天鹅湖畔",
+    "address": "中关村大街215号院",
+    "layout": "1室1厅1卫",
+    "area": 49.4,
+    "price": 180,
+    "tags": [
+      "次新房",
+      "低总价",
+      "物业好"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1630699376167-3870469e7598?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9409,
+    "longitude": 116.3953
+  },
+  {
+    "id": "R088",
+    "title": "带花园一居，合生汇，物业好",
+    "community": "合生汇",
+    "address": "西直门外大街24号院",
+    "layout": "1室1厅1卫",
+    "area": 48.0,
+    "price": 160,
+    "tags": [
+      "近地铁",
+      "低总价",
+      "采光好",
+      "物业好"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1606744824163-985d376605aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9451,
+    "longitude": 116.4051
+  },
+  {
+    "id": "R089",
+    "title": "带露台三居，世贸天阶，近地铁",
+    "community": "世贸天阶",
+    "address": "朝阳路125号楼",
+    "layout": "3室1厅1卫",
+    "area": 123.7,
+    "price": 580,
+    "tags": [
+      "安静",
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1706809019043-c16ada0165e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMzd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9119,
+    "longitude": 116.4466
+  },
+  {
+    "id": "R090",
+    "title": "安静舒适一居，雅居乐园，精装修",
+    "community": "雅居乐园",
+    "address": "花园路91号院",
+    "layout": "1室0厅1卫",
+    "area": 47.5,
+    "price": 240,
+    "tags": [
+      "近地铁",
+      "精装修"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1563298723-dcfebaa392e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNTF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9354,
+    "longitude": 116.4868
+  },
+  {
+    "id": "R091",
+    "title": "品质一居，金茂府，近地铁",
+    "community": "金茂府",
+    "address": "西直门外大街53号楼",
+    "layout": "1室0厅1卫",
+    "area": 50.4,
+    "price": 340,
+    "tags": [
+      "不限购",
+      "近地铁"
+    ],
+    "description": "户型方正，动静分区合理，居住舒适。小区配套成熟，生活便利，物业管理规范。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。",
+    "image_url": "https://images.unsplash.com/photo-1615529151169-7b1ff50dc7f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwNTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8865,
+    "longitude": 116.3797
+  },
+  {
+    "id": "R092",
+    "title": "新上一居，龙湖天街，精装修",
+    "community": "龙湖天街",
+    "address": "创业大街82号院",
+    "layout": "1室1厅1卫",
+    "area": 39.5,
+    "price": 110,
+    "tags": [
+      "近地铁",
+      "精装修",
+      "南北通透"
+    ],
+    "description": "步行可达地铁站，通勤更高效。采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1556910602-38f53e68e15d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMDR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8908,
+    "longitude": 116.3885
+  },
+  {
+    "id": "R093",
+    "title": "稀缺两居，都市驿站，复式",
+    "community": "都市驿站",
+    "address": "朝阳路2号",
+    "layout": "2室2厅1卫",
+    "area": 103.0,
+    "price": 740,
+    "tags": [
+      "品牌开发商",
+      "近地铁",
+      "南北通透",
+      "复式"
+    ],
+    "description": "步行可达地铁站，通勤更高效。采光充足，通风良好，装修维护到位。周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1630699144429-c9912507ef53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwODZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.848,
+    "longitude": 116.3568
+  },
+  {
+    "id": "R094",
+    "title": "采光充足一居，华润置地，降价房",
+    "community": "华润置地",
+    "address": "建国路61号",
+    "layout": "1室0厅1卫",
+    "area": 48.7,
+    "price": 200,
+    "tags": [
+      "得房率高",
+      "新上",
+      "降价房",
+      "低总价"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1608619769165-25647672335f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMTd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8908,
+    "longitude": 116.4992
+  },
+  {
+    "id": "R095",
+    "title": "优选三居，万科城，南北通透",
+    "community": "万科城",
+    "address": "建国路193弄",
+    "layout": "3室2厅2卫",
+    "area": 112.2,
+    "price": 450,
+    "tags": [
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "小区配套成熟，生活便利，物业管理规范。看房方便，欢迎随时预约。周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1706808849803-f61304e024ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5NjR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9492,
+    "longitude": 116.4763
+  },
+  {
+    "id": "R096",
+    "title": "南北通透两居，华润置地，随时看房",
+    "community": "华润置地",
+    "address": "西直门外大街56号",
+    "layout": "2室2厅1卫",
+    "area": 72.3,
+    "price": 440,
+    "tags": [
+      "近地铁",
+      "随时看房"
+    ],
+    "description": "步行可达地铁站，通勤更高效。户型方正，动静分区合理，居住舒适。周边交通便捷，商业与休闲设施齐全。采光充足，通风良好，装修维护到位。",
+    "image_url": "https://images.unsplash.com/photo-1612152605347-f93296cb657d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQwOTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9067,
+    "longitude": 116.3454
+  },
+  {
+    "id": "R097",
+    "title": "带露台三居，合生汇，不限购",
+    "community": "合生汇",
+    "address": "商业街41号",
+    "layout": "3室1厅1卫",
+    "area": 111.1,
+    "price": 440,
+    "tags": [
+      "不限购",
+      "人车分流",
+      "近地铁",
+      "南北通透"
+    ],
+    "description": "周边交通便捷，商业与休闲设施齐全。户型方正，动静分区合理，居住舒适。步行可达地铁站，通勤更高效。小区配套成熟，生活便利，物业管理规范。",
+    "image_url": "https://images.unsplash.com/photo-1600493505371-f2f6153dbb29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8717,
+    "longitude": 116.432
+  },
+  {
+    "id": "R098",
+    "title": "视野开阔一居，中海国际，近地铁",
+    "community": "中海国际",
+    "address": "复兴路261弄",
+    "layout": "1室0厅1卫",
+    "area": 37.2,
+    "price": 290,
+    "tags": [
+      "新上",
+      "近地铁"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。步行可达地铁站，通勤更高效。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1615876063860-d971f6dca5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5OTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9309,
+    "longitude": 116.3181
+  },
+  {
+    "id": "R099",
+    "title": "改善一居，都市驿站，近地铁",
+    "community": "都市驿站",
+    "address": "公园东路99弄",
+    "layout": "1室1厅1卫",
+    "area": 45.0,
+    "price": 230,
+    "tags": [
+      "近地铁",
+      "随时看房"
+    ],
+    "description": "步行可达地铁站，通勤更高效。采光充足，通风良好，装修维护到位。小区配套成熟，生活便利，物业管理规范。周边交通便捷，商业与休闲设施齐全。",
+    "image_url": "https://images.unsplash.com/photo-1666608129935-8d01b4dbc875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjQxMzB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.9409,
+    "longitude": 116.3737
+  },
+  {
+    "id": "R100",
+    "title": "投资优选三居，云栖公馆，南北通透",
+    "community": "云栖公馆",
+    "address": "花园路163号楼",
+    "layout": "3室2厅2卫",
+    "area": 130.5,
+    "price": 980,
+    "tags": [
+      "繁华地段",
+      "随时看房",
+      "南北通透"
+    ],
+    "description": "采光充足，通风良好，装修维护到位。看房方便，欢迎随时预约。小区配套成熟，生活便利，物业管理规范。户型方正，动静分区合理，居住舒适。",
+    "image_url": "https://images.unsplash.com/photo-1709747820806-057272eddd5d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYyMjM5ODh8&ixlib=rb-4.1.0&q=80&w=1080",
+    "latitude": 39.8821,
+    "longitude": 116.4213
+  }
+]
