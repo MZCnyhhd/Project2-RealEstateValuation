@@ -59,6 +59,15 @@ gunicorn wsgi:application --bind 0.0.0.0:$PORT
   - `1`：启动时自动从 `mock_listings.json` 导入到 SQLite
   - `0`：不自动导入
 
+接入大模型 Agent 时可选：
+
+- `OPENAI_API_KEY`
+  - 大模型服务密钥
+- `OPENAI_MODEL`
+  - 默认 `gpt-4.1-mini`
+- `OPENAI_BASE_URL`
+  - 可选，自定义网关地址
+
 ## 本地运行（Windows / Conda）
 
 1) 创建并激活环境（示例）
@@ -100,3 +109,16 @@ python update_images.py
 - `/listing/<id>`：详情
 - `/favorites`：收藏列表
 - `/compare`：对比页面
+- `/calculator`：北京房价计算器（含 Agent 问答）
+- `/agent/chat`：Agent 对话接口（POST）
+
+## 北京政策参数化（示例）
+
+- 配置文件：`beijing_policy.py`
+- 可配置维度：
+  - `purchase_type`：`first_home` / `second_home`
+  - `housing_type`：`normal` / `non_normal`
+  - `loan_type`：`commercial` / `fund` / `combined`
+- 每组策略可调：
+  - `min_down_pct`（最低首付比例）
+  - `default_rate_pct`（默认年化利率）

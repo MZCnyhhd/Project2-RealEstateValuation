@@ -1,9 +1,11 @@
-import json
 import os
 from math import ceil
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 
 from repository import get_repository
+from mortgage import calculate_mortgage
+from llm_agent import build_agent_reply
+from beijing_policy import apply_beijing_policy
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
@@ -231,6 +233,82 @@ def listing_detail(listing_id):
         )
     else:
         return render_template("404.html"), 404
+
+
+@app.route("/calculator", methods=["GET", "POST"])
+def calculator():
+    defaults = {
+        "total_price_wan": 600.0,
+        "down_payment_ratio_pct": 35.0,
+        "years": 30,
+        "annual_rate_pct": 3.1,
+        "repayment_method": "equal_payment",
+        "monthly_income": 50000.0,
+        "monthly_debt": 0.0,
+        "purchase_type": "first_home",
+        "housing_type": "normal",
+        "loan_type": "commercial",
+    }
+    form_data = dict(defaults)
+    result = None
+    error = None
+    policy_meta = None
+
+    if request.method == "POST":
+        try:
+            form_data["total_price_wan"] = request.form.get("total_price_wan", type=float, default=defaults["total_price_wan"])
+            form_data["down_payment_ratio_pct"] = request.form.get("down_payment_ratio_pct", type=float, default=defaults["down_payment_ratio_pct"])
+            form_data["years"] = request.form.get("years", type=int, default=defaults["years"])
+            form_data["annual_rate_pct"] = request.form.get("annual_rate_pct", type=float, default=defaults["annual_rate_pct"])
+            form_data["repayment_method"] = request.form.get("repayment_method", default=defaults["repayment_method"])
+            form_data["monthly_income"] = request.form.get("monthly_income", type=float, default=defaults["monthly_income"])
+            form_data["monthly_debt"] = request.form.get("monthly_debt", type=float, default=defaults["monthly_debt"])
+            form_data["purchase_type"] = request.form.get("purchase_type", default=defaults["purchase_type"])
+            form_data["housing_type"] = request.form.get("housing_type", default=defaults["housing_type"])
+            form_data["loan_type"] = request.form.get("loan_type", default=defaults["loan_type"])
+
+            policy_meta = apply_beijing_policy(
+                down_payment_ratio_pct=form_data["down_payment_ratio_pct"],
+                annual_rate_pct=form_data["annual_rate_pct"],
+                purchase_type=form_data["purchase_type"],
+                housing_type=form_data["housing_type"],
+                loan_type=form_data["loan_type"],
+            )
+
+            calc_payload = {
+                "total_price_wan": form_data["total_price_wan"],
+                "down_payment_ratio_pct": policy_meta["effective_down_payment_ratio_pct"],
+                "years": form_data["years"],
+                "annual_rate_pct": policy_meta["effective_annual_rate_pct"],
+                "repayment_method": form_data["repayment_method"],
+                "monthly_income": form_data["monthly_income"],
+                "monthly_debt": form_data["monthly_debt"],
+            }
+            result = calculate_mortgage(**calc_payload)
+        except ValueError as exc:
+            error = str(exc)
+
+    return render_template(
+        "calculator.html",
+        form_data=form_data,
+        result=result,
+        error=error,
+        policy_meta=policy_meta,
+    )
+
+
+@app.route("/agent/chat", methods=["POST"])
+def agent_chat():
+    payload = request.get_json(silent=True) or {}
+    message = payload.get("message", "")
+    if not isinstance(message, str) or not message.strip():
+        return jsonify({"ok": False, "error": "message 不能为空"}), 400
+
+    try:
+        reply, calc = build_agent_reply(message)
+        return jsonify({"ok": True, "reply": reply, "calculation": calc})
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)

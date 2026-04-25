@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>北京房价计算器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-house-heart-fill"></i> 房地产智能Agent</a>
+            <div class="ms-auto">
+                <a class="btn btn-outline-light btn-sm" href="/">返回房源列表</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="mb-3">北京房价计算器</h4>
+                        <form method="post">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">总价（万）</label>
+                                    <input class="form-control" name="total_price_wan" type="number" step="0.01" value="{{ form_data.total_price_wan }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">首付比例（%）</label>
+                                    <input class="form-control" name="down_payment_ratio_pct" type="number" step="0.01" value="{{ form_data.down_payment_ratio_pct }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">贷款年限（年）</label>
+                                    <input class="form-control" name="years" type="number" step="1" value="{{ form_data.years }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">年化利率（%）</label>
+                                    <input class="form-control" name="annual_rate_pct" type="number" step="0.001" value="{{ form_data.annual_rate_pct }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">还款方式</label>
+                                    <select class="form-select" name="repayment_method">
+                                        <option value="equal_payment" {% if form_data.repayment_method == 'equal_payment' %}selected{% endif %}>等额本息</option>
+                                        <option value="equal_principal" {% if form_data.repayment_method == 'equal_principal' %}selected{% endif %}>等额本金</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">购房属性</label>
+                                    <select class="form-select" name="purchase_type">
+                                        <option value="first_home" {% if form_data.purchase_type == 'first_home' %}selected{% endif %}>首套</option>
+                                        <option value="second_home" {% if form_data.purchase_type == 'second_home' %}selected{% endif %}>二套</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">住宅属性</label>
+                                    <select class="form-select" name="housing_type">
+                                        <option value="normal" {% if form_data.housing_type == 'normal' %}selected{% endif %}>普宅</option>
+                                        <option value="non_normal" {% if form_data.housing_type == 'non_normal' %}selected{% endif %}>非普宅</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">贷款类型</label>
+                                    <select class="form-select" name="loan_type">
+                                        <option value="commercial" {% if form_data.loan_type == 'commercial' %}selected{% endif %}>商业贷款</option>
+                                        <option value="fund" {% if form_data.loan_type == 'fund' %}selected{% endif %}>公积金贷款</option>
+                                        <option value="combined" {% if form_data.loan_type == 'combined' %}selected{% endif %}>组合贷</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">月收入（元）</label>
+                                    <input class="form-control" name="monthly_income" type="number" step="1" value="{{ form_data.monthly_income }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">现有月负债（元）</label>
+                                    <input class="form-control" name="monthly_debt" type="number" step="1" value="{{ form_data.monthly_debt }}">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-primary" type="submit">开始计算</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger mt-3">{{ error }}</div>
+                {% endif %}
+
+                {% if result %}
+                <div class="card shadow-sm mt-3">
+                    <div class="card-body">
+                        <h5 class="mb-3">计算结果</h5>
+                        {% if policy_meta %}
+                        <div class="alert alert-secondary py-2 small">
+                            政策参数：最低首付 {{ "%.1f"|format(policy_meta.policy_min_down_pct) }}%，
+                            默认利率 {{ "%.2f"|format(policy_meta.policy_default_rate_pct) }}%，
+                            实际采用首付 {{ "%.1f"|format(policy_meta.effective_down_payment_ratio_pct) }}%，
+                            实际采用利率 {{ "%.2f"|format(policy_meta.effective_annual_rate_pct) }}%。
+                        </div>
+                        {% endif %}
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between"><span>首付金额</span><strong>{{ "%.0f"|format(result.down_payment_yuan) }} 元</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>贷款总额</span><strong>{{ "%.0f"|format(result.loan_principal_yuan) }} 元</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>月供</span><strong>{{ "%.0f"|format(result.monthly_payment_yuan) }} 元</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>首月月供</span><strong>{{ "%.0f"|format(result.first_month_payment_yuan) }} 元</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>总利息</span><strong>{{ "%.0f"|format(result.total_interest_yuan) }} 元</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>总还款</span><strong>{{ "%.0f"|format(result.total_repayment_yuan) }} 元</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>月供收入比</span><strong>{{ "%.1f"|format(result.dsr * 100) }}%</strong></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>压力等级</span><strong>{{ result.pressure_level }}</strong></li>
+                        </ul>
+                        <p class="text-muted small mt-3 mb-0">提示：政策值为参数化示例，请按最新北京政策调整配置后使用。</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="mb-3">Agent 问答（Beta）</h5>
+                        <p class="text-muted small">示例：我在北京二套非普宅，商贷，预算 800 万，首付 35%，贷款 30 年，月收入 5 万，等额本息。</p>
+                        <textarea id="agentInput" class="form-control" rows="5" placeholder="请输入你的购房测算问题..."></textarea>
+                        <button id="agentBtn" class="btn btn-outline-primary mt-3">发送给 Agent</button>
+                        <pre id="agentOutput" class="mt-3 bg-light border rounded p-3 small" style="white-space: pre-wrap;">等待提问...</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputEl = document.getElementById("agentInput");
+        const btnEl = document.getElementById("agentBtn");
+        const outEl = document.getElementById("agentOutput");
+
+        btnEl.addEventListener("click", async () => {
+            const message = inputEl.value.trim();
+            if (!message) {
+                outEl.textContent = "请输入问题后再发送。";
+                return;
+            }
+            outEl.textContent = "Agent 思考中...";
+            try {
+                const resp = await fetch("/agent/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message })
+                });
+                const data = await resp.json();
+                if (!resp.ok || !data.ok) {
+                    outEl.textContent = "请求失败：" + (data.error || "未知错误");
+                    return;
+                }
+                outEl.textContent = data.reply;
+            } catch (err) {
+                outEl.textContent = "网络异常：" + err;
+            }
+        });
+    </script>
+</body>
+</html>
