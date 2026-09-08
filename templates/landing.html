@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>房地产全息估值引擎 - 让每套房的价值透明可算</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --primary: #667eea; --secondary: #764ba2; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .hero { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: #fff; padding: 5rem 0 4rem; }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.2; }
+        .hero .lead { font-size: 1.2rem; opacity: .9; }
+        .badge-soft { background: rgba(255,255,255,.15); padding: .4rem 1rem; border-radius: 2rem; font-size: .85rem; }
+        .section { padding: 4rem 0; }
+        .section-title { font-weight: 800; margin-bottom: .5rem; }
+        .section-sub { color: #6c757d; margin-bottom: 2.5rem; }
+        .feature-card { border: none; border-radius: 1rem; transition: transform .2s, box-shadow .2s; height: 100%; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,.1); }
+        .feature-icon { width: 56px; height: 56px; border-radius: .75rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; }
+        .step-card { border: 2px dashed #dee2e6; border-radius: 1rem; padding: 2rem 1.5rem; text-align: center; position: relative; }
+        .step-card .step-num { width: 40px; height: 40px; background: var(--primary); color: #fff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 1rem; }
+        .layer-row { padding: .6rem 0; border-bottom: 1px solid #f0f0f0; }
+        .layer-row:last-child { border-bottom: none; }
+        .layer-bar { height: 8px; border-radius: 4px; background: #e9ecef; overflow: hidden; flex: 1; }
+        .layer-bar-fill { height: 100%; border-radius: 4px; }
+        .pricing-card { border: 2px solid #dee2e6; border-radius: 1rem; overflow: hidden; transition: border-color .2s; }
+        .pricing-card.popular { border-color: var(--primary); position: relative; }
+        .pricing-card.popular::before { content: '推荐'; position: absolute; top: 12px; right: -28px; background: var(--primary); color: #fff; padding: .2rem 2rem; transform: rotate(45deg); font-size: .75rem; }
+        .pricing-card .card-header { background: #f8f9fa; text-align: center; padding: 1.5rem; }
+        .pricing-card .price { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+        .demo-radar { max-width: 300px; margin: 0 auto; }
+        .cta-section { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 4rem 0; }
+        .btn-hero { padding: .75rem 2rem; font-size: 1.1rem; font-weight: 700; border-radius: .5rem; }
+        .stat-num { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+        .nav-landing .navbar-brand { font-weight: 800; }
+    </style>
+</head>
+<body>
+
+    <!-- 导航 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top nav-landing">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-gem" style="color:var(--primary);"></i> 全息估值</a>
+            <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-outline-primary btn-sm" href="/listings"><i class="bi bi-house"></i> 浏览房源</a>
+                <a class="btn btn-primary btn-sm" href="/valuate"><i class="bi bi-graph-up-arrow"></i> 免费估值</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero text-center">
+        <div class="container">
+            <span class="badge-soft d-inline-block mb-3"><i class="bi bi-stars me-1"></i> AI驱动 · 7层182维度</span>
+            <h1>每套房的价值<br>都该被认真计算</h1>
+            <p class="lead mt-3 mx-auto" style="max-width:600px;">告别"感觉定价"。全息估值引擎从宏观政策到房屋细节，逐项量化，让你清楚知道一套房到底值多少钱、贵在哪、便宜在哪。</p>
+            <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
+                <a href="/valuate" class="btn btn-light btn-hero"><i class="bi bi-gem me-2"></i>立即免费估值</a>
+                <a href="/listings" class="btn btn-outline-light btn-hero"><i class="bi bi-search me-2"></i>浏览Demo房源</a>
+            </div>
+            <p class="mt-3 small opacity-75">免费查看评分与结论 · 完整182维度报告仅 ¥9.9</p>
+        </div>
+    </section>
+
+    <!-- 数据飞轮 -->
+    <section class="section bg-light">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-md-6">
+                    <h2 class="section-title">数据越多，估值越准</h2>
+                    <p class="section-sub mb-4">四大数据来源构建持续增长的房产知识库</p>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="feature-icon bg-primary bg-opacity-10 text-primary flex-shrink-0"><i class="bi bi-person-check"></i></div>
+                            <div><h6 class="mb-1">经纪人专业录入</h6><p class="text-muted small mb-0">合作经纪人兼职填写房源信息，专业认知 + 实地验证</p></div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="feature-icon bg-success bg-opacity-10 text-success flex-shrink-0"><i class="bi bi-house-door"></i></div>
+                            <div><h6 class="mb-1">业主自助填写</h6><p class="text-muted small mb-0">业主为获得估值报告填写信息，付费的同时贡献数据</p></div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="feature-icon bg-warning bg-opacity-10 text-warning flex-shrink-0"><i class="bi bi-people"></i></div>
+                            <div><h6 class="mb-1">团队上门实勘</h6><p class="text-muted small mb-0">高价值标的专人上门，实地勘察采集深度信息</p></div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="feature-icon bg-info bg-opacity-10 text-info flex-shrink-0"><i class="bi bi-building"></i></div>
+                            <div><h6 class="mb-1">政府公开数据</h6><p class="text-muted small mb-0">住建委成交备案、统计局指数，合法合规的市场基线</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-center">
+                    <div class="bg-white rounded-4 shadow-sm p-4">
+                        <canvas id="demoRadar" class="demo-radar"></canvas>
+                        <p class="text-muted small mt-3 mb-0">七层价值维度 · 实时雷达评估</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 七层体系 -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">7层全息评估体系</h2>
+                <p class="section-sub">从城市基本面到房屋每一处细节，182个维度逐项量化</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card shadow-sm">
+                        <div class="card-body">
+                            <div class="feature-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-globe2"></i></div>
+                            <h5>宏观经济与城市基本面</h5>
+                            <p class="text-muted small">GDP增速、人口流动、地铁规划、老龄化率…14个维度决定"这座城市值不值得买"</p>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">权重 15%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card shadow-sm">
+                        <div class="card-body">
+                            <div class="feature-icon bg-success bg-opacity-10 text-success"><i class="bi bi-geo-alt"></i></div>
+                            <h5>区域与板块价值</h5>
+                            <p class="text-muted small">地铁距离、学区评级、CBD通勤、忌讳设施、噪音污染…33个维度定位"这个片区值不值"</p>
+                            <span class="badge bg-success bg-opacity-10 text-success">权重 20%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card shadow-sm">
+                        <div class="card-body">
+                            <div class="feature-icon bg-info bg-opacity-10 text-info"><i class="bi bi-houses"></i></div>
+                            <h5>社区与地块品质</h5>
+                            <p class="text-muted small">容积率、绿化率、物业品牌、人车分流、车位配比…28个维度衡量"小区里住得舒不舒服"</p>
+                            <span class="badge bg-info bg-opacity-10 text-info">权重 20%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card shadow-sm">
+                        <div class="card-body">
+                            <div class="feature-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-house-heart"></i></div>
+                            <h5>房屋本体</h5>
+                            <p class="text-muted small">户型、楼层、朝向、采光、装修、漏水…72个维度精确到"这套房到底值不值这个价"</p>
+                            <span class="badge bg-danger bg-opacity-10 text-danger">权重 35%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card shadow-sm">
+                        <div class="card-body">
+                            <div class="feature-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-yin-yang"></i></div>
+                            <h5>风水与心理感知</h5>
+                            <p class="text-muted small">路冲、反弓路、入门见厕、门牌号含4、凶宅效应…14个维度捕捉"买家心里的真实顾虑"</p>
+                            <span class="badge bg-warning bg-opacity-10 text-warning">权重 5%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card shadow-sm">
+                        <div class="card-body">
+                            <div class="feature-icon bg-dark bg-opacity-10 text-dark"><i class="bi bi-shield-check"></i></div>
+                            <h5>权益与交易弹性</h5>
+                            <p class="text-muted small">产权类型、满五唯一、挂牌天数、卖家急售、降价次数…16个维度判断"能不能顺利交易"</p>
+                            <span class="badge bg-dark bg-opacity-10 text-dark">权重 5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <span class="text-muted">+ 第7层：特殊事件与历史印记（权重1%）= 7层完整覆盖</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 使用流程 -->
+    <section class="section bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">3分钟，知道一套房值多少钱</h2>
+                <p class="section-sub">填表 → 评估 → 看报告，就这么简单</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="step-card bg-white h-100">
+                        <div class="step-num">1</div>
+                        <h5>填写房源信息</h5>
+                        <p class="text-muted small">输入小区、面积、楼层、朝向等35+字段。不必全部填写，越完整越精准。</p>
+                        <a href="/valuate" class="btn btn-outline-primary btn-sm mt-2">开始填写 <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card bg-white h-100">
+                        <div class="step-num">2</div>
+                        <h5>AI自动评估</h5>
+                        <p class="text-muted small">引擎从182个维度逐项评分，计算正向/负向影响，得出综合评分与估值区间。</p>
+                        <span class="text-muted small"><i class="bi bi-cpu me-1"></i>后台实时计算</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card bg-white h-100">
+                        <div class="step-num">3</div>
+                        <h5>查看估值报告</h5>
+                        <p class="text-muted small">免费看综合评分和估值结论。解锁完整报告查看182项逐项分析，每项折合多少钱。</p>
+                        <span class="text-muted small"><i class="bi bi-file-earmark-bar-graph me-1"></i>可打印PDF报告</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 定价 -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">灵活定价，按需选择</h2>
+                <p class="section-sub">从免费到专业，覆盖个人到机构的全场景需求</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-3">
+                    <div class="pricing-card card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-1">体验版</h6>
+                            <div class="price">免费</div>
+                            <small class="text-muted">快速了解价值</small>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled small">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 综合评分</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 估值结论</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 七层雷达图</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> Top3加减因素</li>
+                            </ul>
+                            <a href="/valuate" class="btn btn-outline-primary w-100">免费体验</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="pricing-card popular card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-1">标准报告</h6>
+                            <div class="price">¥9.9</div>
+                            <small class="text-muted">业主/买家自用</small>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled small">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 包含体验版全部</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> <strong>182维度逐项明细</strong></li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 每项折合万元</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 可打印报告</li>
+                            </ul>
+                            <a href="/valuate" class="btn btn-primary w-100">立即估值</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="pricing-card card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-1">专业版</h6>
+                            <div class="price">¥49-99</div>
+                            <small class="text-muted">含实地勘察数据</small>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled small">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 包含标准报告全部</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> <strong>周边实勘补充数据</strong></li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 市场对比分析</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 定价策略建议</li>
+                            </ul>
+                            <a href="/valuate" class="btn btn-outline-primary w-100">联系客服</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="pricing-card card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-1">经纪人SaaS</h6>
+                            <div class="price">¥299<small>/月</small></div>
+                            <small class="text-muted">给客户出报告</small>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled small">
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> <strong>无限次估值</strong></li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 自定义品牌logo</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 客户管理后台</li>
+                                <li class="mb-2"><i class="bi bi-check-circle text-success me-1"></i> 数据录入返佣</li>
+                            </ul>
+                            <a href="/valuate" class="btn btn-outline-primary w-100">申请合作</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo房源入口 -->
+    <section class="section bg-light">
+        <div class="container text-center">
+            <h2 class="section-title">或者，先看看Demo</h2>
+            <p class="section-sub">100套虚构房源，每套都有自动估值，体验完整功能</p>
+            <a href="/listings" class="btn btn-primary btn-lg"><i class="bi bi-house me-2"></i>浏览Demo房源</a>
+            <p class="text-muted small mt-3">包含搜索、收藏、对比、房贷计算器、AI对话等完整功能</p>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section text-center">
+        <div class="container">
+            <h2 class="mb-3" style="font-size:2rem;font-weight:800;">想知道你的房子值多少钱？</h2>
+            <p class="opacity-75 mb-4">35个字段，3分钟填写，立刻获得182维度全息估值报告</p>
+            <a href="/valuate" class="btn btn-warning btn-hero"><i class="bi bi-gem me-2"></i>立即免费估值</a>
+            <p class="mt-4 small opacity-50">© 2026 房地产全息估值引擎 · 让每套房的价值透明可算</p>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+    (function() {
+        const ctx = document.getElementById('demoRadar');
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['宏观经济', '区域板块', '社区品质', '房屋本体', '风水心理', '权益交易', '历史印记'],
+                datasets: [{
+                    label: '示例房源',
+                    data: [85, 72, 68, 78, 55, 60, 50],
+                    backgroundColor: 'rgba(102,126,234,0.15)',
+                    borderColor: 'rgba(102,126,234,1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(102,126,234,1)',
+                    pointRadius: 4
+                }, {
+                    label: '区域均值',
+                    data: [70, 65, 60, 55, 50, 50, 50],
+                    backgroundColor: 'rgba(200,200,200,0.1)',
+                    borderColor: 'rgba(200,200,200,0.6)',
+                    borderWidth: 1,
+                    borderDash: [4,4],
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 9 } }, pointLabels: { font: { size: 11, weight: 'bold' } } } },
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

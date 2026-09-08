@@ -1,4 +1,5 @@
 import os
+import logging
 from math import ceil
 from flask import Flask, render_template, request, redirect, session, jsonify
 
@@ -6,9 +7,20 @@ from repository import get_repository
 from mortgage import calculate_mortgage
 from llm_agent import build_agent_reply
 from beijing_policy import apply_beijing_policy
+from valuation import evaluate_listing, evaluate_user_input
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()  # 输出到终端
+    ]
+)
+logger = logging.getLogger(__name__)
 
 def load_listings(filename="mock_listings.json"):
     repo = get_repository(filename=filename)
@@ -72,8 +84,15 @@ def search_listings(listings, min_price=None, max_price=None, min_area=None, max
     return results
 
 @app.route("/")
+def landing():
+    """产品介绍页 - 首页"""
+    return render_template("landing.html")
+
+
+@app.route("/listings")
 def index():
-    """主页和搜索结果页"""
+    """房源列表和搜索页"""
+    logger.info(f"房源列表访问 - 查询参数: {request.args}")
     all_listings = load_listings()
 
     # 从URL参数获取搜索条件和排序方式
@@ -225,9 +244,11 @@ def listing_detail(listing_id):
     listing = next((item for item in all_listings if item["id"] == listing_id), None)
     
     if listing:
+        valuation = evaluate_listing(listing, all_listings=all_listings)
         return render_template(
             "listing_detail.html",
             listing=listing,
+            valuation=valuation,
             favorites=_favorites_set(),
             compare=_compare_set(),
         )
@@ -302,13 +323,67 @@ def agent_chat():
     payload = request.get_json(silent=True) or {}
     message = payload.get("message", "")
     if not isinstance(message, str) or not message.strip():
+        logger.warning("Agent聊天请求 - 消息为空")
         return jsonify({"ok": False, "error": "message 不能为空"}), 400
 
     try:
+        logger.info(f"Agent聊天请求 - 消息: {message[:100]}...")
         reply, calc = build_agent_reply(message)
+        logger.info(f"Agent聊天响应 - 成功")
         return jsonify({"ok": True, "reply": reply, "calculation": calc})
     except ValueError as exc:
+        logger.error(f"Agent聊天错误 - {str(exc)}")
         return jsonify({"ok": False, "error": str(exc)}), 400
 
+
+@app.route("/valuate")
+def valuate_form():
+    """全息估值 - 用户录入房源信息表单"""
+    return render_template("valuate_form.html")
+
+
+@app.route("/valuate/report", methods=["POST"])
+def valuate_report():
+    """全息估值 - 生成估值报告"""
+    form_data = {}
+    for key in request.form:
+        val = request.form.get(key, "").strip()
+        if val:
+            form_data[key] = val
+
+    # checkbox 处理：未勾选的不会出现在 form 中
+    checkbox_fields = ["north_south", "has_elevator", "ped_car_split", "five_year_only",
+                       "has_mortgage", "has_lease", "urgent_sell", "is_haunted",
+                       "has_leak", "door_toilet", "beam_press", "squareness",
+                       "dry_wet_sep", "bright_bath", "has_central_ac", "has_fresh_air"]
+    for field in checkbox_fields:
+        if field not in form_data:
+            form_data[field] = ""
+
+    if not form_data.get("community") or not form_data.get("area_size") or not form_data.get("price"):
+        return render_template("valuate_form.html", error="请填写必填字段：小区名称、面积、报价")
+
+    logger.info(f"全息估值请求 - 小区: {form_data.get('community')}, 面积: {form_data.get('area_size')}, 报价: {form_data.get('price')}")
+    valuation = evaluate_user_input(form_data)
+
+    # 付费解锁（演示模式：URL参数unlock=1即解锁）
+    is_paid = request.args.get("unlock") == "1"
+
+    # 将结果存入session以便解锁时复用
+    session["last_valuation"] = {"form_data": form_data, "is_paid": is_paid}
+
+    return render_template("valuate_report.html", valuation=valuation, is_paid=is_paid)
+
+
+@app.route("/valuate/unlock")
+def valuate_unlock():
+    """解锁完整报告（演示模式）"""
+    saved = session.get("last_valuation")
+    if not saved:
+        return redirect("/valuate")
+    valuation = evaluate_user_input(saved["form_data"])
+    return render_template("valuate_report.html", valuation=valuation, is_paid=True)
+
 if __name__ == "__main__":
+    logger.info("RealEstate Flask应用启动")
     app.run(debug=True)

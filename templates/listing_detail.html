@@ -6,8 +6,20 @@
     <title>{{ listing.title }} - 房源详情</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         body { background-color: #f8f9fa; }
+        .score-badge { font-size: 3rem; font-weight: 800; line-height: 1; }
+        .score-excellent { color: #28a745; }
+        .score-good { color: #20c997; }
+        .score-medium { color: #ffc107; }
+        .score-poor { color: #dc3545; }
+        .factor-item { border-left: 3px solid; padding: .4rem .8rem; margin-bottom: .4rem; background: #fff; border-radius: 0 .375rem .375rem 0; }
+        .factor-positive { border-left-color: #28a745; }
+        .factor-negative { border-left-color: #dc3545; }
+        .verdict-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: .75rem; padding: 1.5rem; }
+        .layer-table td, .layer-table th { font-size: .85rem; padding: .35rem .5rem; }
+        .radar-container { max-width: 380px; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -15,8 +27,9 @@
     <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/"><i class="bi bi-house-heart-fill"></i> 房地产智能Agent</a>
+            <a class="navbar-brand" href="/"><i class="bi bi-gem"></i> 全息估值</a>
             <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-warning btn-sm fw-bold" href="/valuate"><i class="bi bi-gem"></i> 估值</a>
                 <a class="btn btn-outline-light btn-sm" href="/calculator"><i class="bi bi-calculator"></i> 计算器</a>
                 <a class="btn btn-outline-light btn-sm" href="/favorites"><i class="bi bi-heart"></i> 收藏</a>
                 <a class="btn btn-outline-light btn-sm" href="/compare"><i class="bi bi-columns-gap"></i> 对比</a>
@@ -77,8 +90,164 @@
                         <h5 class="mb-3">房源描述</h5>
                         <p class="text-muted">{{ listing.description }}</p>
 
+                        {% if valuation %}
+                        <hr class="my-4">
+                        <!-- 全息估值引擎 -->
+                        <h4 class="mb-3"><i class="bi bi-graph-up-arrow me-2"></i>全息价值评估</h4>
+
+                        <!-- A. 估值概览 -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="card h-100 text-center shadow-sm">
+                                    <div class="card-body">
+                                        <div class="score-badge {% if valuation.overall_score >= 80 %}score-excellent{% elif valuation.overall_score >= 65 %}score-good{% elif valuation.overall_score >= 50 %}score-medium{% else %}score-poor{% endif %}">
+                                            {{ valuation.overall_score }}
+                                        </div>
+                                        <div class="mt-1 fw-bold">{{ valuation.score_level }}</div>
+                                        <small class="text-muted">{{ valuation.version }}版 · {{ valuation.dimensions_count }}个维度</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="verdict-card h-100">
+                                    <h5 class="mb-2"><i class="bi bi-patch-check me-1"></i>{{ valuation.verdict }}</h5>
+                                    <p class="mb-2 opacity-90">{{ valuation.verdict_detail }}</p>
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="fs-5 fw-bold">{{ valuation.listing_price_wan }}万</div>
+                                            <small class="opacity-75">挂牌价</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="fs-5 fw-bold">{{ valuation.estimated_value_wan }}万</div>
+                                            <small class="opacity-75">全息估值</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="fs-5 fw-bold">{{ valuation.market_baseline_wan }}万</div>
+                                            <small class="opacity-75">市场基线</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- B. 七层雷达图 -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-5">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-center">七层价值雷达图</h6>
+                                        <div class="radar-container">
+                                            <canvas id="radarChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">各层评分详情</h6>
+                                        <table class="table table-sm layer-table mb-0">
+                                            <thead><tr><th>层级</th><th>权重</th><th>得分</th><th>净影响</th><th>维度数</th></tr></thead>
+                                            <tbody>
+                                            {% for layer in valuation.layers %}
+                                                <tr>
+                                                    <td>{{ layer.name }}</td>
+                                                    <td>{{ (layer.weight * 100)|round(0)|int }}%</td>
+                                                    <td>
+                                                        <span class="badge {% if layer.score >= 65 %}bg-success{% elif layer.score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}">{{ layer.score }}</span>
+                                                    </td>
+                                                    <td class="{% if layer.net_impact_pct > 0 %}text-success{% elif layer.net_impact_pct < 0 %}text-danger{% endif %}">
+                                                        {{ "%+.1f"|format(layer.net_impact_pct) }}%
+                                                    </td>
+                                                    <td>{{ layer.factors_count }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- C. Top 加/减价因素 -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-success"><i class="bi bi-arrow-up-circle me-1"></i>加分项 TOP</h6>
+                                        {% for f in valuation.top_positive %}
+                                        <div class="factor-item factor-positive d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ f.name }}</strong>
+                                                <small class="text-muted ms-1">{{ f.category }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="text-success fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</span>
+                                                <small class="text-success d-block">≈{{ "%+.1f"|format(f.impact_wan) }}万</small>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        {% if not valuation.top_positive %}<p class="text-muted mb-0">无明显加分项</p>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-danger"><i class="bi bi-arrow-down-circle me-1"></i>减分项 TOP</h6>
+                                        {% for f in valuation.top_negative %}
+                                        <div class="factor-item factor-negative d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ f.name }}</strong>
+                                                <small class="text-muted ms-1">{{ f.category }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="text-danger fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</span>
+                                                <small class="text-danger d-block">≈{{ "%+.1f"|format(f.impact_wan) }}万</small>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        {% if not valuation.top_negative %}<p class="text-muted mb-0">无明显减分项</p>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- D. 可折叠详细评估 -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-white" data-bs-toggle="collapse" data-bs-target="#detailCollapse" style="cursor:pointer;">
+                                <h6 class="mb-0"><i class="bi bi-list-columns me-2"></i>全部维度明细 (点击展开)</h6>
+                            </div>
+                            <div class="collapse" id="detailCollapse">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height:500px;overflow-y:auto;">
+                                        <table class="table table-sm table-striped layer-table mb-0">
+                                            <thead class="sticky-top bg-white"><tr><th>维度</th><th>层级</th><th>分类</th><th>当前值</th><th>影响%</th><th>折合万元</th></tr></thead>
+                                            <tbody>
+                                            {% for f in valuation.all_factors[:60] %}
+                                                <tr>
+                                                    <td>{{ f.name }}</td>
+                                                    <td><small>{{ f.layer_name[:4] }}</small></td>
+                                                    <td><small>{{ f.category }}</small></td>
+                                                    <td>{{ f.display_value }}</td>
+                                                    <td class="{% if f.impact_pct > 0 %}text-success{% elif f.impact_pct < 0 %}text-danger{% endif %} fw-bold">
+                                                        {{ "%+.1f"|format(f.impact_pct) }}%
+                                                    </td>
+                                                    <td class="{% if f.impact_wan > 0 %}text-success{% elif f.impact_wan < 0 %}text-danger{% endif %}">
+                                                        {{ "%+.1f"|format(f.impact_wan) }}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                         <hr>
-                        <a href="/" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> 返回列表</a>
+                        <a href="/listings" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> 返回房源列表</a>
                     </div>
                 </div>
             </div>
@@ -91,6 +260,45 @@
             <p>&copy; 2026 房地产智能Agent. All Rights Reserved.</p>
         </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% if valuation %}
+    <script>
+    (function() {
+        const ctx = document.getElementById('radarChart');
+        if (!ctx) return;
+        const labels = {{ valuation.layers|map(attribute='name')|list|tojson }};
+        const data = {{ valuation.layers|map(attribute='score')|list|tojson }};
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '层级得分',
+                    data: data,
+                    backgroundColor: 'rgba(102,126,234,0.2)',
+                    borderColor: 'rgba(102,126,234,1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(102,126,234,1)',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { stepSize: 20, font: { size: 10 } },
+                        pointLabels: { font: { size: 11 } }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    })();
+    </script>
+    {% endif %}
 
 </body>
 </html>

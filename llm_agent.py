@@ -1,6 +1,10 @@
 import json
 import os
+import logging
 from typing import Dict, Tuple
+
+# 配置日志
+logger = logging.getLogger(__name__)
 
 from beijing_policy import apply_beijing_policy
 from chat_agent import build_agent_reply as build_rule_reply
@@ -45,37 +49,49 @@ DEFAULTS = {
 
 
 def _load_openai_client():
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    api_key = os.environ.get("QWEN_API_KEY", "").strip()
     if not api_key:
+        logger.warning("阿里云百炼 API Key 未设置")
         return None
     try:
         from openai import OpenAI
-    except Exception:
+    except Exception as e:
+        logger.error(f"导入OpenAI库失败: {str(e)}")
         return None
 
     kwargs = {"api_key": api_key}
-    base_url = os.environ.get("OPENAI_BASE_URL", "").strip()
+    # 阿里云百炼 API base URL
+    base_url = os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1").strip()
     if base_url:
         kwargs["base_url"] = base_url
+    logger.info("阿里云百炼客户端初始化成功")
     return OpenAI(**kwargs)
 
 
 def _llm_extract_params(message: str) -> Tuple[Dict, list]:
     client = _load_openai_client()
     if client is None:
-        raise RuntimeError("LLM 不可用：缺少 OPENAI_API_KEY 或 openai 依赖")
+        raise RuntimeError("LLM 不可用：缺少 QWEN_API_KEY 或 openai 依赖")
 
-    model = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini").strip()
-    resp = client.chat.completions.create(
-        model=model,
-        temperature=0,
-        response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": message},
-        ],
-    )
-    content = resp.choices[0].message.content or "{}"
+    model = os.environ.get("QWEN_MODEL", "qwen-turbo").strip()
+    logger.info(f"调用阿里云百炼模型: {model}")
+    
+    try:
+        resp = client.chat.completions.create(
+            model=model,
+            temperature=0,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": message},
+            ],
+        )
+        content = resp.choices[0].message.content or "{}"
+        logger.info("阿里云百炼调用成功")
+    except Exception as e:
+        logger.error(f"阿里云百炼调用失败: {str(e)}")
+        raise
+    
     data = json.loads(content)
     params = data.get("params", {})
     missing_fields = data.get("missing_fields", [])
@@ -83,6 +99,7 @@ def _llm_extract_params(message: str) -> Tuple[Dict, list]:
         params = {}
     if not isinstance(missing_fields, list):
         missing_fields = []
+    logger.info(f"提取参数: {params}, 缺失字段: {missing_fields}")
     return params, missing_fields
 
 
@@ -168,11 +185,14 @@ def _build_final_reply(merged: Dict, missing_fields: list) -> Tuple[str, Dict]:
 
 def build_agent_reply(message: str) -> Tuple[str, Dict]:
     try:
+        logger.info("尝试使用Qwen-Turbo大模型处理请求")
         llm_params, missing_fields = _llm_extract_params(message)
         normalized = _normalize_params(llm_params)
         merged = dict(DEFAULTS)
         merged.update(normalized)
+        logger.info("Qwen-Turbo大模型处理成功")
         return _build_final_reply(merged, missing_fields)
-    except Exception:
+    except Exception as e:
+        logger.warning(f"阿里云百炼大模型处理失败，回退到规则解析: {str(e)}")
         # 任何 LLM 异常都回退规则解析，保证服务可用
         return build_rule_reply(message)

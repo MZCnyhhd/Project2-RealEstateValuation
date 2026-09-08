@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>全息估值报告 - {{ valuation.form_data.get('community', '房源') }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { background-color: #f0f2f5; }
+        .report-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 2rem 0; }
+        .score-ring { width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; margin: 0 auto;
+            background: conic-gradient(#fff var(--score-deg), rgba(255,255,255,.2) var(--score-deg)); }
+        .score-ring-inner { width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .score-num { font-size: 2.5rem; font-weight: 800; line-height: 1; }
+        .factor-row { display: flex; justify-content: space-between; align-items: center; padding: .5rem .75rem; border-radius: .375rem; margin-bottom: .25rem; }
+        .factor-row:hover { background: #f8f9fa; }
+        .factor-pos { border-left: 3px solid #28a745; }
+        .factor-neg { border-left: 3px solid #dc3545; }
+        .blur-section { position: relative; }
+        .blur-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(6px); background: rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; flex-direction: column; border-radius: .5rem; z-index: 10; }
+        .layer-bar { height: 8px; border-radius: 4px; background: #e9ecef; overflow: hidden; }
+        .layer-bar-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+        .stat-card { border: none; border-radius: .75rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-gem"></i> 全息估值</a>
+            <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-warning btn-sm fw-bold" href="/valuate"><i class="bi bi-gem"></i> 全息估值</a>
+                <a class="btn btn-outline-light btn-sm" href="/listings"><i class="bi bi-house"></i> 房源</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 报告头部 -->
+    <div class="report-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <div class="score-ring" style="--score-deg: {{ (valuation.overall_score * 3.6)|int }}deg;">
+                        <div class="score-ring-inner">
+                            <div class="score-num">{{ valuation.overall_score }}</div>
+                            <small>{{ valuation.score_level }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3 class="mb-1">{{ valuation.form_data.get('community', '未知小区') }}</h3>
+                    <p class="opacity-75 mb-2">{{ valuation.form_data.get('address', '') }} · {{ valuation.form_data.get('area_size', '') }}㎡ · {{ valuation.form_data.get('layout_rooms', '') }}室{{ valuation.form_data.get('layout_halls', '') }}厅</p>
+                    <div class="alert alert-light alert-sm py-2 px-3 mb-0 d-inline-block">
+                        <strong>{{ valuation.verdict }}</strong>
+                        <span class="ms-2 opacity-75">{{ valuation.verdict_detail }}</span>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="mb-2">
+                        <small class="opacity-75">全息估值</small>
+                        <div class="fs-3 fw-bold">{{ valuation.estimated_value_wan }}<small class="fs-6">万</small></div>
+                    </div>
+                    <div>
+                        <small class="opacity-75">您的报价</small>
+                        <div class="fs-5">{{ valuation.listing_price_wan }}万</div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge bg-light text-dark">数据完整度 {{ valuation.data_completeness }}%</span>
+                        <span class="badge bg-light text-dark">{{ valuation.dimensions_count }}维度</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4 pb-5">
+        <!-- 免费区域：雷达图 + 层级评分 + Top因素 -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-5">
+                <div class="card stat-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="card-title text-center mb-3"><i class="bi bi-broadcast me-1"></i>七层价值雷达图</h6>
+                        <canvas id="radarChart" style="max-height:300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="card stat-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3"><i class="bi bi-bar-chart-steps me-1"></i>各层评分</h6>
+                        {% for layer in valuation.layers %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">{{ layer.name }}</span>
+                                <span>
+                                    <span class="badge {% if layer.score >= 65 %}bg-success{% elif layer.score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}">{{ layer.score }}分</span>
+                                    <small class="text-muted ms-1">权重{{ (layer.weight * 100)|int }}%</small>
+                                </span>
+                            </div>
+                            <div class="layer-bar">
+                                <div class="layer-bar-fill {% if layer.score >= 65 %}bg-success{% elif layer.score >= 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width:{{ layer.score }}%"></div>
+                            </div>
+                            {% if layer.top_factor %}
+                            <small class="text-muted">关键因素：{{ layer.top_factor.name }} ({{ "%+.1f"|format(layer.top_factor.impact_pct) }}%)</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 加减价因素（免费展示前3） -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card stat-card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-success mb-3"><i class="bi bi-arrow-up-circle me-1"></i>加分项 TOP</h6>
+                        {% for f in valuation.top_positive[:3] %}
+                        <div class="factor-row factor-pos">
+                            <div><strong>{{ f.name }}</strong> <small class="text-muted">{{ f.category }}</small></div>
+                            <div class="text-end"><span class="text-success fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</span><small class="text-success d-block">≈{{ "%+.1f"|format(f.impact_wan) }}万</small></div>
+                        </div>
+                        {% endfor %}
+                        {% if not valuation.top_positive %}<p class="text-muted small mb-0">暂无明显加分项</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card stat-card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-danger mb-3"><i class="bi bi-arrow-down-circle me-1"></i>减分项 TOP</h6>
+                        {% for f in valuation.top_negative[:3] %}
+                        <div class="factor-row factor-neg">
+                            <div><strong>{{ f.name }}</strong> <small class="text-muted">{{ f.category }}</small></div>
+                            <div class="text-end"><span class="text-danger fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</span><small class="text-danger d-block">≈{{ "%+.1f"|format(f.impact_wan) }}万</small></div>
+                        </div>
+                        {% endfor %}
+                        {% if not valuation.top_negative %}<p class="text-muted small mb-0">暂无明显减分项</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 付费区域：完整182维度明细 -->
+        <div class="card stat-card shadow-sm mb-4 blur-section" id="fullReport">
+            {% if not is_paid %}
+            <div class="blur-overlay">
+                <i class="bi bi-lock-fill" style="font-size:2.5rem;color:#667eea;"></i>
+                <h5 class="mt-2 mb-1">完整估值报告</h5>
+                <p class="text-muted small mb-3">解锁全部 {{ valuation.dimensions_count }} 个维度的逐项分析与加减价明细</p>
+                <a href="/valuate/unlock" class="btn btn-primary btn-lg px-4"><i class="bi bi-unlock me-1"></i>解锁完整报告 ¥9.9</a>
+                <small class="text-muted mt-2">（演示模式：点击即可免费解锁）</small>
+            </div>
+            {% endif %}
+            <div class="card-body" {% if not is_paid %}style="filter:blur(4px);pointer-events:none;user-select:none;"{% endif %}>
+                <h6 class="mb-3"><i class="bi bi-list-columns me-1"></i>全部维度评估明细 ({{ valuation.dimensions_count }}项)</h6>
+
+                {% for layer in valuation.layers %}
+                <div class="mb-4">
+                    <h6 class="text-primary border-bottom pb-1">第{{ layer.id }}层：{{ layer.name }} <small class="text-muted">(权重{{ (layer.weight*100)|int }}% · 得分{{ layer.score }})</small></h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0" style="font-size:.85rem;">
+                            <thead class="table-light"><tr><th>维度</th><th>分类</th><th>当前值</th><th>影响%</th><th>折合万元</th></tr></thead>
+                            <tbody>
+                            {% for f in valuation.all_factors if f.layer == layer.id %}
+                                <tr>
+                                    <td>{{ f.name }}</td>
+                                    <td><small class="text-muted">{{ f.category }}</small></td>
+                                    <td>{{ f.display_value }}</td>
+                                    <td class="{% if f.impact_pct > 0 %}text-success{% elif f.impact_pct < 0 %}text-danger{% endif %} fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</td>
+                                    <td class="{% if f.impact_wan > 0 %}text-success{% elif f.impact_wan < 0 %}text-danger{% endif %}">{{ "%+.1f"|format(f.impact_wan) }}万</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="text-center">
+            <a href="/valuate" class="btn btn-outline-primary me-2"><i class="bi bi-arrow-repeat me-1"></i>重新评估</a>
+            <a href="/" class="btn btn-outline-secondary"><i class="bi bi-house me-1"></i>浏览房源</a>
+            <button onclick="window.print()" class="btn btn-outline-dark ms-2"><i class="bi bi-printer me-1"></i>打印报告</button>
+        </div>
+    </div>
+
+    <footer class="py-4 bg-light">
+        <div class="container text-center text-muted">
+            <p class="mb-1 small">本报告由全息估值引擎自动生成，仅供参考，不构成交易建议。</p>
+            <p class="mb-0">&copy; 2026 房地产智能Agent · 全息估值引擎 v1.0</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        const ctx = document.getElementById('radarChart');
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: {{ valuation.layers|map(attribute='name')|list|tojson }},
+                datasets: [{
+                    label: '得分',
+                    data: {{ valuation.layers|map(attribute='score')|list|tojson }},
+                    backgroundColor: 'rgba(102,126,234,0.2)',
+                    borderColor: 'rgba(102,126,234,1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(102,126,234,1)',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 9 } }, pointLabels: { font: { size: 10 } } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

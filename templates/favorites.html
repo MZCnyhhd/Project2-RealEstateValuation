@@ -14,8 +14,9 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/"><i class="bi bi-house-heart-fill"></i> 房地产智能Agent</a>
+            <a class="navbar-brand" href="/"><i class="bi bi-gem"></i> 全息估值</a>
             <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-warning btn-sm fw-bold" href="/valuate"><i class="bi bi-gem"></i> 估值</a>
                 <a class="btn btn-outline-light btn-sm" href="/calculator"><i class="bi bi-calculator"></i> 计算器</a>
                 <a class="btn btn-outline-light btn-sm" href="/compare"><i class="bi bi-columns-gap"></i> 对比</a>
             </div>
@@ -25,7 +26,7 @@
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="mb-0">我的收藏 ({{ listings|length }})</h3>
-            <a href="/" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> 返回首页</a>
+            <a href="/listings" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> 返回房源列表</a>
         </div>
 
         {% if listings %}
