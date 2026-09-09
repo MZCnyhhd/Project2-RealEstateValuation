@@ -7,11 +7,162 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        :root {
+            --brand-purple: #764ba2;
+            --brand-blue: #667eea;
+            --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
         body { background-color: #f8f9fa; }
-        .form-section { border-left: 3px solid #667eea; padding-left: 1rem; margin-bottom: 1.5rem; }
-        .form-section h6 { color: #667eea; font-weight: 700; margin-bottom: .75rem; }
-        .hero-banner { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 2.5rem 0; margin-bottom: 2rem; }
-        .price-tag { font-size: .85rem; background: rgba(255,255,255,.15); padding: .25rem .75rem; border-radius: 1rem; }
+
+        /* Hero */
+        .hero-banner {
+            background: var(--brand-gradient);
+            color: #fff;
+            padding: 2.5rem 0;
+            margin-bottom: 2rem;
+        }
+        .hero-banner .price-tag {
+            font-size: .85rem;
+            background: rgba(255,255,255,.15);
+            padding: .25rem .75rem;
+            border-radius: 1rem;
+        }
+
+        /* Stepper */
+        .stepper {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .stepper::before {
+            content: "";
+            position: absolute;
+            top: 1.1rem;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 0;
+        }
+        .step {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 0 .5rem;
+            cursor: pointer;
+            flex: 1;
+        }
+        .step-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            line-height: 2.25rem;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid #dee2e6;
+            color: #6c757d;
+            margin: 0 auto .4rem;
+            font-weight: 700;
+            transition: all .2s;
+        }
+        .step:hover .step-icon { border-color: var(--brand-blue); color: var(--brand-blue); }
+        .step.active .step-icon { background: var(--brand-gradient); border-color: transparent; color: #fff; }
+        .step-label { font-size: .8rem; color: #6c757d; font-weight: 500; }
+        .step.active .step-label { color: var(--brand-purple); }
+        @media (max-width: 767px) {
+            .stepper { margin-bottom: 1.25rem; }
+            .stepper::before { top: .85rem; }
+            .step-icon { width: 1.75rem; height: 1.75rem; line-height: 1.75rem; font-size: .8rem; }
+            .step-label { display: none; }
+        }
+
+        /* Form sections */
+        .val-section {
+            border: none;
+            border-radius: 1rem;
+            background: #fff;
+            box-shadow: 0 .125rem .5rem rgba(0,0,0,.04);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .val-section .section-header {
+            background: #f8f9ff;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #eef0ff;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+        .val-section .section-header .section-num {
+            width: 1.75rem; height: 1.75rem;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: var(--brand-gradient);
+            color: #fff;
+            font-size: .8rem; font-weight: 700;
+        }
+        .val-section .section-header h6 {
+            margin: 0; font-weight: 700; color: #4a4a68;
+        }
+        .val-section .card-body { padding: 1.25rem; }
+        .form-label { font-size: .88rem; color: #555; margin-bottom: .35rem; }
+        .form-control, .form-select { font-size: .92rem; }
+
+        /* Sticky summary */
+        .sticky-summary {
+            position: sticky;
+            top: 1rem;
+            z-index: 1020;
+        }
+        .summary-card {
+            border: none;
+            border-radius: 1rem;
+            background: #fff;
+            box-shadow: 0 .25rem 1rem rgba(0,0,0,.08);
+        }
+        .summary-card .card-header {
+            background: var(--brand-gradient);
+            color: #fff;
+            border: none;
+            border-radius: 1rem 1rem 0 0;
+            padding: 1rem 1.25rem;
+        }
+        .price-board {
+            background: #f8f9ff;
+            border-radius: .75rem;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .price-board .unit-price {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--brand-purple);
+            line-height: 1;
+        }
+        .check-item i { font-size: 1.1rem; }
+        .check-item.done { color: #198754; }
+        .check-item.pending { color: #adb5bd; }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            border: none;
+            color: #332200;
+            font-weight: 700;
+        }
+        .btn-submit:hover { filter: brightness(1.05); }
+
+        /* Mobile bottom CTA */
+        .mobile-cta {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #fff;
+            box-shadow: 0 -.25rem 1rem rgba(0,0,0,.08);
+            padding: .75rem 1rem;
+            z-index: 1030;
+        }
     </style>
 </head>
 <body>
@@ -30,318 +181,385 @@
     <div class="hero-banner">
         <div class="container">
             <h2><i class="bi bi-gem me-2"></i>房地产全息价值评估</h2>
-            <p class="mb-2 opacity-90">7层 × 182维度，AI驱动的房产估值引擎。填写房源信息，生成专业估值报告。</p>
+            <p class="mb-2 opacity-90">7层 × 182维度，AI 驱动的房产估值引擎。填写房源信息，生成专业估值报告。</p>
             <div class="d-flex gap-3 flex-wrap">
-                <span class="price-tag"><i class="bi bi-check-circle me-1"></i>免费预览：综合评分 + 估值结论</span>
-                <span class="price-tag"><i class="bi bi-lock me-1"></i>完整报告：182维度逐项分析 ¥9.9</span>
+                <span class="price-tag"><i class="bi bi-gem me-1"></i>专业版 ¥{{ price }}：7层 × 182维度完整报告</span>
+                <span class="price-tag"><i class="bi bi-shield-check me-1"></i>含税费测算 · 成交建议 · 政策校验</span>
             </div>
         </div>
     </div>
 
     <div class="container pb-5">
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <!-- Stepper -->
+        <div class="stepper" id="stepper">
+            <div class="step active" data-target="section-basic">
+                <div class="step-icon">1</div>
+                <div class="step-label">房源基础</div>
+            </div>
+            <div class="step" data-target="section-property">
+                <div class="step-icon">2</div>
+                <div class="step-label">房屋属性</div>
+            </div>
+            <div class="step" data-target="section-community">
+                <div class="step-icon">3</div>
+                <div class="step-label">小区&配套</div>
+            </div>
+            <div class="step" data-target="section-transaction">
+                <div class="step-icon">4</div>
+                <div class="step-label">交易&其他</div>
+            </div>
+            <div class="step" data-target="section-submit">
+                <div class="step-icon">5</div>
+                <div class="step-label">提交报告</div>
+            </div>
+        </div>
+
         <form action="/valuate/report" method="POST" id="valuateForm">
-            <div class="row">
+            <div class="row g-4">
+                <!-- 左侧表单 -->
                 <div class="col-lg-8">
-                    <!-- 基本信息 -->
-                    <div class="card shadow-sm mb-4">
+
+                    <!-- 1. 房源基础 -->
+                    <div class="card val-section" id="section-basic">
+                        <div class="section-header">
+                            <span class="section-num">1</span>
+                            <h6><i class="bi bi-building me-2"></i>房源基础信息</h6>
+                        </div>
                         <div class="card-body">
-                            <div class="form-section">
-                                <h6><i class="bi bi-building me-1"></i>基本信息</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">小区名称 <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="community" required placeholder="如：金茂府">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">详细地址</label>
-                                        <input type="text" class="form-control" name="address" placeholder="如：朝阳区花园路96号院">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">建筑面积(㎡) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.1" class="form-control" name="area_size" required placeholder="如：89.5">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">报价/挂牌价(万) <span class="text-danger">*</span></label>
-                                        <input type="number" step="1" class="form-control" name="price" required placeholder="如：520">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">建筑年代</label>
-                                        <input type="number" class="form-control" name="build_year" placeholder="如：2018" min="1950" max="2026">
-                                    </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">小区名称 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control required-field" name="community" required placeholder="如：金茂府">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">详细地址</label>
+                                    <input type="text" class="form-control" name="address" placeholder="如：朝阳区花园路96号院">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">建筑面积(㎡) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.1" class="form-control required-field" name="area_size" id="area_size" required placeholder="如：89.5">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">报价/挂牌价(万) <span class="text-danger">*</span></label>
+                                    <input type="number" step="1" class="form-control required-field" name="price" id="price" required placeholder="如：520">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">建筑年代</label>
+                                    <input type="number" class="form-control" name="build_year" placeholder="如：2018" min="1950" max="2026">
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="form-section">
-                                <h6><i class="bi bi-door-open me-1"></i>房屋属性</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-2">
-                                        <label class="form-label">室</label>
-                                        <input type="number" class="form-control" name="layout_rooms" value="3" min="0" max="10">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">厅</label>
-                                        <input type="number" class="form-control" name="layout_halls" value="2" min="0" max="5">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">卫</label>
-                                        <input type="number" class="form-control" name="layout_baths" value="1" min="0" max="5">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">所在楼层</label>
-                                        <input type="number" class="form-control" name="floor" placeholder="如：12">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">总楼层</label>
-                                        <input type="number" class="form-control" name="total_floors" placeholder="如：28">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">朝向</label>
-                                        <select class="form-select" name="orientation">
-                                            <option value="南">南</option>
-                                            <option value="东南">东南</option>
-                                            <option value="西南">西南</option>
-                                            <option value="东">东</option>
-                                            <option value="西">西</option>
-                                            <option value="北">北</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">装修状况</label>
-                                        <select class="form-select" name="decoration">
-                                            <option value="毛坯">毛坯</option>
-                                            <option value="简装">简装</option>
-                                            <option value="精装" selected>精装</option>
-                                            <option value="豪装">豪装</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">梯户比</label>
-                                        <select class="form-select" name="elevator_ratio">
-                                            <option value="1T2">1梯2户</option>
-                                            <option value="2T4" selected>2梯4户</option>
-                                            <option value="2T6">2梯6户</option>
-                                            <option value="3T8">3梯8户</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">层高(米)</label>
-                                        <input type="number" step="0.1" class="form-control" name="ceiling_height" placeholder="如：2.9" value="2.8">
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="d-flex flex-wrap gap-3">
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="north_south" value="1" id="ck_ns"><label class="form-check-label" for="ck_ns">南北通透</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="has_elevator" value="1" id="ck_ev" checked><label class="form-check-label" for="ck_ev">有电梯</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="squareness" value="1" id="ck_sq" checked><label class="form-check-label" for="ck_sq">户型方正</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="dry_wet_sep" value="1" id="ck_dw"><label class="form-check-label" for="ck_dw">干湿分离</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="bright_bath" value="1" id="ck_bb"><label class="form-check-label" for="ck_bb">明卫(有窗)</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="has_central_ac" value="1" id="ck_ac"><label class="form-check-label" for="ck_ac">中央空调</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="has_fresh_air" value="1" id="ck_fa"><label class="form-check-label" for="ck_fa">新风系统</label></div>
-                                        </div>
+                    <!-- 2. 房屋属性 -->
+                    <div class="card val-section" id="section-property">
+                        <div class="section-header">
+                            <span class="section-num">2</span>
+                            <h6><i class="bi bi-door-open me-2"></i>房屋属性</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-4 col-md-2">
+                                    <label class="form-label">室</label>
+                                    <input type="number" class="form-control" name="layout_rooms" value="3" min="0" max="10">
+                                </div>
+                                <div class="col-4 col-md-2">
+                                    <label class="form-label">厅</label>
+                                    <input type="number" class="form-control" name="layout_halls" value="2" min="0" max="5">
+                                </div>
+                                <div class="col-4 col-md-2">
+                                    <label class="form-label">卫</label>
+                                    <input type="number" class="form-control" name="layout_baths" value="1" min="0" max="5">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">所在楼层</label>
+                                    <input type="number" class="form-control" name="floor" placeholder="如：12">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">总楼层</label>
+                                    <input type="number" class="form-control" name="total_floors" placeholder="如：28">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">朝向</label>
+                                    <select class="form-select" name="orientation">
+                                        <option value="南">南</option>
+                                        <option value="东南">东南</option>
+                                        <option value="西南">西南</option>
+                                        <option value="东">东</option>
+                                        <option value="西">西</option>
+                                        <option value="北">北</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">装修状况</label>
+                                    <select class="form-select" name="decoration">
+                                        <option value="毛坯">毛坯</option>
+                                        <option value="简装">简装</option>
+                                        <option value="精装" selected>精装</option>
+                                        <option value="豪装">豪装</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">梯户比</label>
+                                    <select class="form-select" name="elevator_ratio">
+                                        <option value="1T2">1梯2户</option>
+                                        <option value="2T4" selected>2梯4户</option>
+                                        <option value="2T6">2梯6户</option>
+                                        <option value="3T8">3梯8户</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">层高(米)</label>
+                                    <input type="number" step="0.1" class="form-control" name="ceiling_height" placeholder="如：2.9" value="2.8">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">户型亮点</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="north_south" value="1" id="ck_ns"><label class="form-check-label" for="ck_ns">南北通透</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_elevator" value="1" id="ck_ev" checked><label class="form-check-label" for="ck_ev">有电梯</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="squareness" value="1" id="ck_sq" checked><label class="form-check-label" for="ck_sq">户型方正</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="dry_wet_sep" value="1" id="ck_dw"><label class="form-check-label" for="ck_dw">干湿分离</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="bright_bath" value="1" id="ck_bb"><label class="form-check-label" for="ck_bb">明卫(有窗)</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_central_ac" value="1" id="ck_ac"><label class="form-check-label" for="ck_ac">中央空调</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_fresh_air" value="1" id="ck_fa"><label class="form-check-label" for="ck_fa">新风系统</label></div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="form-section">
-                                <h6><i class="bi bi-houses me-1"></i>小区信息</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label">容积率</label>
-                                        <input type="number" step="0.1" class="form-control" name="far" placeholder="如：2.5">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">绿化率(%)</label>
-                                        <input type="number" class="form-control" name="green_rate" placeholder="如：35">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">物业费(元/㎡/月)</label>
-                                        <input type="number" step="0.1" class="form-control" name="property_fee" placeholder="如：3.5">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">车位配比</label>
-                                        <input type="number" step="0.1" class="form-control" name="parking_ratio" placeholder="如：1.2">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">物业/开发商品牌</label>
-                                        <select class="form-select" name="property_brand">
-                                            <option value="">请选择</option>
-                                            <option value="万科">万科</option>
-                                            <option value="龙湖">龙湖</option>
-                                            <option value="绿城">绿城</option>
-                                            <option value="中海">中海</option>
-                                            <option value="保利">保利</option>
-                                            <option value="华润">华润</option>
-                                            <option value="普通">普通物业</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">总户数</label>
-                                        <input type="number" class="form-control" name="total_units" placeholder="如：800">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">楼间距(米)</label>
-                                        <input type="number" class="form-control" name="building_gap" placeholder="如：45">
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="ped_car_split" value="1" id="ck_pc"><label class="form-check-label" for="ck_pc">人车分流</label></div>
-                                    </div>
+                    <!-- 3. 小区与配套 -->
+                    <div class="card val-section" id="section-community">
+                        <div class="section-header">
+                            <span class="section-num">3</span>
+                            <h6><i class="bi bi-houses me-2"></i>小区与周边配套</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">容积率</label>
+                                    <input type="number" step="0.1" class="form-control" name="far" placeholder="如：2.5">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">绿化率(%)</label>
+                                    <input type="number" class="form-control" name="green_rate" placeholder="如：35">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">物业费(元/㎡/月)</label>
+                                    <input type="number" step="0.1" class="form-control" name="property_fee" placeholder="如：3.5">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label">车位配比</label>
+                                    <input type="number" step="0.1" class="form-control" name="parking_ratio" placeholder="如：1.2">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">物业/开发商品牌</label>
+                                    <select class="form-select" name="property_brand">
+                                        <option value="">请选择</option>
+                                        <option value="万科">万科</option>
+                                        <option value="龙湖">龙湖</option>
+                                        <option value="绿城">绿城</option>
+                                        <option value="中海">中海</option>
+                                        <option value="保利">保利</option>
+                                        <option value="华润">华润</option>
+                                        <option value="普通">普通物业</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">总户数</label>
+                                    <input type="number" class="form-control" name="total_units" placeholder="如：800">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">楼间距(米)</label>
+                                    <input type="number" class="form-control" name="building_gap" placeholder="如：45">
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" name="ped_car_split" value="1" id="ck_pc"><label class="form-check-label" for="ck_pc">人车分流</label></div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">距最近地铁站(米)</label>
+                                    <input type="number" class="form-control" name="subway_distance" placeholder="如：500">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">距CBD通勤(分钟)</label>
+                                    <input type="number" class="form-control" name="cbd_commute" placeholder="如：35">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">对口学校等级</label>
+                                    <select class="form-select" name="school_level">
+                                        <option value="">无/不确定</option>
+                                        <option value="市重点">市重点</option>
+                                        <option value="区重点">区重点</option>
+                                        <option value="普通">普通学校</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">距三甲医院(分钟)</label>
+                                    <input type="number" class="form-control" name="hospital_min" placeholder="如：15">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">距最近公园(米)</label>
+                                    <input type="number" class="form-control" name="park_distance" placeholder="如：800">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">距大型商超(米)</label>
+                                    <input type="number" class="form-control" name="mall_distance" placeholder="如：1200">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">噪音环境</label>
+                                    <select class="form-select" name="noise_level">
+                                        <option value="安静">安静</option>
+                                        <option value="一般" selected>一般</option>
+                                        <option value="临街">临街</option>
+                                        <option value="临高架">临高架/铁路</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">窗外景观</label>
+                                    <select class="form-select" name="view_type">
+                                        <option value="无遮挡">无遮挡(开阔)</option>
+                                        <option value="公园景">公园/绿化景</option>
+                                        <option value="湖景">湖景/水景</option>
+                                        <option value="城市景">城市景观</option>
+                                        <option value="楼对楼">楼对楼(遮挡)</option>
+                                    </select>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 交易与特殊情况 -->
+                    <div class="card val-section" id="section-transaction">
+                        <div class="section-header">
+                            <span class="section-num">4</span>
+                            <h6><i class="bi bi-shield-exclamation me-2"></i>交易条件与特殊情况</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">产权类型</label>
+                                    <select class="form-select" name="property_type">
+                                        <option value="商品房" selected>商品房</option>
+                                        <option value="已购公房">已购公房(房改房)</option>
+                                        <option value="经适房">经济适用房</option>
+                                        <option value="共有产权">共有产权房</option>
+                                        <option value="商住两用">商住两用</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">挂牌天数</label>
+                                    <input type="number" class="form-control" name="listing_days" placeholder="如：45">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">交易标签</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="five_year_only" value="1" id="ck_5y"><label class="form-check-label" for="ck_5y">满五唯一</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_mortgage" value="1" id="ck_mg"><label class="form-check-label" for="ck_mg">有抵押</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_lease" value="1" id="ck_ls"><label class="form-check-label" for="ck_ls">有租约</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="urgent_sell" value="1" id="ck_us"><label class="form-check-label" for="ck_us">急售</label></div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">房屋缺陷</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="is_haunted" value="1" id="ck_ht"><label class="form-check-label" for="ck_ht">凶宅</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_leak" value="1" id="ck_lk"><label class="form-check-label" for="ck_lk">有漏水</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="door_toilet" value="1" id="ck_dt"><label class="form-check-label" for="ck_dt">入门见厕</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="beam_press" value="1" id="ck_bp"><label class="form-check-label" for="ck_bp">横梁压顶</label></div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">周边忌讳设施</label>
+                                    <select class="form-select" name="taboo_facilities">
+                                        <option value="">无</option>
+                                        <option value="殡仪馆">殡仪馆/火葬场</option>
+                                        <option value="墓地">墓地/陵园</option>
+                                        <option value="变电站">变电站/高压线</option>
+                                        <option value="垃圾站">垃圾中转站</option>
+                                        <option value="加油站">加油站/化工厂</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">风水问题</label>
+                                    <select class="form-select" name="feng_shui_issue">
+                                        <option value="">无</option>
+                                        <option value="路冲">路冲(路直冲大门)</option>
+                                        <option value="反弓路">反弓路</option>
+                                        <option value="天斩煞">天斩煞(两楼缝隙正对)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">供暖方式</label>
+                                    <select class="form-select" name="heating_type">
+                                        <option value="集中供暖">集中供暖</option>
+                                        <option value="地暖">地暖</option>
+                                        <option value="自采暖">自采暖</option>
+                                        <option value="无">无供暖</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label">窗户类型</label>
+                                    <select class="form-select" name="window_type">
+                                        <option value="断桥铝">断桥铝(双层中空)</option>
+                                        <option value="塑钢">塑钢</option>
+                                        <option value="铝合金">铝合金(单层)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. 提交区（桌面端显示，移动端被底部 CTA 替代） -->
+                    <div class="card val-section d-none d-lg-block" id="section-submit">
+                        <div class="card-body text-center py-4" style="background: var(--brand-gradient); color: #fff; border-radius: 1rem;">
+                            <p class="mb-3 opacity-90"><i class="bi bi-info-circle me-1"></i>填写越完整，估值越精准（当前支持 182 个评估维度）</p>
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold px-5 text-dark">
+                                <i class="bi bi-lock-fill me-2"></i>提交并支付 ¥{{ price }}
+                            </button>
+                            <p class="mb-0 mt-2 small opacity-75">支付后立即生成完整估值报告</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- 右侧摘要 -->
                 <div class="col-lg-4">
-                    <!-- 周边配套 -->
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-body">
-                            <div class="form-section">
-                                <h6><i class="bi bi-geo-alt me-1"></i>周边配套</h6>
-                                <div class="row g-3">
-                                    <div class="col-12">
-                                        <label class="form-label">距最近地铁站(米)</label>
-                                        <input type="number" class="form-control" name="subway_distance" placeholder="如：500">
+                    <div class="sticky-summary">
+                        <div class="card summary-card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>订单摘要</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="price-board">
+                                    <div class="text-muted small mb-1">估算单价</div>
+                                    <div class="unit-price" id="unitPrice">--</div>
+                                    <div class="text-muted small">万 / ㎡</div>
+                                </div>
+
+                                <h6 class="fw-bold mb-2">必填项检查</h6>
+                                <div class="mb-3">
+                                    <div class="check-item pending mb-1" id="check-community">
+                                        <i class="bi bi-circle"></i> <span>小区名称</span>
                                     </div>
-                                    <div class="col-12">
-                                        <label class="form-label">距CBD通勤(分钟)</label>
-                                        <input type="number" class="form-control" name="cbd_commute" placeholder="如：35">
+                                    <div class="check-item pending mb-1" id="check-area">
+                                        <i class="bi bi-circle"></i> <span>建筑面积</span>
                                     </div>
-                                    <div class="col-12">
-                                        <label class="form-label">对口学校等级</label>
-                                        <select class="form-select" name="school_level">
-                                            <option value="">无/不确定</option>
-                                            <option value="市重点">市重点</option>
-                                            <option value="区重点">区重点</option>
-                                            <option value="普通">普通学校</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">距三甲医院(分钟车程)</label>
-                                        <input type="number" class="form-control" name="hospital_min" placeholder="如：15">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">距最近公园(米)</label>
-                                        <input type="number" class="form-control" name="park_distance" placeholder="如：800">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">距大型商超(米)</label>
-                                        <input type="number" class="form-control" name="mall_distance" placeholder="如：1200">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">噪音环境</label>
-                                        <select class="form-select" name="noise_level">
-                                            <option value="安静">安静</option>
-                                            <option value="一般" selected>一般</option>
-                                            <option value="临街">临街</option>
-                                            <option value="临高架">临高架/铁路</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">窗外景观</label>
-                                        <select class="form-select" name="view_type">
-                                            <option value="无遮挡">无遮挡(开阔)</option>
-                                            <option value="公园景">公园/绿化景</option>
-                                            <option value="湖景">湖景/水景</option>
-                                            <option value="城市景">城市景观</option>
-                                            <option value="楼对楼">楼对楼(遮挡)</option>
-                                        </select>
+                                    <div class="check-item pending mb-1" id="check-price">
+                                        <i class="bi bi-circle"></i> <span>挂牌报价</span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- 特殊与交易 -->
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-body">
-                            <div class="form-section">
-                                <h6><i class="bi bi-shield-exclamation me-1"></i>产权与交易</h6>
-                                <div class="row g-3">
-                                    <div class="col-12">
-                                        <label class="form-label">产权类型</label>
-                                        <select class="form-select" name="property_type">
-                                            <option value="商品房" selected>商品房</option>
-                                            <option value="已购公房">已购公房(房改房)</option>
-                                            <option value="经适房">经济适用房</option>
-                                            <option value="共有产权">共有产权房</option>
-                                            <option value="商住两用">商住两用</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">挂牌天数</label>
-                                        <input type="number" class="form-control" name="listing_days" placeholder="如：45">
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="five_year_only" value="1" id="ck_5y"><label class="form-check-label" for="ck_5y">满五唯一</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="has_mortgage" value="1" id="ck_mg"><label class="form-check-label" for="ck_mg">有抵押</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="has_lease" value="1" id="ck_ls"><label class="form-check-label" for="ck_ls">有租约</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="urgent_sell" value="1" id="ck_us"><label class="form-check-label" for="ck_us">急售</label></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <button type="submit" class="btn btn-submit btn-lg w-100 fw-bold">
+                                    <i class="bi bi-lock-fill me-2"></i>提交并支付 ¥{{ price }}
+                                </button>
+                                <p class="text-muted small text-center mt-2 mb-0">支付后解锁 182 维度完整报告</p>
                             </div>
-
-                            <div class="form-section mt-3">
-                                <h6><i class="bi bi-exclamation-triangle me-1"></i>特殊情况(选填)</h6>
-                                <div class="row g-3">
-                                    <div class="col-12">
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="is_haunted" value="1" id="ck_ht"><label class="form-check-label" for="ck_ht">凶宅</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="has_leak" value="1" id="ck_lk"><label class="form-check-label" for="ck_lk">有漏水</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="door_toilet" value="1" id="ck_dt"><label class="form-check-label" for="ck_dt">入门见厕</label></div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox" name="beam_press" value="1" id="ck_bp"><label class="form-check-label" for="ck_bp">横梁压顶</label></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">周边忌讳设施</label>
-                                        <select class="form-select" name="taboo_facilities">
-                                            <option value="">无</option>
-                                            <option value="殡仪馆">殡仪馆/火葬场</option>
-                                            <option value="墓地">墓地/陵园</option>
-                                            <option value="变电站">变电站/高压线</option>
-                                            <option value="垃圾站">垃圾中转站</option>
-                                            <option value="加油站">加油站/化工厂</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">风水问题</label>
-                                        <select class="form-select" name="feng_shui_issue">
-                                            <option value="">无</option>
-                                            <option value="路冲">路冲(路直冲大门)</option>
-                                            <option value="反弓路">反弓路</option>
-                                            <option value="天斩煞">天斩煞(两楼缝隙正对)</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">供暖方式</label>
-                                        <select class="form-select" name="heating_type">
-                                            <option value="集中供暖">集中供暖</option>
-                                            <option value="地暖">地暖</option>
-                                            <option value="自采暖">自采暖</option>
-                                            <option value="无">无供暖</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">窗户类型</label>
-                                        <select class="form-select" name="window_type">
-                                            <option value="断桥铝">断桥铝(双层中空)</option>
-                                            <option value="塑钢">塑钢</option>
-                                            <option value="铝合金">铝合金(单层)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 提交 -->
-                    <div class="card shadow-sm border-0" style="background:linear-gradient(135deg,#667eea,#764ba2);">
-                        <div class="card-body text-center text-white">
-                            <p class="mb-2 small opacity-75">填写越完整，估值越精准（当前支持182个评估维度）</p>
-                            <button type="submit" class="btn btn-light btn-lg fw-bold px-5">
-                                <i class="bi bi-graph-up-arrow me-2"></i>生成估值报告
-                            </button>
-                            <p class="mb-0 mt-2 small opacity-75">免费查看评分与结论 · 完整报告 ¥9.9</p>
                         </div>
                     </div>
                 </div>
@@ -349,11 +567,71 @@
         </form>
     </div>
 
-    <footer class="py-4 bg-light">
+    <!-- 移动端固定提交栏 -->
+    <div class="mobile-cta d-lg-none">
+        <button type="submit" form="valuateForm" class="btn btn-submit w-100 fw-bold">
+            <i class="bi bi-lock-fill me-2"></i>提交并支付 ¥{{ price }}
+        </button>
+    </div>
+
+    <footer class="py-4 bg-light d-none d-lg-block">
         <div class="container text-center text-muted">
             <p class="mb-0">&copy; 2026 房地产智能Agent · 全息估值引擎 v1.0</p>
         </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 估算单价 + 必填项检查
+        const priceInput = document.getElementById('price');
+        const areaInput = document.getElementById('area_size');
+        const unitPriceEl = document.getElementById('unitPrice');
+        const requiredMap = {
+            community: 'check-community',
+            area_size: 'check-area',
+            price: 'check-price'
+        };
+
+        function updateSummary() {
+            const price = parseFloat(priceInput.value);
+            const area = parseFloat(areaInput.value);
+            if (price && area && area > 0) {
+                unitPriceEl.textContent = (price / area).toFixed(2);
+            } else {
+                unitPriceEl.textContent = '--';
+            }
+
+            Object.keys(requiredMap).forEach(name => {
+                const input = document.querySelector(`[name="${name}"]`);
+                const item = document.getElementById(requiredMap[name]);
+                if (input && input.value.trim()) {
+                    item.classList.remove('pending');
+                    item.classList.add('done');
+                    item.querySelector('i').className = 'bi bi-check-circle-fill';
+                } else {
+                    item.classList.remove('done');
+                    item.classList.add('pending');
+                    item.querySelector('i').className = 'bi bi-circle';
+                }
+            });
+        }
+
+        priceInput.addEventListener('input', updateSummary);
+        areaInput.addEventListener('input', updateSummary);
+        document.querySelector('[name="community"]').addEventListener('input', updateSummary);
+
+        // Stepper 点击滚动到对应区域
+        document.querySelectorAll('.step').forEach(step => {
+            step.addEventListener('click', () => {
+                const target = document.getElementById(step.dataset.target);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // 初始化
+        updateSummary();
+    </script>
 </body>
 </html>

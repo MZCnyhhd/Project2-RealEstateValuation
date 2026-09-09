@@ -336,22 +336,33 @@ def agent_chat():
         return jsonify({"ok": False, "error": str(exc)}), 400
 
 
+# 全息估值定价（元）
+VALUATION_PRICE = 9.9
+
+
+def _new_order_no():
+    """生成估值订单号，形如 HV20260909A1B2C3"""
+    from datetime import datetime
+    import random
+    stamp = datetime.now().strftime("%Y%m%d")
+    suffix = "".join(random.choice("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ") for _ in range(6))
+    return f"HV{stamp}{suffix}"
+
+
 @app.route("/valuate")
 def valuate_form():
     """全息估值 - 用户录入房源信息表单"""
-    return render_template("valuate_form.html")
+    return render_template("valuate_form.html", price=VALUATION_PRICE)
 
 
-@app.route("/valuate/report", methods=["POST"])
-def valuate_report():
-    """全息估值 - 生成估值报告"""
+def _normalize_valuate_form():
+    """提取并归一化估值表单字段"""
     form_data = {}
     for key in request.form:
         val = request.form.get(key, "").strip()
         if val:
             form_data[key] = val
 
-    # checkbox 处理：未勾选的不会出现在 form 中
     checkbox_fields = ["north_south", "has_elevator", "ped_car_split", "five_year_only",
                        "has_mortgage", "has_lease", "urgent_sell", "is_haunted",
                        "has_leak", "door_toilet", "beam_press", "squareness",
@@ -359,30 +370,86 @@ def valuate_report():
     for field in checkbox_fields:
         if field not in form_data:
             form_data[field] = ""
+    return form_data
+
+
+@app.route("/valuate/report", methods=["POST"])
+def valuate_report():
+    """全息估值 - 提交房源信息，生成待支付订单后跳转收银台"""
+    form_data = _normalize_valuate_form()
 
     if not form_data.get("community") or not form_data.get("area_size") or not form_data.get("price"):
-        return render_template("valuate_form.html", error="请填写必填字段：小区名称、面积、报价")
+        return render_template("valuate_form.html", price=VALUATION_PRICE,
+                               error="请填写必填字段：小区名称、面积、报价")
 
-    logger.info(f"全息估值请求 - 小区: {form_data.get('community')}, 面积: {form_data.get('area_size')}, 报价: {form_data.get('price')}")
-    valuation = evaluate_user_input(form_data)
+    order = {
+        "order_no": _new_order_no(),
+        "form_data": form_data,
+        "community": form_data.get("community", ""),
+        "area_size": form_data.get("area_size", ""),
+        "listing_price": form_data.get("price", ""),
+        "amount": VALUATION_PRICE,
+        "paid": False,
+    }
+    session["pending_valuation"] = order
+    # 上一条订单的支付状态作废，避免复用旧支付凭证
+    session.pop("valuation_paid_no", None)
 
-    # 付费解锁（演示模式：URL参数unlock=1即解锁）
-    is_paid = request.args.get("unlock") == "1"
+    logger.info(f"估值订单创建 - 单号: {order['order_no']}, 小区: {order['community']}, "
+                f"面积: {order['area_size']}, 报价: {order['listing_price']}, 金额: ¥{VALUATION_PRICE}")
+    return redirect("/valuate/pay")
 
-    # 将结果存入session以便解锁时复用
-    session["last_valuation"] = {"form_data": form_data, "is_paid": is_paid}
 
-    return render_template("valuate_report.html", valuation=valuation, is_paid=is_paid)
+@app.route("/valuate/pay")
+def valuate_pay():
+    """收银台 - ¥9.9 支付确认页"""
+    order = session.get("pending_valuation")
+    if not order:
+        return redirect("/valuate")
+    if order.get("paid") and session.get("valuation_paid_no") == order["order_no"]:
+        return redirect("/valuate/result")
+    return render_template("valuate_pay.html", order=order, price=VALUATION_PRICE)
+
+
+@app.route("/valuate/pay/confirm", methods=["POST"])
+def valuate_pay_confirm():
+    """确认支付 - 成功后解锁完整报告"""
+    order = session.get("pending_valuation")
+    if not order:
+        return redirect("/valuate")
+
+    pay_method = request.form.get("pay_method", "wechat")
+    if pay_method not in ("wechat", "alipay"):
+        pay_method = "wechat"
+
+    from datetime import datetime
+    order["paid"] = True
+    order["pay_method"] = pay_method
+    order["paid_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    session["pending_valuation"] = order
+    session["valuation_paid_no"] = order["order_no"]
+
+    logger.info(f"估值订单支付成功 - 单号: {order['order_no']}, 渠道: {pay_method}, 金额: ¥{VALUATION_PRICE}")
+    return redirect("/valuate/result")
+
+
+@app.route("/valuate/result")
+def valuate_result():
+    """完整估值报告 - 仅支付成功后可访问"""
+    order = session.get("pending_valuation")
+    if not order:
+        return redirect("/valuate")
+    if not order.get("paid") or session.get("valuation_paid_no") != order["order_no"]:
+        return redirect("/valuate/pay")
+
+    valuation = evaluate_user_input(order["form_data"])
+    return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True)
 
 
 @app.route("/valuate/unlock")
 def valuate_unlock():
-    """解锁完整报告（演示模式）"""
-    saved = session.get("last_valuation")
-    if not saved:
-        return redirect("/valuate")
-    valuation = evaluate_user_input(saved["form_data"])
-    return render_template("valuate_report.html", valuation=valuation, is_paid=True)
+    """旧「免费解锁」入口已废弃，统一走收银台"""
+    return redirect("/valuate/pay")
 
 if __name__ == "__main__":
     logger.info("RealEstate Flask应用启动")

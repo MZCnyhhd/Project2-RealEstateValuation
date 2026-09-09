@@ -76,7 +76,7 @@
     </div>
 
     <div class="container mt-4 pb-5">
-        <!-- 免费区域：雷达图 + 层级评分 + Top因素 -->
+        <!-- 核心结论：雷达图 + 层级评分 + Top因素 -->
         <div class="row g-4 mb-4">
             <div class="col-md-5">
                 <div class="card stat-card shadow-sm h-100">
@@ -112,13 +112,13 @@
             </div>
         </div>
 
-        <!-- Top 加减价因素（免费展示前3） -->
+        <!-- Top 加减价因素 -->
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <div class="card stat-card shadow-sm">
                     <div class="card-body">
                         <h6 class="text-success mb-3"><i class="bi bi-arrow-up-circle me-1"></i>加分项 TOP</h6>
-                        {% for f in valuation.top_positive[:3] %}
+                        {% for f in valuation.top_positive %}
                         <div class="factor-row factor-pos">
                             <div><strong>{{ f.name }}</strong> <small class="text-muted">{{ f.category }}</small></div>
                             <div class="text-end"><span class="text-success fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</span><small class="text-success d-block">≈{{ "%+.1f"|format(f.impact_wan) }}万</small></div>
@@ -132,7 +132,7 @@
                 <div class="card stat-card shadow-sm">
                     <div class="card-body">
                         <h6 class="text-danger mb-3"><i class="bi bi-arrow-down-circle me-1"></i>减分项 TOP</h6>
-                        {% for f in valuation.top_negative[:3] %}
+                        {% for f in valuation.top_negative %}
                         <div class="factor-row factor-neg">
                             <div><strong>{{ f.name }}</strong> <small class="text-muted">{{ f.category }}</small></div>
                             <div class="text-end"><span class="text-danger fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</span><small class="text-danger d-block">≈{{ "%+.1f"|format(f.impact_wan) }}万</small></div>
@@ -144,18 +144,13 @@
             </div>
         </div>
 
-        <!-- 付费区域：完整182维度明细 -->
-        <div class="card stat-card shadow-sm mb-4 blur-section" id="fullReport">
-            {% if not is_paid %}
-            <div class="blur-overlay">
-                <i class="bi bi-lock-fill" style="font-size:2.5rem;color:#667eea;"></i>
-                <h5 class="mt-2 mb-1">完整估值报告</h5>
-                <p class="text-muted small mb-3">解锁全部 {{ valuation.dimensions_count }} 个维度的逐项分析与加减价明细</p>
-                <a href="/valuate/unlock" class="btn btn-primary btn-lg px-4"><i class="bi bi-unlock me-1"></i>解锁完整报告 ¥9.9</a>
-                <small class="text-muted mt-2">（演示模式：点击即可免费解锁）</small>
+        <!-- 完整维度明细（已付费，全量展示） -->
+        <div class="card stat-card shadow-sm mb-4" id="fullReport">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="text-success small fw-bold"><i class="bi bi-patch-check-fill me-1"></i>已支付 · 完整版内容</span>
+                {% if order %}<small class="text-muted">订单号 <code>{{ order.order_no }}</code> · {{ order.paid_at }}</small>{% endif %}
             </div>
-            {% endif %}
-            <div class="card-body" {% if not is_paid %}style="filter:blur(4px);pointer-events:none;user-select:none;"{% endif %}>
+            <div class="card-body">
                 <h6 class="mb-3"><i class="bi bi-list-columns me-1"></i>全部维度评估明细 ({{ valuation.dimensions_count }}项)</h6>
 
                 {% for layer in valuation.layers %}

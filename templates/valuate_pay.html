@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>支付确认 - 全息估值报告</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; }
+        .hero-banner { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 2rem 0; margin-bottom: 2rem; }
+        .pay-card { border: none; border-radius: .75rem; }
+        .pay-method { border: 2px solid #dee2e6; border-radius: .75rem; padding: .85rem 1rem; cursor: pointer; transition: all .15s; }
+        .pay-method:hover { border-color: #adb5bd; }
+        .pay-method.active { border-color: #667eea; background: #f5f6ff; }
+        .pay-method input { display: none; }
+        .amount-big { font-size: 2.75rem; font-weight: 800; line-height: 1; color: #667eea; }
+        .qr-box { width: 148px; height: 148px; background: #fff; border: 1px solid #dee2e6; border-radius: .5rem; display: flex; align-items: center; justify-content: center; }
+        .step-dot { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-gem"></i> 全息估值</a>
+            <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-warning btn-sm fw-bold" href="/valuate"><i class="bi bi-gem"></i> 全息估值</a>
+                <a class="btn btn-outline-light btn-sm" href="/listings"><i class="bi bi-house"></i> 房源</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h4 class="mb-1"><i class="bi bi-shield-check me-2"></i>确认订单</h4>
+            <p class="mb-0 small opacity-75">支付完成后立即生成完整估值报告，支持随时回看</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <!-- 步骤条 -->
+        <div class="d-flex align-items-center justify-content-center mb-4 small text-muted">
+            <span class="step-dot bg-secondary text-white me-2">1</span> 填写房源信息
+            <span class="mx-3" style="height:1px;width:40px;background:#dee2e6;"></span>
+            <span class="step-dot bg-primary text-white me-2">2</span> <strong class="text-dark">支付 ¥{{ price }}</strong>
+            <span class="mx-3" style="height:1px;width:40px;background:#dee2e6;"></span>
+            <span class="step-dot bg-light border me-2">3</span> 查看报告
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-7">
+                <div class="card pay-card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="mb-3"><i class="bi bi-receipt me-1"></i>订单详情</h6>
+                        <table class="table table-borderless mb-0" style="font-size:.9rem;">
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted" style="width:38%;">商品名称</td>
+                                    <td class="fw-semibold">房地产全息价值评估报告</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">评估标的</td>
+                                    <td>{{ order.community }} · {{ order.area_size }}㎡</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">挂牌报价</td>
+                                    <td>{{ order.listing_price }} 万</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">报告内容</td>
+                                    <td>7层 × 182维度逐项分析 · 加减价明细 · 成交建议</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">订单号</td>
+                                    <td><code class="small">{{ order.order_no }}</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <div class="text-muted small">应付金额</div>
+                                <div class="amount-big"><span class="fs-4">¥</span>{{ price }}</div>
+                            </div>
+                            <div class="text-end text-success small">
+                                <i class="bi bi-patch-check me-1"></i>7天内有异议可申请复核
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card pay-card shadow-sm">
+                    <div class="card-body p-4">
+                        <h6 class="mb-3"><i class="bi bi-wallet2 me-1"></i>选择支付方式</h6>
+                        <form action="/valuate/pay/confirm" method="POST" id="payForm">
+                            <label class="pay-method d-flex align-items-center mb-2 active" data-method="wechat">
+                                <input type="radio" name="pay_method" value="wechat" checked>
+                                <i class="bi bi-wechat fs-4 me-3" style="color:#07C160;"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">微信支付</div>
+                                    <small class="text-muted">推荐使用，扫码即可完成</small>
+                                </div>
+                                <i class="bi bi-check-circle-fill text-primary d-none check-icon"></i>
+                            </label>
+                            <label class="pay-method d-flex align-items-center" data-method="alipay">
+                                <input type="radio" name="pay_method" value="alipay">
+                                <i class="bi bi-alipay fs-4 me-3" style="color:#1677FF;"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">支付宝</div>
+                                    <small class="text-muted">支持花呗分期</small>
+                                </div>
+                                <i class="bi bi-check-circle-fill text-primary d-none check-icon"></i>
+                            </label>
+
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg fw-bold px-5">
+                                    <i class="bi bi-lock-fill me-2"></i>确认支付 ¥{{ price }}
+                                </button>
+                                <div class="mt-3">
+                                    <a href="/valuate" class="btn btn-link btn-sm text-muted text-decoration-none">
+                                        <i class="bi bi-arrow-left me-1"></i>返回修改房源信息
+                                    </a>
+                                </div>
+                                <p class="text-muted small mt-3 mb-0">
+                                    <i class="bi bi-shield-lock me-1"></i>支付环境已加密 · 本报告为数字化商品，支付后不支持退款
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card pay-card shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <h6 class="mb-3"><i class="bi bi-qr-code me-1"></i>扫码支付</h6>
+                        <div class="qr-box mx-auto mb-3" id="qrBox">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data={{ order.order_no }}"
+                                 alt="支付二维码" width="132" height="132">
+                        </div>
+                        <div class="small text-muted mb-3">
+                            请使用 <strong id="qrTip">微信</strong> 扫描二维码<br>完成 ¥{{ price }} 支付
+                        </div>
+                        <hr>
+                        <div class="text-start small">
+                            <div class="mb-2"><i class="bi bi-check2 text-success me-2"></i>AI 引擎 7层权重模型</div>
+                            <div class="mb-2"><i class="bi bi-check2 text-success me-2"></i>182 项维度逐项拆解</div>
+                            <div class="mb-2"><i class="bi bi-check2 text-success me-2"></i>每项影响折算到万元</div>
+                            <div class="mb-0"><i class="bi bi-check2 text-success me-2"></i>北京限购政策自动校验</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-4 bg-light">
+        <div class="container text-center text-muted">
+            <p class="mb-0 small">&copy; 2026 房地产智能Agent · 全息估值引擎 v1.0</p>
+        </div>
+    </footer>
+
+    <script>
+    (function () {
+        document.querySelectorAll('.pay-method').forEach(function (el) {
+            el.addEventListener('click', function () {
+                document.querySelectorAll('.pay-method').forEach(function (x) {
+                    x.classList.remove('active');
+                    x.querySelector('.check-icon').classList.add('d-none');
+                    x.querySelector('input').checked = false;
+                });
+                el.classList.add('active');
+                el.querySelector('.check-icon').classList.remove('d-none');
+                el.querySelector('input').checked = true;
+                document.getElementById('qrTip').textContent =
+                    el.dataset.method === 'wechat' ? '微信' : '支付宝';
+            });
+        });
+        document.querySelector('.pay-method.active .check-icon').classList.remove('d-none');
+    })();
+    </script>
+</body>
+</html>
