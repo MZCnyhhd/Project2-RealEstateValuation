@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>房地产全息估值引擎</title>
+    <title>房地产全息估值引擎 · 产品介绍</title>
+    <meta name="description" content="7 层 · 182 维度 · AI 驱动的房产价值评估系统。输入房源信息，生成专业估值报告、税费测算与政策校验。">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -42,6 +43,18 @@
         }
         .layer-name { font-weight: 600; }
         .layer-dim { color: #999; font-size: .85rem; margin-left: auto; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin-top: .5rem; }
+        .step {
+            background: #fff; border-radius: 1rem; padding: 1.5rem;
+            box-shadow: 0 .1rem .5rem rgba(0,0,0,.05); position: relative;
+        }
+        .step .step-no {
+            width: 2.2rem; height: 2.2rem; line-height: 2.2rem; text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+            border-radius: 50%; font-weight: 700; margin-bottom: .8rem;
+        }
+        .step h3 { color: #4a3a78; font-size: 1.05rem; margin-bottom: .4rem; }
+        .step p { color: #666; font-size: .9rem; }
         .note {
             background: #fff7e6; border-left: 4px solid #f6a623; padding: 1rem 1.2rem;
             border-radius: .5rem; margin-top: 2rem; font-size: .92rem; color: #8a5a00;
@@ -50,7 +63,9 @@
         .btn {
             display: inline-block; padding: .8rem 2rem; margin: .4rem;
             border-radius: 2rem; text-decoration: none; font-weight: 700; font-size: .95rem;
+            transition: transform .15s ease, box-shadow .15s ease;
         }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 .4rem 1rem rgba(102,126,234,.3); }
         .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
         .btn-ghost { background: #fff; color: #764ba2; border: 1px solid #764ba2; }
         footer { text-align: center; padding: 2rem 1rem; color: #aaa; font-size: .85rem; }
@@ -58,13 +73,13 @@
 </head>
 <body>
     <header class="hero">
-        <h1><i class="bi bi-gem"></i> 房地产全息估值引擎</h1>
+        <h1>房地产全息估值引擎</h1>
         <p>7 层 · 182 维度 · AI 驱动的房产价值评估系统。输入房源信息，生成专业估值报告、税费测算与政策校验。</p>
         <span class="badge">7 层评估架构 · 182 个评估维度 · 专业版报告</span>
     </header>
 
     <main class="container">
-        <h2 class="section-title">评估架构（7 层）</h2>
+        <h2 class="section-title">评估架构（7 层 · 182 维度）</h2>
         <div class="layers">
             <div class="layer-row"><span class="layer-num">1</span><span class="layer-name">宏观经济与城市基本面</span><span class="layer-dim">14 维度</span></div>
             <div class="layer-row"><span class="layer-num">2</span><span class="layer-name">区域与板块价值</span><span class="layer-dim">33 维度</span></div>
@@ -87,7 +102,7 @@
             </div>
             <div class="card">
                 <h3>房源浏览与对比</h3>
-                <p>多条件筛选、收藏、并排对比，直观判断房源性价比。</p>
+                <p>多条件筛选、收藏、整卡点击查看详情，并排对比直观判断性价比。</p>
             </div>
             <div class="card">
                 <h3>AI 购房助手</h3>
@@ -95,14 +110,34 @@
             </div>
         </div>
 
+        <h2 class="section-title" style="margin-top:2.5rem;">三步生成估值报告</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-no">1</div>
+                <h3>录入房源信息</h3>
+                <p>填写小区、面积、报价、户型、配套等字段，系统实时估算单价并提示必填项。</p>
+            </div>
+            <div class="step">
+                <div class="step-no">2</div>
+                <h3>AI 全息评估</h3>
+                <p>182 维度模型逐层打分，叠加税费、政策与交易弹性，得出综合评分与估值。</p>
+            </div>
+            <div class="step">
+                <div class="step-no">3</div>
+                <h3>生成专业报告</h3>
+                <p>输出各层得分、逐项加减价明细、成交建议与政策校验，支持收藏与对比。</p>
+            </div>
+        </div>
+
         <div class="note">
             <strong>关于本页面：</strong>GitHub Pages 仅支持静态内容，无法运行 Python 后端。
             此页面为项目介绍页；完整可交互的估值应用需部署至支持 Python 的主机（如 Render / Railway）。
-            源码与部署说明见下方仓库链接。
+            源码与部署说明见下方仓库链接，在线体验请点击「在线体验 Demo」。
         </div>
 
         <div class="cta">
-            <a class="btn btn-primary" href="https://github.com/MZCnyhhd/Project2-RealEstateValuation">查看源码仓库</a>
+            <a class="btn btn-primary" href="https://realestate-flask-demo.onrender.com/">在线体验 Demo</a>
+            <a class="btn btn-ghost" href="https://github.com/MZCnyhhd/Project2-RealEstateValuation">查看源码仓库</a>
             <a class="btn btn-ghost" href="https://github.com/MZCnyhhd/Project2-RealEstateValuation#readme">阅读 README</a>
         </div>
     </main>
