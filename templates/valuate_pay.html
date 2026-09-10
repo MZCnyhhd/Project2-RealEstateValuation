@@ -136,8 +136,10 @@
                     <div class="card-body p-4 text-center">
                         <h6 class="mb-3"><i class="bi bi-qr-code me-1"></i>扫码支付</h6>
                         <div class="qr-box mx-auto mb-3" id="qrBox">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=148x148&data={{ order.order_no }}"
-                                 alt="支付二维码" width="132" height="132">
+                            <img id="qrWechat" src="{{ url_for('static', filename='wechat-pay-qr.png') }}"
+                                 alt="微信支付二维码" width="132" height="132">
+                            <img id="qrAlipay" class="d-none" src="{{ url_for('static', filename='alipay-qr.jpg') }}"
+                                 alt="支付宝支付二维码" width="132" height="132">
                         </div>
                         <div class="small text-muted mb-3">
                             请使用 <strong id="qrTip">微信</strong> 扫描二维码<br>完成 ¥{{ price }} 支付
@@ -173,8 +175,11 @@
                 el.classList.add('active');
                 el.querySelector('.check-icon').classList.remove('d-none');
                 el.querySelector('input').checked = true;
+                var method = el.dataset.method;
                 document.getElementById('qrTip').textContent =
-                    el.dataset.method === 'wechat' ? '微信' : '支付宝';
+                    method === 'wechat' ? '微信' : '支付宝';
+                document.getElementById('qrWechat').classList.toggle('d-none', method !== 'wechat');
+                document.getElementById('qrAlipay').classList.toggle('d-none', method !== 'alipay');
             });
         });
         document.querySelector('.pay-method.active .check-icon').classList.remove('d-none');
