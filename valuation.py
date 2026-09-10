@@ -589,7 +589,7 @@ _FORM_TO_DIM = {
     "has_lease": lambda v: {"l6_lease": bool(v)},
     "is_haunted": lambda v: {"l5_haunted_self": "是" if v else "否"},
     "taboo_facilities": lambda v: {"l2_taboo_1km": v if v else "无",
-                                    "l5_funeral_near": "近" if v in ("殃仪馆", "墓地") else "远"},
+                                    "l5_funeral_near": "近" if v in ("殡仪馆", "墓地") else "远"},
     "has_leak": lambda v: {"l4_leak": "严重" if v else "无"},
     "feng_shui_issue": lambda v: {"l5_road_rush": "有" if v == "路冲" else "无",
                                    "l5_bow_road": "有" if v == "反弓路" else "无",
