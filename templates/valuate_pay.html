@@ -15,7 +15,7 @@
         .pay-method.active { border-color: #667eea; background: #f5f6ff; }
         .pay-method input { display: none; }
         .amount-big { font-size: 2.75rem; font-weight: 800; line-height: 1; color: #667eea; }
-        .qr-box { width: 148px; height: 148px; background: #fff; border: 1px solid #dee2e6; border-radius: .5rem; display: flex; align-items: center; justify-content: center; }
+        .qr-box { width: 180px; height: 180px; background: #fff; border: 1px solid #dee2e6; border-radius: .5rem; display: flex; align-items: center; justify-content: center; }
         .step-dot { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; }
     </style>
 </head>
@@ -136,14 +136,38 @@
                     <div class="card-body p-4 text-center">
                         <h6 class="mb-3"><i class="bi bi-qr-code me-1"></i>扫码支付</h6>
                         <div class="qr-box mx-auto mb-3" id="qrBox">
+                            {% if order.wx_code_url %}
+                            <img id="qrWechat" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ order.wx_code_url|urlencode }}"
+                                 alt="微信支付二维码" width="160" height="160">
+                            {% else %}
                             <img id="qrWechat" src="{{ url_for('static', filename='wechat-pay-qr.png') }}"
                                  alt="微信支付二维码" width="132" height="132">
+                            {% endif %}
+                            {% if order.ali_qr_code %}
+                            <img id="qrAlipay" class="d-none" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ order.ali_qr_code|urlencode }}"
+                                 alt="支付宝支付二维码" width="160" height="160">
+                            {% else %}
                             <img id="qrAlipay" class="d-none" src="{{ url_for('static', filename='alipay-qr.jpg') }}"
                                  alt="支付宝支付二维码" width="132" height="132">
+                            {% endif %}
                         </div>
-                        <div class="small text-muted mb-3">
+                        <div class="small text-muted mb-2">
                             请使用 <strong id="qrTip">微信</strong> 扫描二维码<br>完成 ¥{{ price }} 支付
                         </div>
+                        {% if wx_configured or ali_configured %}
+                        <div class="small text-success mb-2" id="payHint">
+                            <i class="bi bi-check-circle me-1"></i>官方收款：支付成功后本页将自动跳转
+                        </div>
+                        {% else %}
+                        <div class="small text-warning mb-2">
+                            <i class="bi bi-info-circle me-1"></i>演示模式：扫码付款后点「确认支付」即可解锁
+                        </div>
+                        {% endif %}
+                        {% if request.args.get('wait') %}
+                        <div class="small text-primary mb-2" id="waitHint">
+                            <i class="bi bi-hourglass-split me-1"></i>正在等待支付确认…
+                        </div>
+                        {% endif %}
                         <hr>
                         <div class="text-start small">
                             <div class="mb-2"><i class="bi bi-check2 text-success me-2"></i>AI 引擎 7层权重模型</div>
@@ -165,6 +189,11 @@
 
     <script>
     (function () {
+        function switchQr(method) {
+            document.getElementById('qrTip').textContent = method === 'wechat' ? '微信' : '支付宝';
+            document.getElementById('qrWechat').classList.toggle('d-none', method !== 'wechat');
+            document.getElementById('qrAlipay').classList.toggle('d-none', method !== 'alipay');
+        }
         document.querySelectorAll('.pay-method').forEach(function (el) {
             el.addEventListener('click', function () {
                 document.querySelectorAll('.pay-method').forEach(function (x) {
@@ -175,14 +204,27 @@
                 el.classList.add('active');
                 el.querySelector('.check-icon').classList.remove('d-none');
                 el.querySelector('input').checked = true;
-                var method = el.dataset.method;
-                document.getElementById('qrTip').textContent =
-                    method === 'wechat' ? '微信' : '支付宝';
-                document.getElementById('qrWechat').classList.toggle('d-none', method !== 'wechat');
-                document.getElementById('qrAlipay').classList.toggle('d-none', method !== 'alipay');
+                switchQr(el.dataset.method);
             });
         });
         document.querySelector('.pay-method.active .check-icon').classList.remove('d-none');
+
+        // 官方支付模式：轮询支付状态，回调验签成功即自动跳转报告页
+        var official = {% if wx_configured or ali_configured %}true{% else %}false{% endif %};
+        if (official) {
+            var orderNo = "{{ order.order_no }}";
+            var timer = setInterval(function () {
+                fetch("/valuate/pay/status?order_no=" + encodeURIComponent(orderNo))
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        if (d.paid) {
+                            clearInterval(timer);
+                            window.location.href = "/valuate/result";
+                        }
+                    })
+                    .catch(function () {});
+            }, 2500);
+        }
     })();
     </script>
 </body>

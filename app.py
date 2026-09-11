@@ -3,11 +3,12 @@ import logging
 from math import ceil
 from flask import Flask, render_template, request, redirect, session, jsonify
 
-from repository import get_repository
+from repository import get_repository, get_order_store
 from mortgage import calculate_mortgage
 from llm_agent import build_agent_reply
 from beijing_policy import apply_beijing_policy
 from valuation import evaluate_listing, evaluate_user_input
+import payments
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
@@ -390,8 +391,12 @@ def valuate_report():
         "listing_price": form_data.get("price", ""),
         "amount": VALUATION_PRICE,
         "paid": False,
+        "pay_method": None,
+        "wx_code_url": None,
+        "ali_qr_code": None,
     }
     session["pending_valuation"] = order
+    get_order_store().save(order)
     # 上一条订单的支付状态作废，避免复用旧支付凭证
     session.pop("valuation_paid_no", None)
 
@@ -408,12 +413,38 @@ def valuate_pay():
         return redirect("/valuate")
     if order.get("paid") and session.get("valuation_paid_no") == order["order_no"]:
         return redirect("/valuate/result")
-    return render_template("valuate_pay.html", order=order, price=VALUATION_PRICE)
+
+    # 真实支付：若已配置微信/支付宝官方 API，则在服务端创建支付单并拿到二维码
+    store = get_order_store()
+    if not order.get("wx_code_url") and not order.get("ali_qr_code"):
+        desc = f"房地产全息价值评估报告-{order['community']}"
+        if payments.WX_CONFIGURED:
+            order["wx_code_url"] = payments.create_wechat_native(
+                order["order_no"], int(round(VALUATION_PRICE * 100)), desc,
+                url_for("valuate_pay_notify_wechat", _external=True),
+            )
+        if payments.ALI_CONFIGURED:
+            order["ali_qr_code"] = payments.create_alipay_precreate(
+                order["order_no"], f"{VALUATION_PRICE:.2f}", desc,
+            )
+        if order.get("wx_code_url") or order.get("ali_qr_code"):
+            store.update(order["order_no"], wx_code_url=order.get("wx_code_url"),
+                         ali_qr_code=order.get("ali_qr_code"))
+
+    return render_template(
+        "valuate_pay.html", order=order, price=VALUATION_PRICE,
+        wx_configured=payments.WX_CONFIGURED, ali_configured=payments.ALI_CONFIGURED,
+    )
 
 
 @app.route("/valuate/pay/confirm", methods=["POST"])
 def valuate_pay_confirm():
-    """确认支付 - 成功后解锁完整报告"""
+    """确认支付按钮。
+
+    * 真实支付模式（已配置微信/支付宝 API）：按钮仅作为「我已支付」的主动确认，
+      真正解锁取决于回调验签结果。若订单尚未被回调标记为已支付，则回到收银台并提示等待。
+    * 演示模式（未配置 API）：维持原有 honor-system，点击即解锁（仅用于本地测试）。
+    """
     order = session.get("pending_valuation")
     if not order:
         return redirect("/valuate")
@@ -422,26 +453,87 @@ def valuate_pay_confirm():
     if pay_method not in ("wechat", "alipay"):
         pay_method = "wechat"
 
+    store = get_order_store()
+    real_paid = store.get(order["order_no"]) or {}
+    if real_paid.get("paid"):
+        order["paid"] = True
+        order["pay_method"] = real_paid.get("pay_method") or pay_method
+        order["paid_at"] = real_paid.get("paid_at")
+        session["pending_valuation"] = order
+        session["valuation_paid_no"] = order["order_no"]
+        logger.info(f"估值订单支付成功 - 单号: {order['order_no']}, 渠道: {pay_method}, 金额: ¥{VALUATION_PRICE}")
+        return redirect("/valuate/result")
+
+    # 真实模式但回调尚未到达：回到收银台等待轮询
+    if payments.WX_CONFIGURED or payments.ALI_CONFIGURED:
+        return redirect("/valuate/pay?wait=1")
+
+    # 演示模式：直接放行（同步写入订单存储，valuation_result 以存储为权威来源）
     from datetime import datetime
+    paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     order["paid"] = True
     order["pay_method"] = pay_method
-    order["paid_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    order["paid_at"] = paid_at
     session["pending_valuation"] = order
     session["valuation_paid_no"] = order["order_no"]
-
-    logger.info(f"估值订单支付成功 - 单号: {order['order_no']}, 渠道: {pay_method}, 金额: ¥{VALUATION_PRICE}")
+    store.update(order["order_no"], paid=True, pay_method=pay_method, paid_at=paid_at)
     return redirect("/valuate/result")
+
+
+@app.route("/valuate/pay/status")
+def valuate_pay_status():
+    """前端轮询：返回订单支付状态。"""
+    order_no = request.args.get("order_no") or (session.get("pending_valuation") or {}).get("order_no")
+    if not order_no:
+        return jsonify({"paid": False})
+    order = get_order_store().get(order_no) or {}
+    return jsonify({"paid": bool(order.get("paid")), "method": order.get("pay_method")})
+
+
+@app.route("/valuate/pay/notify/wechat", methods=["POST"])
+def valuate_pay_notify_wechat():
+    """微信支付异步回调：验签 + 标记订单已支付。"""
+    body = request.get_data(as_text=True)
+    out_trade_no, paid = payments.verify_wechat_notify(dict(request.headers), body)
+    if out_trade_no and paid:
+        from datetime import datetime
+        get_order_store().update(
+            out_trade_no, paid=True, pay_method="wechat",
+            paid_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        logger.info("微信支付到账 - 单号: %s", out_trade_no)
+        return jsonify({"code": "SUCCESS", "message": "成功"})
+    return jsonify({"code": "FAIL", "message": "验签失败"}), 400
+
+
+@app.route("/valuate/pay/notify/alipay", methods=["POST"])
+def valuate_pay_notify_alipay():
+    """支付宝异步回调：验签 + 标记订单已支付。"""
+    form = request.form.to_dict()
+    out_trade_no, paid = payments.verify_alipay_notify(form)
+    if out_trade_no and paid:
+        from datetime import datetime
+        get_order_store().update(
+            out_trade_no, paid=True, pay_method="alipay",
+            paid_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        logger.info("支付宝支付到账 - 单号: %s", out_trade_no)
+        return "success"
+    return "failure", 400
 
 
 @app.route("/valuate/result")
 def valuate_result():
-    """完整估值报告 - 仅支付成功后可访问"""
-    order = session.get("pending_valuation")
+    """完整估值报告 - 仅支付成功后可访问（以服务端订单存储为权威来源）"""
+    order_no = (session.get("pending_valuation") or {}).get("order_no") or session.get("valuation_paid_no")
+    order = get_order_store().get(order_no) if order_no else None
     if not order:
         return redirect("/valuate")
-    if not order.get("paid") or session.get("valuation_paid_no") != order["order_no"]:
+    if not order.get("paid"):
         return redirect("/valuate/pay")
 
+    session["pending_valuation"] = order
+    session["valuation_paid_no"] = order["order_no"]
     valuation = evaluate_user_input(order["form_data"])
     return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True)
 

@@ -11,3 +11,21 @@ services:
         generateValue: true
       - key: DATA_BACKEND
         value: json
+      # 微信支付 v3（留空则支付页回退到演示模式）
+      - key: WXPAY_MCH_ID
+        sync: false
+      - key: WXPAY_APP_ID
+        sync: false
+      - key: WXPAY_API_V3_KEY
+        sync: false
+      - key: WXPAY_MCH_SERIAL
+        sync: false
+      - key: WXPAY_PRIVATE_KEY
+        sync: false
+      # 支付宝（留空则支付页回退到演示模式）
+      - key: ALIPAY_APP_ID
+        sync: false
+      - key: ALIPAY_PRIVATE_KEY
+        sync: false
+      - key: ALIPAY_PUBLIC_KEY
+        sync: false
