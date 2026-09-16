@@ -20,6 +20,21 @@
         /* 弹窗内放大二维码 */
         .qr-modal-img { width: 280px; height: 280px; object-fit: contain; border: 1px solid #dee2e6; border-radius: .75rem; background: #fff; padding: .5rem; }
         .qr-preview-img { width: 160px; height: 160px; object-fit: contain; }
+        /* 纯原生 JS 放大收款码弹窗（不依赖任何外部 JS） */
+        #payModal { position: fixed; inset: 0; z-index: 2000; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(0,0,0,.5); }
+        #payModal.open { display: flex; }
+        #payModal .qr-panel { position: relative; width: 100%; max-width: 380px; background: #fff; border-radius: 1rem; padding: 1.5rem 1.25rem 1.25rem; text-align: center; box-shadow: 0 16px 48px rgba(0,0,0,.3); animation: qrPop .18s ease-out; }
+        @keyframes qrPop { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+        #payModal .qr-close { position: absolute; top: .4rem; right: .7rem; border: 0; background: transparent; font-size: 1.6rem; line-height: 1; color: #adb5bd; cursor: pointer; }
+        #payModal .qr-close:hover { color: #495057; }
+        #payModal .qr-title { font-weight: 700; font-size: 1.05rem; margin-bottom: .85rem; }
+        #payModal .qr-hint { color: #6c757d; font-size: .8rem; margin: .6rem 0 0; }
+        #payModal .qr-actions { display: flex; gap: .75rem; justify-content: center; margin-top: 1rem; }
+        #payModal .qr-actions button { border: 0; border-radius: .5rem; padding: .55rem 1.4rem; font-weight: 600; cursor: pointer; }
+        #payModal .qr-btn-fail { background: #fff; color: #495057; border: 1px solid #ced4da; }
+        #payModal .qr-btn-ok { background: #198754; color: #fff; }
+        #payModal .qr-btn-ok:hover { background: #157347; }
+        body.qr-locked { overflow: hidden; }
     </style>
 </head>
 <body>
@@ -182,64 +197,64 @@
         </div>
     </footer>
 
-    <!-- 放大版个人收款码弹窗 -->
-    <div class="modal fade" id="payModal" tabindex="-1" aria-labelledby="payModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="payModalLabel">
-                        <i class="bi bi-wechat me-2" style="color:#07C160;"></i>微信扫码支付 ¥{{ price }}
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <div class="mb-3">
-                        {% if order.wx_code_url %}
-                        <img class="qr-modal-img" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ order.wx_code_url|urlencode }}"
-                             alt="微信支付二维码">
-                        {% else %}
-                        <img class="qr-modal-img" src="{{ url_for('static', filename='wechat-pay-qr-large.png') }}"
-                             alt="微信支付二维码">
-                        {% endif %}
-                    </div>
-                    <p class="text-muted small mb-1">
-                        请使用微信「<strong>扫一扫</strong>」扫描上方二维码完成支付
-                    </p>
-                    <p class="text-secondary small mb-0">
-                        付款成功后，点击下方「支付成功」提交凭证
-                    </p>
-                </div>
-                <div class="modal-footer border-0 justify-content-center gap-3">
-                    <button type="button" class="btn btn-outline-secondary px-4" id="payFailBtn" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>支付失败
-                    </button>
-                    <button type="button" class="btn btn-success px-4" id="paySuccessBtn">
-                        <i class="bi bi-check-circle me-1"></i>支付成功
-                    </button>
-                </div>
+    <!-- 放大版个人收款码弹窗（纯原生 JS，无外部依赖） -->
+    <div id="payModal" role="dialog" aria-modal="true" aria-labelledby="payModalLabel" aria-hidden="true">
+        <div class="qr-panel">
+            <button type="button" class="qr-close" id="qrCloseBtn" aria-label="关闭">&times;</button>
+            <div class="qr-title" id="payModalLabel">
+                <i class="bi bi-wechat me-1" style="color:#07C160;"></i>微信扫码支付 ¥{{ price }}
+            </div>
+            {% if order.wx_code_url %}
+            <img class="qr-modal-img" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ order.wx_code_url|urlencode }}"
+                 alt="微信支付二维码">
+            {% else %}
+            <img class="qr-modal-img" src="{{ url_for('static', filename='wechat-pay-qr-large.png') }}"
+                 alt="微信支付二维码">
+            {% endif %}
+            <p class="qr-hint">请使用微信「<strong>扫一扫</strong>」扫描上方二维码完成支付</p>
+            <p class="qr-hint">付款成功后，点击下方「支付成功」提交凭证</p>
+            <div class="qr-actions">
+                <button type="button" class="qr-btn-fail" id="payFailBtn"><i class="bi bi-x-circle me-1"></i>支付失败</button>
+                <button type="button" class="qr-btn-ok" id="paySuccessBtn"><i class="bi bi-check-circle me-1"></i>支付成功</button>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     (function () {
         var payForm = document.getElementById('payForm');
         var payModalEl = document.getElementById('payModal');
 
-        // 点击「确认支付」弹出放大二维码
-        document.getElementById('openPayBtn').addEventListener('click', function () {
-            var modal = new bootstrap.Modal(payModalEl);
-            modal.show();
-        });
+        function openPay() {
+            payModalEl.classList.add('open');
+            payModalEl.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('qr-locked');
+        }
+        function closePay() {
+            payModalEl.classList.remove('open');
+            payModalEl.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('qr-locked');
+        }
+
+        // 点击「确认支付」弹出放大收款码（纯原生 JS，不依赖 Bootstrap / CDN）
+        document.getElementById('openPayBtn').addEventListener('click', openPay);
 
         // 点击「支付成功」提交支付凭证表单（进入人工核验「待确认」）
         document.getElementById('paySuccessBtn').addEventListener('click', function () {
             payForm.submit();
         });
 
-        // 点击「支付失败」仅关闭弹窗（不提交），用户可重试
-        // payFailBtn 自带 data-bs-dismiss，无需额外逻辑
+        // 支付失败 / 右上角关闭：仅关闭弹窗（不提交），用户可重试
+        document.getElementById('payFailBtn').addEventListener('click', closePay);
+        document.getElementById('qrCloseBtn').addEventListener('click', closePay);
+
+        // 点击遮罩或按 Esc 也可关闭
+        payModalEl.addEventListener('click', function (e) {
+            if (e.target === payModalEl) { closePay(); }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { closePay(); }
+        });
 
         // 官方支付模式：轮询支付状态，回调验签成功即自动跳转报告页
         var official = {% if wx_configured %}true{% else %}false{% endif %};
