@@ -49,7 +49,7 @@
                             <tr>
                                 <td class="ps-3"><code class="small">{{ o.order_no }}</code></td>
                                 <td>{{ o.community }} · {{ o.area_size }}㎡<br><small class="text-muted">报价 {{ o.listing_price }} 万</small></td>
-                                <td class="fw-semibold">¥{{ o.amount }}</td>
+                                <td class="fw-semibold">¥{{ o.amount }}<br><small class="text-muted fw-normal">{{ o.plan_name or '标准报告' }}</small></td>
                                 <td>
                                     {% if o.pay_method == 'wechat' %}<span class="text-success"><i class="bi bi-wechat"></i> 微信</span>
                                     {% elif o.pay_method == 'alipay' %}<span class="text-primary"><i class="bi bi-alipay"></i> 支付宝</span>

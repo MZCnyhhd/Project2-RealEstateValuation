@@ -1,7 +1,7 @@
 import os
 import logging
 from math import ceil
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 
 from repository import get_repository, get_order_store
 from mortgage import calculate_mortgage
@@ -342,8 +342,55 @@ def agent_chat():
         return jsonify({"ok": False, "error": str(exc)}), 400
 
 
-# 全息估值定价（元）
+# 全息估值定价（元）—— 标准报告默认价，同时作为兜底
 VALUATION_PRICE = 9.9
+
+
+def _env_price(env_key, default):
+    """套餐价格可由环境变量覆盖，便于不改代码调价。"""
+    try:
+        return round(float(os.environ.get(env_key, default)), 2)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+# 套餐定义。kind=report 支付后即时解锁报告；kind=service 支付后转人工交付
+PLANS = {
+    "standard": {
+        "key": "standard",
+        "name": "全息估值报告 · 完整版",
+        "desc": "7层 × 182维度逐项明细 · 每项折合万元 · 可打印报告",
+        "price": _env_price("PRICE_STANDARD", VALUATION_PRICE),
+        "kind": "report",
+        "fulfill": "在线即时交付",
+    },
+    "pro": {
+        "key": "pro",
+        "name": "专业版报告（含实勘）",
+        "desc": "含完整版全部 · 周边实勘补充数据 · 市场对比分析 · 定价策略建议",
+        "price": _env_price("PRICE_PRO", 49.0),
+        "kind": "service",
+        "fulfill": "人工安排实勘（1-3 个工作日）",
+    },
+    "pro_plus": {
+        "key": "pro_plus",
+        "name": "专业版报告 · 深度实勘",
+        "desc": "含专业版全部 · 专人上门实勘 · 一对一解读",
+        "price": _env_price("PRICE_PRO_PLUS", 99.0),
+        "kind": "service",
+        "fulfill": "专人上门实勘（1-3 个工作日）",
+    },
+}
+DEFAULT_PLAN_KEY = "standard"
+
+# 展示用价格标签（去掉多余的 .0，如 49.0 → 49）
+for _p in PLANS.values():
+    _p["price_label"] = f"{_p['price']:g}"
+
+
+def get_plan(key):
+    """按 key 取套餐；非法 key 一律回退默认套餐（价格以服务端为准，防止前端篡改）。"""
+    return PLANS.get((key or "").strip()) or PLANS[DEFAULT_PLAN_KEY]
 
 
 def _new_order_no():
@@ -388,13 +435,17 @@ def valuate_report():
         return render_template("valuate_form.html", price=VALUATION_PRICE,
                                error="请填写必填字段：小区名称、面积、报价")
 
+    default_plan = get_plan(DEFAULT_PLAN_KEY)
     order = {
         "order_no": _new_order_no(),
         "form_data": form_data,
         "community": form_data.get("community", ""),
         "area_size": form_data.get("area_size", ""),
         "listing_price": form_data.get("price", ""),
-        "amount": VALUATION_PRICE,
+        "plan": default_plan["key"],
+        "plan_name": default_plan["name"],
+        "plan_kind": default_plan["kind"],
+        "amount": default_plan["price"],
         "paid": False,
         "pay_method": None,
         "wx_code_url": None,
@@ -406,43 +457,64 @@ def valuate_report():
     session.pop("valuation_paid_no", None)
 
     logger.info(f"估值订单创建 - 单号: {order['order_no']}, 小区: {order['community']}, "
-                f"面积: {order['area_size']}, 报价: {order['listing_price']}, 金额: ¥{VALUATION_PRICE}")
+                f"面积: {order['area_size']}, 报价: {order['listing_price']}, "
+                f"套餐: {default_plan['name']}, 金额: ¥{default_plan['price']}")
     return redirect("/valuate/pay")
 
 
 @app.route("/valuate/pay")
 def valuate_pay():
-    """收银台 - ¥9.9 支付确认页"""
+    """收银台 - 支持多套餐（标准报告 / 专业版实勘），未支付时可切换套餐"""
     order = session.get("pending_valuation")
     if not order:
         return redirect("/valuate")
-    if order.get("paid") and session.get("valuation_paid_no") == order["order_no"]:
+
+    store = get_order_store()
+    plan = get_plan(request.args.get("plan") or order.get("plan"))
+
+    # 已支付的「报告类」订单直接进报告页；「服务类」订单留在本页展示交付状态
+    if (order.get("paid")
+            and session.get("valuation_paid_no") == order["order_no"]
+            and plan["kind"] == "report"):
         return redirect("/valuate/result")
 
-    # 真实支付：若已配置微信官方 API，则在服务端创建支付单并拿到二维码
-    store = get_order_store()
+    # 套餐变更：金额变了则作废旧支付单，按新金额重新下单
+    if not order.get("paid") and (order.get("plan") != plan["key"] or order.get("amount") != plan["price"]):
+        order["plan"] = plan["key"]
+        order["plan_name"] = plan["name"]
+        order["plan_kind"] = plan["kind"]
+        order["amount"] = plan["price"]
+        order["wx_code_url"] = None
+        session["pending_valuation"] = order
+        store.update(order["order_no"], plan=plan["key"], plan_name=plan["name"],
+                     plan_kind=plan["kind"], amount=plan["price"], wx_code_url=None)
+
+    # 真实支付：若已配置微信官方 API，则按套餐金额在服务端创建支付单并拿到二维码
     if not order.get("wx_code_url"):
         if payments.WX_CONFIGURED:
-            desc = f"房地产全息价值评估报告-{order['community']}"
+            desc = f"{plan['name']}-{order['community']}"
             order["wx_code_url"] = payments.create_wechat_native(
-                order["order_no"], int(round(VALUATION_PRICE * 100)), desc,
+                order["order_no"], int(round(plan["price"] * 100)), desc,
                 url_for("valuate_pay_notify_wechat", _external=True),
             )
             store.update(order["order_no"], wx_code_url=order.get("wx_code_url"))
 
     return render_template(
-        "valuate_pay.html", order=order, price=VALUATION_PRICE,
+        "valuate_pay.html", order=order, plan=plan, plans=list(PLANS.values()),
+        price=plan["price"],
         wx_configured=payments.WX_CONFIGURED,
         official=payments.WX_CONFIGURED,
+        done=bool(request.args.get("done")) or (bool(order.get("paid")) and plan["kind"] == "service"),
     )
 
 
 @app.route("/valuate/pay/confirm", methods=["POST"])
 def valuate_pay_confirm():
-    """确认支付按钮：用户点「支付成功」后直接解锁并生成完整估值报告。
+    """确认支付：用户点「支付成功」后按套餐类型交付。
 
-    * 官方支付模式（已配置微信 API）：解锁以回调验签为准，未到账则回收银台等待。
-    * 个人收款码模式（未配置官方 API）：用户自主确认已付款，立即解锁报告，无需人工核验。
+    * kind=report（标准报告）：直接解锁并生成完整估值报告。
+    * kind=service（专业版实勘）：不生成报告，转人工交付，提示客服将联系安排实勘。
+    * 官方支付模式（已配置微信 API）：以回调验签为准，未到账则回收银台等待。
     """
     order = session.get("pending_valuation")
     if not order:
@@ -451,6 +523,13 @@ def valuate_pay_confirm():
     pay_method = request.form.get("pay_method", "wechat")
     if pay_method not in ("wechat", "alipay"):
         pay_method = "wechat"
+
+    # 套餐以服务端定义为准：前端只提交 key，价格不可被篡改
+    plan = get_plan(request.form.get("plan") or order.get("plan"))
+    order["plan"] = plan["key"]
+    order["plan_name"] = plan["name"]
+    order["plan_kind"] = plan["kind"]
+    order["amount"] = plan["price"]
 
     store = get_order_store()
     official = payments.WX_CONFIGURED or payments.ALI_CONFIGURED
@@ -461,26 +540,32 @@ def valuate_pay_confirm():
     if official:
         real_paid = store.get(order["order_no"]) or {}
         if not real_paid.get("paid"):
+            session["pending_valuation"] = order
             return redirect("/valuate/pay?wait=1")
         order["paid"] = True
         order["pay_method"] = real_paid.get("pay_method") or pay_method
         order["paid_at"] = real_paid.get("paid_at")
-        session["pending_valuation"] = order
-        session["valuation_paid_no"] = order["order_no"]
-        logger.info(f"估值订单支付成功(官方) - 单号: {order['order_no']}, 渠道: {pay_method}")
-        return redirect("/valuate/result")
+    else:
+        # 个人收款码模式：用户自主确认已付款
+        paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        order["paid"] = True
+        order["pay_method"] = pay_method
+        order["paid_at"] = paid_at
 
-    # 个人收款码模式：用户确认已付款 → 直接解锁报告（无需人工核验）
-    paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    order["paid"] = True
-    order["pay_method"] = pay_method
-    order["paid_at"] = paid_at
     order["review_status"] = "confirmed"
     session["pending_valuation"] = order
     session["valuation_paid_no"] = order["order_no"]
-    store.update(order["order_no"], paid=True, pay_method=pay_method, paid_at=paid_at,
+    store.update(order["order_no"], paid=True,
+                 pay_method=order["pay_method"], paid_at=order["paid_at"],
+                 plan=plan["key"], plan_name=plan["name"],
+                 plan_kind=plan["kind"], amount=plan["price"],
                  review_status="confirmed")
-    logger.info(f"估值订单已支付并解锁 - 单号: {order['order_no']}, 渠道: {pay_method}")
+    logger.info(f"估值订单已支付 - 单号: {order['order_no']}, 套餐: {plan['name']}, "
+                f"金额: ¥{plan['price']}, 渠道: {pay_method}")
+
+    # 服务类套餐（专业版实勘）转人工交付，其余即时解锁报告
+    if plan["kind"] == "service":
+        return redirect("/valuate/pay?done=1")
     return redirect("/valuate/result")
 
 

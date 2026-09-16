@@ -61,10 +61,20 @@
         <div class="d-flex align-items-center justify-content-center mb-4 small text-muted">
             <span class="step-dot bg-secondary text-white me-2">1</span> 填写房源信息
             <span class="mx-3" style="height:1px;width:40px;background:#dee2e6;"></span>
-            <span class="step-dot bg-primary text-white me-2">2</span> <strong class="text-dark">支付 ¥{{ price }}</strong>
+            <span class="step-dot bg-primary text-white me-2">2</span> <strong class="text-dark">支付 ¥{{ plan.price_label }}</strong>
             <span class="mx-3" style="height:1px;width:40px;background:#dee2e6;"></span>
-            <span class="step-dot bg-light border me-2">3</span> 查看报告
+            <span class="step-dot bg-light border me-2">3</span> {% if plan.kind == 'service' %}等待人工交付{% else %}查看报告{% endif %}
         </div>
+
+        {% if done %}
+        <div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+            <div>
+                <div class="fw-semibold">已收到你的付款，订单已进入交付流程</div>
+                <div class="small mb-0">{{ plan.fulfill }} · 订单号 <code>{{ order.order_no }}</code>，我们会尽快与你联系。</div>
+            </div>
+        </div>
+        {% endif %}
 
         <div class="row g-4 justify-content-center">
             <div class="col-lg-7">
@@ -75,7 +85,7 @@
                             <tbody>
                                 <tr>
                                     <td class="text-muted" style="width:38%;">商品名称</td>
-                                    <td class="fw-semibold">房地产全息价值评估报告</td>
+                                    <td class="fw-semibold">{{ plan.name }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">评估标的</td>
@@ -86,8 +96,12 @@
                                     <td>{{ order.listing_price }} 万</td>
                                 </tr>
                                 <tr>
-                                    <td class="text-muted">报告内容</td>
-                                    <td>7层 × 182维度逐项分析 · 加减价明细 · 成交建议</td>
+                                    <td class="text-muted">套餐内容</td>
+                                    <td>{{ plan.desc }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">交付方式</td>
+                                    <td>{{ plan.fulfill }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">订单号</td>
@@ -99,7 +113,7 @@
                         <div class="d-flex justify-content-between align-items-end">
                             <div>
                                 <div class="text-muted small">应付金额</div>
-                                <div class="amount-big"><span class="fs-4">¥</span>{{ price }}</div>
+                                <div class="amount-big"><span class="fs-4">¥</span>{{ plan.price_label }}</div>
                             </div>
                             <div class="text-end text-success small">
                                 <i class="bi bi-patch-check me-1"></i>7天内有异议可申请复核
@@ -108,10 +122,36 @@
                     </div>
                 </div>
 
+                {% if not done %}
+                <div class="card pay-card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="mb-3"><i class="bi bi-box-seam me-1"></i>选择套餐</h6>
+                        <div class="row g-2">
+                            {% for p in plans %}
+                            <div class="col-md-4">
+                                <a href="/valuate/pay?plan={{ p.key }}" class="text-decoration-none">
+                                    <div class="h-100 p-3 rounded-3 {% if p.key == plan.key %}border border-2 border-primary bg-light{% else %}border{% endif %}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-semibold text-dark small">{{ p.name }}</span>
+                                            <span class="fw-bold text-primary">¥{{ p.price_label }}</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">{{ p.desc }}</small>
+                                        {% if p.key == plan.key %}
+                                        <small class="text-primary fw-semibold d-block mt-1"><i class="bi bi-check-circle-fill me-1"></i>已选</small>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card pay-card shadow-sm">
                     <div class="card-body p-4">
                         <h6 class="mb-3"><i class="bi bi-wallet2 me-1"></i>选择支付方式</h6>
                         <form action="/valuate/pay/confirm" method="POST" id="payForm">
+                            <input type="hidden" name="plan" value="{{ plan.key }}">
                             <label class="pay-method d-flex align-items-center mb-2 active" data-method="wechat">
                                 <input type="radio" name="pay_method" value="wechat" checked>
                                 <i class="bi bi-wechat fs-4 me-3" style="color:#07C160;"></i>
@@ -124,7 +164,7 @@
 
                             <div class="mt-4 text-center">
                                 <button type="button" class="btn btn-success btn-lg fw-bold px-5" id="openPayBtn">
-                                    <i class="bi bi-wechat me-2"></i>确认支付 ¥{{ price }}
+                                    <i class="bi bi-wechat me-2"></i>确认支付 ¥{{ plan.price_label }}
                                 </button>
                                 <div class="mt-3">
                                     <a href="/valuate" class="btn btn-link btn-sm text-muted text-decoration-none">
@@ -138,8 +178,10 @@
                         </form>
                     </div>
                 </div>
+                {% endif %}
             </div>
 
+            {% if not done %}
             <div class="col-lg-4">
                 <div class="card pay-card shadow-sm">
                     <div class="card-body p-4 text-center">
@@ -154,7 +196,7 @@
                             {% endif %}
                         </div>
                         <div class="small text-muted mb-2">
-                            请使用 <strong>微信</strong> 扫描二维码<br>完成 ¥{{ price }} 支付
+                            请使用 <strong>微信</strong> 扫描二维码<br>完成 ¥{{ plan.price_label }} 支付
                         </div>
                         <div class="small text-secondary mb-2">
                             <i class="bi bi-arrows-fullscreen me-1"></i>点击「确认支付」可放大二维码
@@ -165,7 +207,7 @@
                         </div>
                         {% else %}
                         <div class="small text-warning mb-2">
-                            <i class="bi bi-info-circle me-1"></i>扫码付款后点「支付成功」，即可直接生成报告
+                            <i class="bi bi-info-circle me-1"></i>{% if plan.kind == 'service' %}扫码付款后点「支付成功」，我们会联系你安排实勘{% else %}扫码付款后点「支付成功」，即可直接生成报告{% endif %}
                         </div>
                         {% endif %}
                         <hr>
@@ -178,6 +220,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -192,7 +235,7 @@
         <div class="qr-panel">
             <button type="button" class="qr-close" id="qrCloseBtn" aria-label="关闭">&times;</button>
             <div class="qr-title" id="payModalLabel">
-                <i class="bi bi-wechat me-1" style="color:#07C160;"></i>微信扫码支付 ¥{{ price }}
+                <i class="bi bi-wechat me-1" style="color:#07C160;"></i>微信扫码支付 ¥{{ plan.price_label }}
             </div>
             {% if order.wx_code_url %}
             <img class="qr-modal-img" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ order.wx_code_url|urlencode }}"

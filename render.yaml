@@ -25,3 +25,10 @@ services:
         sync: false
       - key: WXPAY_PRIVATE_KEY
         sync: false
+      # 套餐价格（可选，留空则用默认价：标准 9.9 / 专业版 49 / 深度实勘 99）
+      - key: PRICE_STANDARD
+        sync: false
+      - key: PRICE_PRO
+        sync: false
+      - key: PRICE_PRO_PLUS
+        sync: false
