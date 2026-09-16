@@ -25,10 +25,3 @@ services:
         sync: false
       - key: WXPAY_PRIVATE_KEY
         sync: false
-      # 支付宝（留空则支付页回退到演示模式）
-      - key: ALIPAY_APP_ID
-        sync: false
-      - key: ALIPAY_PRIVATE_KEY
-        sync: false
-      - key: ALIPAY_PUBLIC_KEY
-        sync: false
