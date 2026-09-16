@@ -13,6 +13,11 @@ import payments
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
+# 后台管理密码（请在 Render 环境变量中设置 ADMIN_PASSWORD，本地默认仅用于测试）
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "change_me_admin")
+if ADMIN_PASSWORD == "change_me_admin":
+    logger.warning("ADMIN_PASSWORD 使用默认弱口令，请在生产环境通过环境变量设置强密码")
+
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
@@ -434,6 +439,8 @@ def valuate_pay():
     return render_template(
         "valuate_pay.html", order=order, price=VALUATION_PRICE,
         wx_configured=payments.WX_CONFIGURED, ali_configured=payments.ALI_CONFIGURED,
+        official=(payments.WX_CONFIGURED or payments.ALI_CONFIGURED),
+        submitted=request.args.get("submitted"),
     )
 
 
@@ -441,9 +448,10 @@ def valuate_pay():
 def valuate_pay_confirm():
     """确认支付按钮。
 
-    * 真实支付模式（已配置微信/支付宝 API）：按钮仅作为「我已支付」的主动确认，
-      真正解锁取决于回调验签结果。若订单尚未被回调标记为已支付，则回到收银台并提示等待。
-    * 演示模式（未配置 API）：维持原有 honor-system，点击即解锁（仅用于本地测试）。
+    * 真实支付模式（已配置微信/支付宝 API）：真正解锁取决于回调验签结果；
+      若订单尚未被回调标记为已支付，则回到收银台并提示等待轮询。
+    * 人工核验模式（未配置官方 API）：用户提交支付凭证后订单进入「待确认」，
+      不自动解锁，需商家在后台核实到账后手动确认（见 /admin/orders）。
     """
     order = session.get("pending_valuation")
     if not order:
@@ -454,30 +462,31 @@ def valuate_pay_confirm():
         pay_method = "wechat"
 
     store = get_order_store()
-    real_paid = store.get(order["order_no"]) or {}
-    if real_paid.get("paid"):
-        order["paid"] = True
-        order["pay_method"] = real_paid.get("pay_method") or pay_method
-        order["paid_at"] = real_paid.get("paid_at")
-        session["pending_valuation"] = order
-        session["valuation_paid_no"] = order["order_no"]
-        logger.info(f"估值订单支付成功 - 单号: {order['order_no']}, 渠道: {pay_method}, 金额: ¥{VALUATION_PRICE}")
-        return redirect("/valuate/result")
+    official = payments.WX_CONFIGURED or payments.ALI_CONFIGURED
 
-    # 真实模式但回调尚未到达：回到收银台等待轮询
-    if payments.WX_CONFIGURED or payments.ALI_CONFIGURED:
+    # 真实支付模式：解锁取决于回调验签
+    if official:
+        real_paid = store.get(order["order_no"]) or {}
+        if real_paid.get("paid"):
+            order["paid"] = True
+            order["pay_method"] = real_paid.get("pay_method") or pay_method
+            order["paid_at"] = real_paid.get("paid_at")
+            session["pending_valuation"] = order
+            session["valuation_paid_no"] = order["order_no"]
+            logger.info(f"估值订单支付成功(官方) - 单号: {order['order_no']}, 渠道: {pay_method}")
+            return redirect("/valuate/result")
         return redirect("/valuate/pay?wait=1")
 
-    # 演示模式：直接放行（同步写入订单存储，valuation_result 以存储为权威来源）
+    # 人工核验模式：提交凭证 → 待确认，不自动解锁
     from datetime import datetime
-    paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    order["paid"] = True
+    submitted_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     order["pay_method"] = pay_method
-    order["paid_at"] = paid_at
+    order["review_status"] = "pending"
+    order["submitted_at"] = submitted_at
     session["pending_valuation"] = order
-    session["valuation_paid_no"] = order["order_no"]
-    store.update(order["order_no"], paid=True, pay_method=pay_method, paid_at=paid_at)
-    return redirect("/valuate/result")
+    store.update(order["order_no"], pay_method=pay_method, review_status="pending", submitted_at=submitted_at)
+    logger.info(f"用户提交支付凭证 - 单号: {order['order_no']}, 渠道: {pay_method}")
+    return redirect("/valuate/pay?submitted=1")
 
 
 @app.route("/valuate/pay/status")
@@ -542,6 +551,63 @@ def valuate_result():
 def valuate_unlock():
     """旧「免费解锁」入口已废弃，统一走收银台"""
     return redirect("/valuate/pay")
+
+
+# ---------------------------------------------------------------------------
+# 后台：人工核验（手动确认收款）
+# ---------------------------------------------------------------------------
+def _admin_required(view):
+    from functools import wraps
+
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if not session.get("admin_logged_in"):
+            return redirect("/admin/login")
+        return view(*args, **kwargs)
+
+    return wrapper
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        if request.form.get("password") == ADMIN_PASSWORD:
+            session["admin_logged_in"] = True
+            return redirect("/admin/orders")
+        return render_template("admin_login.html", error="密码错误，请重试")
+    return render_template("admin_login.html", error=None)
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin_logged_in", None)
+    return redirect("/admin/login")
+
+
+@app.route("/admin/orders")
+@_admin_required
+def admin_orders():
+    orders = list(get_order_store().all().values())
+    orders.sort(key=lambda o: o.get("submitted_at") or o.get("order_no"), reverse=True)
+    return render_template("admin_orders.html", orders=orders)
+
+
+@app.route("/admin/orders/<order_no>/confirm", methods=["POST"])
+@_admin_required
+def admin_confirm(order_no):
+    from datetime import datetime
+    paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    get_order_store().update(order_no, paid=True, review_status="confirmed", paid_at=paid_at)
+    logger.info("商家确认收款 - 单号: %s", order_no)
+    return redirect("/admin/orders")
+
+
+@app.route("/admin/orders/<order_no>/reject", methods=["POST"])
+@_admin_required
+def admin_reject(order_no):
+    get_order_store().update(order_no, review_status="rejected")
+    logger.info("商家驳回订单 - 单号: %s", order_no)
+    return redirect("/admin/orders")
 
 if __name__ == "__main__":
     logger.info("RealEstate Flask应用启动")

@@ -140,6 +140,10 @@ class OrderStore:
         with self._lock:
             return self._load().get(order_no)
 
+    def all(self):
+        with self._lock:
+            return self._load()
+
     def update(self, order_no, **fields):
         with self._lock:
             data = self._load()

@@ -17,6 +17,9 @@
         .amount-big { font-size: 2.75rem; font-weight: 800; line-height: 1; color: #667eea; }
         .qr-box { width: 180px; height: 180px; background: #fff; border: 1px solid #dee2e6; border-radius: .5rem; display: flex; align-items: center; justify-content: center; }
         .step-dot { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; }
+        /* 弹窗内放大二维码 */
+        .qr-modal-img { width: 280px; height: 280px; object-fit: contain; border: 1px solid #dee2e6; border-radius: .75rem; background: #fff; padding: .5rem; }
+        .qr-preview-img { width: 160px; height: 160px; object-fit: contain; }
     </style>
 </head>
 <body>
@@ -47,6 +50,16 @@
             <span class="mx-3" style="height:1px;width:40px;background:#dee2e6;"></span>
             <span class="step-dot bg-light border me-2">3</span> 查看报告
         </div>
+
+        {% if submitted %}
+        <div class="alert alert-info d-flex align-items-center shadow-sm" role="alert">
+            <i class="bi bi-hourglass-split fs-4 me-3"></i>
+            <div>
+                <div class="fw-semibold">支付凭证已提交，正在核实到账</div>
+                <div class="small mb-0">商家确认收款后将自动解锁报告（通常几分钟内）。如需加急，可凭订单号 <code>{{ order.order_no }}</code> 联系客服。</div>
+            </div>
+        </div>
+        {% endif %}
 
         <div class="row g-4 justify-content-center">
             <div class="col-lg-7">
@@ -99,23 +112,14 @@
                                 <i class="bi bi-wechat fs-4 me-3" style="color:#07C160;"></i>
                                 <div class="flex-grow-1">
                                     <div class="fw-semibold">微信支付</div>
-                                    <small class="text-muted">推荐使用，扫码即可完成</small>
+                                    <small class="text-muted">扫码即可完成，推荐使用</small>
                                 </div>
-                                <i class="bi bi-check-circle-fill text-primary d-none check-icon"></i>
-                            </label>
-                            <label class="pay-method d-flex align-items-center" data-method="alipay">
-                                <input type="radio" name="pay_method" value="alipay">
-                                <i class="bi bi-alipay fs-4 me-3" style="color:#1677FF;"></i>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold">支付宝</div>
-                                    <small class="text-muted">支持花呗分期</small>
-                                </div>
-                                <i class="bi bi-check-circle-fill text-primary d-none check-icon"></i>
+                                <i class="bi bi-check-circle-fill text-primary"></i>
                             </label>
 
                             <div class="mt-4 text-center">
-                                <button type="submit" class="btn btn-primary btn-lg fw-bold px-5">
-                                    <i class="bi bi-lock-fill me-2"></i>确认支付 ¥{{ price }}
+                                <button type="button" class="btn btn-success btn-lg fw-bold px-5" id="openPayBtn">
+                                    <i class="bi bi-wechat me-2"></i>确认支付 ¥{{ price }}
                                 </button>
                                 <div class="mt-3">
                                     <a href="/valuate" class="btn btn-link btn-sm text-muted text-decoration-none">
@@ -134,38 +138,29 @@
             <div class="col-lg-4">
                 <div class="card pay-card shadow-sm">
                     <div class="card-body p-4 text-center">
-                        <h6 class="mb-3"><i class="bi bi-qr-code me-1"></i>扫码支付</h6>
-                        <div class="qr-box mx-auto mb-3" id="qrBox">
+                        <h6 class="mb-3"><i class="bi bi-qr-code me-1"></i>扫码支付（预览）</h6>
+                        <div class="qr-box mx-auto mb-3">
                             {% if order.wx_code_url %}
-                            <img id="qrWechat" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ order.wx_code_url|urlencode }}"
-                                 alt="微信支付二维码" width="160" height="160">
+                            <img class="qr-preview-img" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ order.wx_code_url|urlencode }}"
+                                 alt="微信支付二维码">
                             {% else %}
-                            <img id="qrWechat" src="{{ url_for('static', filename='wechat-pay-qr.png') }}"
-                                 alt="微信支付二维码" width="132" height="132">
-                            {% endif %}
-                            {% if order.ali_qr_code %}
-                            <img id="qrAlipay" class="d-none" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ order.ali_qr_code|urlencode }}"
-                                 alt="支付宝支付二维码" width="160" height="160">
-                            {% else %}
-                            <img id="qrAlipay" class="d-none" src="{{ url_for('static', filename='alipay-qr.jpg') }}"
-                                 alt="支付宝支付二维码" width="132" height="132">
+                            <img class="qr-preview-img" src="{{ url_for('static', filename='wechat-pay-qr.png') }}"
+                                 alt="微信支付二维码">
                             {% endif %}
                         </div>
                         <div class="small text-muted mb-2">
-                            请使用 <strong id="qrTip">微信</strong> 扫描二维码<br>完成 ¥{{ price }} 支付
+                            请使用 <strong>微信</strong> 扫描二维码<br>完成 ¥{{ price }} 支付
                         </div>
-                        {% if wx_configured or ali_configured %}
+                        <div class="small text-secondary mb-2">
+                            <i class="bi bi-arrows-fullscreen me-1"></i>点击「确认支付」可放大二维码
+                        </div>
+                        {% if wx_configured %}
                         <div class="small text-success mb-2" id="payHint">
                             <i class="bi bi-check-circle me-1"></i>官方收款：支付成功后本页将自动跳转
                         </div>
                         {% else %}
                         <div class="small text-warning mb-2">
-                            <i class="bi bi-info-circle me-1"></i>演示模式：扫码付款后点「确认支付」即可解锁
-                        </div>
-                        {% endif %}
-                        {% if request.args.get('wait') %}
-                        <div class="small text-primary mb-2" id="waitHint">
-                            <i class="bi bi-hourglass-split me-1"></i>正在等待支付确认…
+                            <i class="bi bi-info-circle me-1"></i>演示模式：扫码付款后点「支付成功」提交凭证
                         </div>
                         {% endif %}
                         <hr>
@@ -187,30 +182,67 @@
         </div>
     </footer>
 
+    <!-- 放大版个人收款码弹窗 -->
+    <div class="modal fade" id="payModal" tabindex="-1" aria-labelledby="payModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="payModalLabel">
+                        <i class="bi bi-wechat me-2" style="color:#07C160;"></i>微信扫码支付 ¥{{ price }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        {% if order.wx_code_url %}
+                        <img class="qr-modal-img" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ order.wx_code_url|urlencode }}"
+                             alt="微信支付二维码">
+                        {% else %}
+                        <img class="qr-modal-img" src="{{ url_for('static', filename='wechat-pay-qr.png') }}"
+                             alt="微信支付二维码">
+                        {% endif %}
+                    </div>
+                    <p class="text-muted small mb-1">
+                        请使用微信「<strong>扫一扫</strong>」扫描上方二维码完成支付
+                    </p>
+                    <p class="text-secondary small mb-0">
+                        付款成功后，点击下方「支付成功」提交凭证
+                    </p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-3">
+                    <button type="button" class="btn btn-outline-secondary px-4" id="payFailBtn" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>支付失败
+                    </button>
+                    <button type="button" class="btn btn-success px-4" id="paySuccessBtn">
+                        <i class="bi bi-check-circle me-1"></i>支付成功
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     (function () {
-        function switchQr(method) {
-            document.getElementById('qrTip').textContent = method === 'wechat' ? '微信' : '支付宝';
-            document.getElementById('qrWechat').classList.toggle('d-none', method !== 'wechat');
-            document.getElementById('qrAlipay').classList.toggle('d-none', method !== 'alipay');
-        }
-        document.querySelectorAll('.pay-method').forEach(function (el) {
-            el.addEventListener('click', function () {
-                document.querySelectorAll('.pay-method').forEach(function (x) {
-                    x.classList.remove('active');
-                    x.querySelector('.check-icon').classList.add('d-none');
-                    x.querySelector('input').checked = false;
-                });
-                el.classList.add('active');
-                el.querySelector('.check-icon').classList.remove('d-none');
-                el.querySelector('input').checked = true;
-                switchQr(el.dataset.method);
-            });
+        var payForm = document.getElementById('payForm');
+        var payModalEl = document.getElementById('payModal');
+
+        // 点击「确认支付」弹出放大二维码
+        document.getElementById('openPayBtn').addEventListener('click', function () {
+            var modal = new bootstrap.Modal(payModalEl);
+            modal.show();
         });
-        document.querySelector('.pay-method.active .check-icon').classList.remove('d-none');
+
+        // 点击「支付成功」提交支付凭证表单（进入人工核验「待确认」）
+        document.getElementById('paySuccessBtn').addEventListener('click', function () {
+            payForm.submit();
+        });
+
+        // 点击「支付失败」仅关闭弹窗（不提交），用户可重试
+        // payFailBtn 自带 data-bs-dismiss，无需额外逻辑
 
         // 官方支付模式：轮询支付状态，回调验签成功即自动跳转报告页
-        var official = {% if wx_configured or ali_configured %}true{% else %}false{% endif %};
+        var official = {% if wx_configured %}true{% else %}false{% endif %};
         if (official) {
             var orderNo = "{{ order.order_no }}";
             var timer = setInterval(function () {
