@@ -76,6 +76,19 @@
     </div>
 
     <div class="container mt-4 pb-5">
+        {% if order and order.listing_id %}
+        <div class="alert alert-success d-flex align-items-center shadow-sm mb-4" role="alert">
+            <i class="bi bi-house-add-fill fs-4 me-3"></i>
+            <div class="flex-grow-1">
+                <div class="fw-semibold">本房源已自动加入 Demo 房源库</div>
+                <div class="small mb-0">编号 <code>{{ order.listing_id }}</code>，可在房源列表中查看、收藏与对比。</div>
+            </div>
+            <a href="/listings" class="btn btn-sm btn-success flex-shrink-0 ms-3">
+                <i class="bi bi-search me-1"></i>去房源列表看
+            </a>
+        </div>
+        {% endif %}
+
         <!-- 核心结论：雷达图 + 层级评分 + Top因素 -->
         <div class="row g-4 mb-4">
             <div class="col-md-5">

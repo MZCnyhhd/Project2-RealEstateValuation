@@ -426,6 +426,105 @@ def _normalize_valuate_form():
     return form_data
 
 
+# 用户估值房源回流到 Demo 房源时使用的配图（取自现有 Demo 数据，保证可加载）
+_USER_LISTING_IMAGES = [
+    "https://images.unsplash.com/photo-1630699293388-0938c397106a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1684928365167-e91916573122?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1562821696-c68d007f943b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDl8&ixlib=rb-4.1.0&q=80&w=1080",
+]
+
+
+def _build_listing_from_form(form_data, order_no):
+    """把用户估值表单转换成一条 Demo 房源记录；缺面积或报价时返回 None。"""
+    def _num(key):
+        try:
+            val = float(str(form_data.get(key, "")).strip())
+            return val if val > 0 else None
+        except (TypeError, ValueError):
+            return None
+
+    def _flag(key):
+        return str(form_data.get(key, "")).strip() not in ("", "0", "None", "False", "false")
+
+    area = _num("area_size")
+    price = _num("price")
+    if area is None or price is None:
+        return None
+
+    rooms = form_data.get("layout_rooms") or "3"
+    halls = form_data.get("layout_halls") or "2"
+    baths = form_data.get("layout_baths") or "1"
+    layout = f"{rooms}室{halls}厅{baths}卫"
+
+    # 标签按「搜索价值」排序：越靠前越能帮买家筛到这套房，超出的截断
+    deco = (form_data.get("decoration") or "").strip()
+    subway = _num("subway_distance")
+    school = (form_data.get("school_level") or "").strip()
+    view = (form_data.get("view_type") or "").strip()
+
+    tags = ["新上"]
+    if subway is not None and subway <= 800:
+        tags.append("近地铁")
+    if school and school not in ("无", "普通", "暂无"):
+        tags.append("学区房")
+    if _flag("north_south"):
+        tags.append("南北通透")
+    if deco:
+        tags.append(deco)
+    if _flag("five_year_only"):
+        tags.append("满五唯一")
+    if _flag("ped_car_split"):
+        tags.append("人车分流")
+    if _flag("has_elevator"):
+        tags.append("电梯房")
+    if _flag("urgent_sell"):
+        tags.append("急售")
+    if view and view not in ("无", "普通"):
+        tags.append(view)
+    if _flag("is_haunted"):
+        tags.append("历史印记")
+    if area >= 180:
+        tags.append("大平层")
+
+    seen, clean_tags = set(), []
+    for t in tags:
+        if t and t not in seen:
+            seen.add(t)
+            clean_tags.append(t)
+    clean_tags = clean_tags[:6]
+
+    community = (form_data.get("community") or "未知小区").strip()
+    address = (form_data.get("address") or community).strip()
+
+    highlight = "、".join(clean_tags[1:3]) or "业主自荐"
+    title = f"{community} {layout}，{highlight}"
+
+    bits = [f"建筑面积约{area:g}㎡，{layout}"]
+    if form_data.get("floor"):
+        bits.append(f"位于{form_data['floor']}层")
+    if form_data.get("orientation"):
+        bits.append(f"{form_data['orientation']}朝向")
+    if deco:
+        bits.append(deco)
+    bits.append("房源信息由用户估值自动录入。")
+
+    idx = sum(ord(c) for c in order_no) % len(_USER_LISTING_IMAGES)
+    return {
+        "id": f"U-{order_no}",
+        "title": title,
+        "community": community,
+        "address": address,
+        "layout": layout,
+        "area": area,
+        "price": price,
+        "tags": clean_tags,
+        "description": "，".join(bits),
+        "image_url": _USER_LISTING_IMAGES[idx],
+        "latitude": None,
+        "longitude": None,
+    }
+
+
 @app.route("/valuate/report", methods=["POST"])
 def valuate_report():
     """全息估值 - 提交房源信息，生成待支付订单后跳转收银台"""
@@ -624,6 +723,20 @@ def valuate_result():
     session["pending_valuation"] = order
     session["valuation_paid_no"] = order["order_no"]
     valuation = evaluate_user_input(order["form_data"])
+
+    # 报告生成后，把该房产回流到 Demo 房源库（同一订单仅入库一次）
+    if not order.get("listing_id"):
+        listing = _build_listing_from_form(order["form_data"], order["order_no"])
+        if listing:
+            try:
+                get_repository().add_listing(listing)
+                order["listing_id"] = listing["id"]
+                get_order_store().update(order["order_no"], listing_id=listing["id"])
+                logger.info("房产已加入 Demo 房源 - 单号: %s, 房源号: %s",
+                            order["order_no"], listing["id"])
+            except Exception as exc:
+                logger.error("加入 Demo 房源失败 - 单号: %s, 错误: %s", order["order_no"], exc)
+
     return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True)
 
 

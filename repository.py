@@ -3,6 +3,8 @@ import json
 import sqlite3
 import threading
 
+_JSON_LOCK = threading.Lock()
+
 
 class JsonRepository:
     def __init__(self, filename="mock_listings.json"):
@@ -11,6 +13,17 @@ class JsonRepository:
     def list_listings(self):
         with open(self.filename, "r", encoding="utf-8") as f:
             return json.load(f)
+
+    def add_listing(self, listing):
+        """新增房源并置顶（用于把用户估值房源回流到 Demo 房源）。"""
+        with _JSON_LOCK:
+            with open(self.filename, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            data = [item for item in data if item.get("id") != listing.get("id")]
+            data.insert(0, listing)
+            with open(self.filename, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        return listing
 
 
 class SqliteRepository:
@@ -60,6 +73,32 @@ class SqliteRepository:
                     item["tags"] = []
                 listings.append(item)
             return listings
+
+    def add_listing(self, listing):
+        """新增/覆盖一条房源（用于把用户估值房源回流到 Demo 房源）。"""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO listings
+                (id, title, community, address, layout, area, price, tags, description, image_url, latitude, longitude)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    listing.get("id"),
+                    listing.get("title"),
+                    listing.get("community"),
+                    listing.get("address"),
+                    listing.get("layout"),
+                    listing.get("area"),
+                    listing.get("price"),
+                    json.dumps(listing.get("tags", []), ensure_ascii=False),
+                    listing.get("description"),
+                    listing.get("image_url"),
+                    listing.get("latitude"),
+                    listing.get("longitude"),
+                ),
+            )
+        return listing
 
     def import_from_json(self, filename="mock_listings.json"):
         with open(filename, "r", encoding="utf-8") as f:
