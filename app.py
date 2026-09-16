@@ -7,7 +7,7 @@ from repository import get_repository, get_order_store
 from mortgage import calculate_mortgage
 from llm_agent import build_agent_reply
 from beijing_policy import apply_beijing_policy
-from valuation import evaluate_listing, evaluate_user_input
+from valuation import evaluate_listing, evaluate_user_input, format_layout
 import payments
 
 app = Flask(__name__)
@@ -419,7 +419,8 @@ def _normalize_valuate_form():
     checkbox_fields = ["north_south", "has_elevator", "ped_car_split", "five_year_only",
                        "has_mortgage", "has_lease", "urgent_sell", "is_haunted",
                        "has_leak", "door_toilet", "beam_press", "squareness",
-                       "dry_wet_sep", "bright_bath", "has_central_ac", "has_fresh_air"]
+                       "dry_wet_sep", "bright_bath", "bright_kitchen",
+                       "has_central_ac", "has_fresh_air"]
     for field in checkbox_fields:
         if field not in form_data:
             form_data[field] = ""
@@ -451,10 +452,7 @@ def _build_listing_from_form(form_data, order_no):
     if area is None or price is None:
         return None
 
-    rooms = form_data.get("layout_rooms") or "3"
-    halls = form_data.get("layout_halls") or "2"
-    baths = form_data.get("layout_baths") or "1"
-    layout = f"{rooms}室{halls}厅{baths}卫"
+    layout = format_layout(form_data)
 
     # 标签按「搜索价值」排序：越靠前越能帮买家筛到这套房，超出的截断
     deco = (form_data.get("decoration") or "").strip()
@@ -737,7 +735,8 @@ def valuate_result():
             except Exception as exc:
                 logger.error("加入 Demo 房源失败 - 单号: %s, 错误: %s", order["order_no"], exc)
 
-    return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True)
+    return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True,
+                           layout_text=format_layout(order["form_data"]))
 
 
 @app.route("/valuate/unlock")

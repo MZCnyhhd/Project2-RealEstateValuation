@@ -272,18 +272,59 @@ def _sim_categorical(listing_id: str, dim_id: str, choices: list) -> str:
 
 
 # === 推导引擎 ===
+_LAYOUT_UNITS = {
+    "室": "rooms", "厅": "halls", "卫": "baths", "厨": "kitchens",
+    "阳台": "balconies", "露台": "terraces", "花园": "gardens", "储藏室": "storages",
+}
+_LAYOUT_PATTERN = re.compile(r"(\d+)\s*(储藏室|阳台|露台|花园|室|厅|卫|厨)")
+
+
+def format_layout(form_data: dict) -> str:
+    """把表单户型字段拼成标准户型串，如「3室2厅1厨2卫2阳台」。"""
+    def _cnt(key, default=0):
+        raw = str(form_data.get(key, "")).strip()
+        if raw == "":
+            return default
+        try:
+            n = int(float(raw))
+            return n if n > 0 else 0
+        except (ValueError, TypeError):
+            return default
+
+    parts = [f"{_cnt('layout_rooms', 3)}室", f"{_cnt('layout_halls', 2)}厅"]
+    for key, unit, default in (
+        ("layout_kitchens", "厨", 1),
+        ("layout_baths", "卫", 1),
+        ("layout_balconies", "阳台", 1),
+        ("layout_terraces", "露台", 0),
+        ("layout_gardens", "花园", 0),
+        ("layout_storages", "储藏室", 0),
+    ):
+        n = _cnt(key, default)
+        if n:
+            parts.append(f"{n}{unit}")
+    return "".join(parts)
+
+
 def _parse_layout(layout: str) -> Dict[str, int]:
-    """解析户型字符串 '3室2厅2卫' → {rooms:3, halls:2, baths:2}"""
-    m = re.match(r"(\d+)室(\d*)厅?(\d*)卫?", layout or "")
-    if m:
-        return {
-            "rooms": int(m.group(1)),
-            "halls": int(m.group(2)) if m.group(2) else 0,
-            "baths": int(m.group(3)) if m.group(3) else 1,
-        }
+    """解析户型字符串（顺序无关）'3室2厅1厨2卫2阳台' → {rooms, halls, baths, kitchens, balconies, ...}"""
+    info = {"rooms": 0, "halls": 0, "baths": 0, "kitchens": 0,
+            "balconies": 0, "terraces": 0, "gardens": 0, "storages": 0}
+    if layout:
+        for m in _LAYOUT_PATTERN.finditer(layout):
+            key = _LAYOUT_UNITS.get(m.group(2))
+            if key:
+                info[key] = max(info[key], int(m.group(1)))
+
+    if info["rooms"]:
+        if info["baths"] == 0:
+            info["baths"] = 1
+        return info
     if "开放式" in (layout or ""):
-        return {"rooms": 1, "halls": 0, "baths": 1}
-    return {"rooms": 2, "halls": 1, "baths": 1}
+        info.update({"rooms": 1, "halls": 0, "baths": 1})
+        return info
+    info.update({"rooms": 2, "halls": 1, "baths": 1})
+    return info
 
 
 def derive_listing_dimensions(listing: dict) -> Dict[str, Any]:
@@ -536,6 +577,15 @@ def evaluate_listing(listing: dict, all_listings: list = None, version: str = "s
 
 
 # === 用户录入房源评估 ===
+def _as_int(val, default=0):
+    """宽松转整数：空值/非法值 → default，0 或负数 → default。"""
+    try:
+        n = int(float(str(val).strip()))
+        return n if n > 0 else default
+    except (TypeError, ValueError):
+        return default
+
+
 # 表单字段 → 维度值 的直接映射
 _FORM_TO_DIM = {
     # 基本信息 → 生成伪tags/desc
@@ -570,6 +620,16 @@ _FORM_TO_DIM = {
     "layout_rooms": lambda v: {},
     "layout_halls": lambda v: {"l4_dining": int(v) >= 1 if v else False},
     "layout_baths": lambda v: {"l4_master_bath": int(v) >= 2 if v else False},
+    "layout_kitchens": lambda v: {},
+    "layout_balconies": lambda v: {
+        "l4_living_balcony": "有" if _as_int(v) >= 1 else "无",
+        "l4_drying": "阳台" if _as_int(v) >= 1 else "无",
+        "l4_balcony_count": _as_int(v) >= 1,
+    },
+    "layout_terraces": lambda v: {"l4_balcony_count": True} if _as_int(v) >= 1 else {},
+    "layout_gardens": lambda v: {"l4_garden": _as_int(v) >= 1},
+    "layout_storages": lambda v: {"l4_storage": "有" if _as_int(v) >= 1 else "无"},
+    "bright_kitchen": lambda v: {"l4_bright_kitchen": "有窗" if v else "无窗"},
     "area_size": lambda v: {},
     # 小区信息
     "far": lambda v: {"l3_far": float(v) if v else 2.5},
@@ -637,7 +697,7 @@ def evaluate_user_input(form_data: dict, version: str = "professional") -> dict:
         "id": hashlib.md5(pseudo_id.encode()).hexdigest()[:8].upper(),
         "community": form_data.get("community", "未知小区"),
         "address": form_data.get("address", ""),
-        "layout": f"{form_data.get('layout_rooms', 2)}室{form_data.get('layout_halls', 1)}厅{form_data.get('layout_baths', 1)}卫",
+        "layout": format_layout(form_data),
         "area": float(form_data.get("area_size", 90)),
         "price": float(form_data.get("price", 300)),
         "tags": [],
