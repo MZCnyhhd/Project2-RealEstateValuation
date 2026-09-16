@@ -419,27 +419,21 @@ def valuate_pay():
     if order.get("paid") and session.get("valuation_paid_no") == order["order_no"]:
         return redirect("/valuate/result")
 
-    # 真实支付：若已配置微信/支付宝官方 API，则在服务端创建支付单并拿到二维码
+    # 真实支付：若已配置微信官方 API，则在服务端创建支付单并拿到二维码
     store = get_order_store()
-    if not order.get("wx_code_url") and not order.get("ali_qr_code"):
-        desc = f"房地产全息价值评估报告-{order['community']}"
+    if not order.get("wx_code_url"):
         if payments.WX_CONFIGURED:
+            desc = f"房地产全息价值评估报告-{order['community']}"
             order["wx_code_url"] = payments.create_wechat_native(
                 order["order_no"], int(round(VALUATION_PRICE * 100)), desc,
                 url_for("valuate_pay_notify_wechat", _external=True),
             )
-        if payments.ALI_CONFIGURED:
-            order["ali_qr_code"] = payments.create_alipay_precreate(
-                order["order_no"], f"{VALUATION_PRICE:.2f}", desc,
-            )
-        if order.get("wx_code_url") or order.get("ali_qr_code"):
-            store.update(order["order_no"], wx_code_url=order.get("wx_code_url"),
-                         ali_qr_code=order.get("ali_qr_code"))
+            store.update(order["order_no"], wx_code_url=order.get("wx_code_url"))
 
     return render_template(
         "valuate_pay.html", order=order, price=VALUATION_PRICE,
-        wx_configured=payments.WX_CONFIGURED, ali_configured=payments.ALI_CONFIGURED,
-        official=(payments.WX_CONFIGURED or payments.ALI_CONFIGURED),
+        wx_configured=payments.WX_CONFIGURED,
+        official=payments.WX_CONFIGURED,
         submitted=request.args.get("submitted"),
     )
 

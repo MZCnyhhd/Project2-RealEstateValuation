@@ -144,7 +144,7 @@
                             <img class="qr-preview-img" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ order.wx_code_url|urlencode }}"
                                  alt="微信支付二维码">
                             {% else %}
-                            <img class="qr-preview-img" src="{{ url_for('static', filename='wechat-pay-qr.png') }}"
+                            <img class="qr-preview-img" src="{{ url_for('static', filename='wechat-pay-qr-large.png') }}"
                                  alt="微信支付二维码">
                             {% endif %}
                         </div>
@@ -198,7 +198,7 @@
                         <img class="qr-modal-img" src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={{ order.wx_code_url|urlencode }}"
                              alt="微信支付二维码">
                         {% else %}
-                        <img class="qr-modal-img" src="{{ url_for('static', filename='wechat-pay-qr.png') }}"
+                        <img class="qr-modal-img" src="{{ url_for('static', filename='wechat-pay-qr-large.png') }}"
                              alt="微信支付二维码">
                         {% endif %}
                     </div>
