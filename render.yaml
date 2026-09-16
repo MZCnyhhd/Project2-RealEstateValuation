@@ -11,17 +11,3 @@ services:
         generateValue: true
       - key: DATA_BACKEND
         value: json
-      # 后台管理密码（人工核验收款后台 /admin 登录口令，必填，请设置强密码）
-      - key: ADMIN_PASSWORD
-        sync: false
-      # 微信支付 v3（留空则支付页回退到演示模式）
-      - key: WXPAY_MCH_ID
-        sync: false
-      - key: WXPAY_APP_ID
-        sync: false
-      - key: WXPAY_API_V3_KEY
-        sync: false
-      - key: WXPAY_MCH_SERIAL
-        sync: false
-      - key: WXPAY_PRIVATE_KEY
-        sync: false
