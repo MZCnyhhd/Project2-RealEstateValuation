@@ -1,6 +1,7 @@
 import os
 import json
 import sqlite3
+import threading
 
 
 class JsonRepository:
@@ -99,3 +100,68 @@ def get_repository(filename="mock_listings.json"):
         return repo
 
     return JsonRepository(filename=filename)
+
+
+class OrderStore:
+    """服务端订单存储 —— 供微信/支付宝支付回调按 out_trade_no 查询订单。
+
+    注意：当前用 JSON 文件实现（与 DATA_BACKEND=json 一致）。
+    Render 等临时文件系统会在重启时清空，但支付回调通常在用户付款后数秒内到达，
+    足以完成一次交易闭环；如需持久化请改用 SQLite 或外部数据库。
+    """
+
+    def __init__(self, path="orders.json"):
+        self.path = path
+        self._lock = threading.Lock()
+
+    def _load(self):
+        if not os.path.exists(self.path):
+            return {}
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def _save(self, data):
+        try:
+            with open(self.path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    def save(self, order):
+        with self._lock:
+            data = self._load()
+            data[order["order_no"]] = order
+            self._save(data)
+
+    def get(self, order_no):
+        with self._lock:
+            return self._load().get(order_no)
+
+    def all(self):
+        with self._lock:
+            return self._load()
+
+    def update(self, order_no, **fields):
+        with self._lock:
+            data = self._load()
+            o = data.get(order_no)
+            if not o:
+                return None
+            o.update(fields)
+            data[order_no] = o
+            self._save(data)
+            return o
+
+
+_order_store = None
+
+
+def get_order_store():
+    global _order_store
+    if _order_store is None:
+        _order_store = OrderStore(path=os.environ.get("ORDERS_PATH", "orders.json"))
+    return _order_store
+

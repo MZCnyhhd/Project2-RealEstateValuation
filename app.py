@@ -3,14 +3,20 @@ import logging
 from math import ceil
 from flask import Flask, render_template, request, redirect, session, jsonify
 
-from repository import get_repository
+from repository import get_repository, get_order_store
 from mortgage import calculate_mortgage
 from llm_agent import build_agent_reply
 from beijing_policy import apply_beijing_policy
 from valuation import evaluate_listing, evaluate_user_input
+import payments
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
+
+# 后台管理密码（请在 Render 环境变量中设置 ADMIN_PASSWORD，本地默认仅用于测试）
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "change_me_admin")
+if ADMIN_PASSWORD == "change_me_admin":
+    logger.warning("ADMIN_PASSWORD 使用默认弱口令，请在生产环境通过环境变量设置强密码")
 
 # 配置日志
 logging.basicConfig(
@@ -242,7 +248,7 @@ def listing_detail(listing_id):
     all_listings = load_listings()
     # 查找与传入ID匹配的房源
     listing = next((item for item in all_listings if item["id"] == listing_id), None)
-
+    
     if listing:
         valuation = evaluate_listing(listing, all_listings=all_listings)
         return render_template(
@@ -336,13 +342,23 @@ def agent_chat():
         return jsonify({"ok": False, "error": str(exc)}), 400
 
 
-# ---------------------------------------------------------------------------
-# 全息估值报告（免费）
-# ---------------------------------------------------------------------------
+# 全息估值定价（元）
+VALUATION_PRICE = 9.9
+
+
+def _new_order_no():
+    """生成估值订单号，形如 HV20260909A1B2C3"""
+    from datetime import datetime
+    import random
+    stamp = datetime.now().strftime("%Y%m%d")
+    suffix = "".join(random.choice("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ") for _ in range(6))
+    return f"HV{stamp}{suffix}"
+
+
 @app.route("/valuate")
 def valuate_form():
     """全息估值 - 用户录入房源信息表单"""
-    return render_template("valuate_form.html")
+    return render_template("valuate_form.html", price=VALUATION_PRICE)
 
 
 def _normalize_valuate_form():
@@ -365,27 +381,227 @@ def _normalize_valuate_form():
 
 @app.route("/valuate/report", methods=["POST"])
 def valuate_report():
-    """全息估值 - 提交房源信息，直接生成完整估值报告（免费）"""
+    """全息估值 - 提交房源信息，生成待支付订单后跳转收银台"""
     form_data = _normalize_valuate_form()
 
     if not form_data.get("community") or not form_data.get("area_size") or not form_data.get("price"):
-        return render_template("valuate_form.html",
+        return render_template("valuate_form.html", price=VALUATION_PRICE,
                                error="请填写必填字段：小区名称、面积、报价")
 
-    session["valuation_form"] = form_data
-    logger.info(f"估值报告生成 - 小区: {form_data.get('community')}, "
-                f"面积: {form_data.get('area_size')}, 报价: {form_data.get('price')}")
-    return redirect("/valuate/result")
+    order = {
+        "order_no": _new_order_no(),
+        "form_data": form_data,
+        "community": form_data.get("community", ""),
+        "area_size": form_data.get("area_size", ""),
+        "listing_price": form_data.get("price", ""),
+        "amount": VALUATION_PRICE,
+        "paid": False,
+        "pay_method": None,
+        "wx_code_url": None,
+        "ali_qr_code": None,
+    }
+    session["pending_valuation"] = order
+    get_order_store().save(order)
+    # 上一条订单的支付状态作废，避免复用旧支付凭证
+    session.pop("valuation_paid_no", None)
+
+    logger.info(f"估值订单创建 - 单号: {order['order_no']}, 小区: {order['community']}, "
+                f"面积: {order['area_size']}, 报价: {order['listing_price']}, 金额: ¥{VALUATION_PRICE}")
+    return redirect("/valuate/pay")
+
+
+@app.route("/valuate/pay")
+def valuate_pay():
+    """收银台 - ¥9.9 支付确认页"""
+    order = session.get("pending_valuation")
+    if not order:
+        return redirect("/valuate")
+    if order.get("paid") and session.get("valuation_paid_no") == order["order_no"]:
+        return redirect("/valuate/result")
+
+    # 真实支付：若已配置微信官方 API，则在服务端创建支付单并拿到二维码
+    store = get_order_store()
+    if not order.get("wx_code_url"):
+        if payments.WX_CONFIGURED:
+            desc = f"房地产全息价值评估报告-{order['community']}"
+            order["wx_code_url"] = payments.create_wechat_native(
+                order["order_no"], int(round(VALUATION_PRICE * 100)), desc,
+                url_for("valuate_pay_notify_wechat", _external=True),
+            )
+            store.update(order["order_no"], wx_code_url=order.get("wx_code_url"))
+
+    return render_template(
+        "valuate_pay.html", order=order, price=VALUATION_PRICE,
+        wx_configured=payments.WX_CONFIGURED,
+        official=payments.WX_CONFIGURED,
+        submitted=request.args.get("submitted"),
+    )
+
+
+@app.route("/valuate/pay/confirm", methods=["POST"])
+def valuate_pay_confirm():
+    """确认支付按钮。
+
+    * 真实支付模式（已配置微信/支付宝 API）：真正解锁取决于回调验签结果；
+      若订单尚未被回调标记为已支付，则回到收银台并提示等待轮询。
+    * 人工核验模式（未配置官方 API）：用户提交支付凭证后订单进入「待确认」，
+      不自动解锁，需商家在后台核实到账后手动确认（见 /admin/orders）。
+    """
+    order = session.get("pending_valuation")
+    if not order:
+        return redirect("/valuate")
+
+    pay_method = request.form.get("pay_method", "wechat")
+    if pay_method not in ("wechat", "alipay"):
+        pay_method = "wechat"
+
+    store = get_order_store()
+    official = payments.WX_CONFIGURED or payments.ALI_CONFIGURED
+
+    # 真实支付模式：解锁取决于回调验签
+    if official:
+        real_paid = store.get(order["order_no"]) or {}
+        if real_paid.get("paid"):
+            order["paid"] = True
+            order["pay_method"] = real_paid.get("pay_method") or pay_method
+            order["paid_at"] = real_paid.get("paid_at")
+            session["pending_valuation"] = order
+            session["valuation_paid_no"] = order["order_no"]
+            logger.info(f"估值订单支付成功(官方) - 单号: {order['order_no']}, 渠道: {pay_method}")
+            return redirect("/valuate/result")
+        return redirect("/valuate/pay?wait=1")
+
+    # 人工核验模式：提交凭证 → 待确认，不自动解锁
+    from datetime import datetime
+    submitted_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    order["pay_method"] = pay_method
+    order["review_status"] = "pending"
+    order["submitted_at"] = submitted_at
+    session["pending_valuation"] = order
+    store.update(order["order_no"], pay_method=pay_method, review_status="pending", submitted_at=submitted_at)
+    logger.info(f"用户提交支付凭证 - 单号: {order['order_no']}, 渠道: {pay_method}")
+    return redirect("/valuate/pay?submitted=1")
+
+
+@app.route("/valuate/pay/status")
+def valuate_pay_status():
+    """前端轮询：返回订单支付状态。"""
+    order_no = request.args.get("order_no") or (session.get("pending_valuation") or {}).get("order_no")
+    if not order_no:
+        return jsonify({"paid": False})
+    order = get_order_store().get(order_no) or {}
+    return jsonify({"paid": bool(order.get("paid")), "method": order.get("pay_method")})
+
+
+@app.route("/valuate/pay/notify/wechat", methods=["POST"])
+def valuate_pay_notify_wechat():
+    """微信支付异步回调：验签 + 标记订单已支付。"""
+    body = request.get_data(as_text=True)
+    out_trade_no, paid = payments.verify_wechat_notify(dict(request.headers), body)
+    if out_trade_no and paid:
+        from datetime import datetime
+        get_order_store().update(
+            out_trade_no, paid=True, pay_method="wechat",
+            paid_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        logger.info("微信支付到账 - 单号: %s", out_trade_no)
+        return jsonify({"code": "SUCCESS", "message": "成功"})
+    return jsonify({"code": "FAIL", "message": "验签失败"}), 400
+
+
+@app.route("/valuate/pay/notify/alipay", methods=["POST"])
+def valuate_pay_notify_alipay():
+    """支付宝异步回调：验签 + 标记订单已支付。"""
+    form = request.form.to_dict()
+    out_trade_no, paid = payments.verify_alipay_notify(form)
+    if out_trade_no and paid:
+        from datetime import datetime
+        get_order_store().update(
+            out_trade_no, paid=True, pay_method="alipay",
+            paid_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        logger.info("支付宝支付到账 - 单号: %s", out_trade_no)
+        return "success"
+    return "failure", 400
 
 
 @app.route("/valuate/result")
 def valuate_result():
-    """完整估值报告（免费，无需支付）"""
-    form_data = session.get("valuation_form")
-    if not form_data:
+    """完整估值报告 - 仅支付成功后可访问（以服务端订单存储为权威来源）"""
+    order_no = (session.get("pending_valuation") or {}).get("order_no") or session.get("valuation_paid_no")
+    order = get_order_store().get(order_no) if order_no else None
+    if not order:
         return redirect("/valuate")
-    valuation = evaluate_user_input(form_data)
-    return render_template("valuate_report.html", valuation=valuation)
+    if not order.get("paid"):
+        return redirect("/valuate/pay")
+
+    session["pending_valuation"] = order
+    session["valuation_paid_no"] = order["order_no"]
+    valuation = evaluate_user_input(order["form_data"])
+    return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True)
+
+
+@app.route("/valuate/unlock")
+def valuate_unlock():
+    """旧「免费解锁」入口已废弃，统一走收银台"""
+    return redirect("/valuate/pay")
+
+
+# ---------------------------------------------------------------------------
+# 后台：人工核验（手动确认收款）
+# ---------------------------------------------------------------------------
+def _admin_required(view):
+    from functools import wraps
+
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if not session.get("admin_logged_in"):
+            return redirect("/admin/login")
+        return view(*args, **kwargs)
+
+    return wrapper
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        if request.form.get("password") == ADMIN_PASSWORD:
+            session["admin_logged_in"] = True
+            return redirect("/admin/orders")
+        return render_template("admin_login.html", error="密码错误，请重试")
+    return render_template("admin_login.html", error=None)
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin_logged_in", None)
+    return redirect("/admin/login")
+
+
+@app.route("/admin/orders")
+@_admin_required
+def admin_orders():
+    orders = list(get_order_store().all().values())
+    orders.sort(key=lambda o: o.get("submitted_at") or o.get("order_no"), reverse=True)
+    return render_template("admin_orders.html", orders=orders)
+
+
+@app.route("/admin/orders/<order_no>/confirm", methods=["POST"])
+@_admin_required
+def admin_confirm(order_no):
+    from datetime import datetime
+    paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    get_order_store().update(order_no, paid=True, review_status="confirmed", paid_at=paid_at)
+    logger.info("商家确认收款 - 单号: %s", order_no)
+    return redirect("/admin/orders")
+
+
+@app.route("/admin/orders/<order_no>/reject", methods=["POST"])
+@_admin_required
+def admin_reject(order_no):
+    get_order_store().update(order_no, review_status="rejected")
+    logger.info("商家驳回订单 - 单号: %s", order_no)
+    return redirect("/admin/orders")
 
 if __name__ == "__main__":
     logger.info("RealEstate Flask应用启动")
