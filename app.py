@@ -13,11 +13,6 @@ import payments
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 
-# 后台管理密码（请在 Render 环境变量中设置 ADMIN_PASSWORD，本地默认仅用于测试）
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "change_me_admin")
-if ADMIN_PASSWORD == "change_me_admin":
-    logger.warning("ADMIN_PASSWORD 使用默认弱口令，请在生产环境通过环境变量设置强密码")
-
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
@@ -27,6 +22,11 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+# 后台管理密码（请在 Render 环境变量中设置 ADMIN_PASSWORD，本地默认仅用于测试）
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "change_me_admin")
+if ADMIN_PASSWORD == "change_me_admin":
+    logger.warning("ADMIN_PASSWORD 使用默认弱口令，请在生产环境通过环境变量设置强密码")
 
 def load_listings(filename="mock_listings.json"):
     repo = get_repository(filename=filename)
