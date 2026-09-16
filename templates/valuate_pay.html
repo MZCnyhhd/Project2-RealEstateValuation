@@ -66,16 +66,6 @@
             <span class="step-dot bg-light border me-2">3</span> 查看报告
         </div>
 
-        {% if submitted %}
-        <div class="alert alert-info d-flex align-items-center shadow-sm" role="alert">
-            <i class="bi bi-hourglass-split fs-4 me-3"></i>
-            <div>
-                <div class="fw-semibold">支付凭证已提交，正在核实到账</div>
-                <div class="small mb-0">商家确认收款后将自动解锁报告（通常几分钟内）。如需加急，可凭订单号 <code>{{ order.order_no }}</code> 联系客服。</div>
-            </div>
-        </div>
-        {% endif %}
-
         <div class="row g-4 justify-content-center">
             <div class="col-lg-7">
                 <div class="card pay-card shadow-sm mb-4">
@@ -175,7 +165,7 @@
                         </div>
                         {% else %}
                         <div class="small text-warning mb-2">
-                            <i class="bi bi-info-circle me-1"></i>演示模式：扫码付款后点「支付成功」提交凭证
+                            <i class="bi bi-info-circle me-1"></i>扫码付款后点「支付成功」，即可直接生成报告
                         </div>
                         {% endif %}
                         <hr>

@@ -434,18 +434,15 @@ def valuate_pay():
         "valuate_pay.html", order=order, price=VALUATION_PRICE,
         wx_configured=payments.WX_CONFIGURED,
         official=payments.WX_CONFIGURED,
-        submitted=request.args.get("submitted"),
     )
 
 
 @app.route("/valuate/pay/confirm", methods=["POST"])
 def valuate_pay_confirm():
-    """确认支付按钮。
+    """确认支付按钮：用户点「支付成功」后直接解锁并生成完整估值报告。
 
-    * 真实支付模式（已配置微信/支付宝 API）：真正解锁取决于回调验签结果；
-      若订单尚未被回调标记为已支付，则回到收银台并提示等待轮询。
-    * 人工核验模式（未配置官方 API）：用户提交支付凭证后订单进入「待确认」，
-      不自动解锁，需商家在后台核实到账后手动确认（见 /admin/orders）。
+    * 官方支付模式（已配置微信 API）：解锁以回调验签为准，未到账则回收银台等待。
+    * 个人收款码模式（未配置官方 API）：用户自主确认已付款，立即解锁报告，无需人工核验。
     """
     order = session.get("pending_valuation")
     if not order:
@@ -458,29 +455,33 @@ def valuate_pay_confirm():
     store = get_order_store()
     official = payments.WX_CONFIGURED or payments.ALI_CONFIGURED
 
-    # 真实支付模式：解锁取决于回调验签
+    from datetime import datetime
+
+    # 官方支付模式：解锁取决于回调验签
     if official:
         real_paid = store.get(order["order_no"]) or {}
-        if real_paid.get("paid"):
-            order["paid"] = True
-            order["pay_method"] = real_paid.get("pay_method") or pay_method
-            order["paid_at"] = real_paid.get("paid_at")
-            session["pending_valuation"] = order
-            session["valuation_paid_no"] = order["order_no"]
-            logger.info(f"估值订单支付成功(官方) - 单号: {order['order_no']}, 渠道: {pay_method}")
-            return redirect("/valuate/result")
-        return redirect("/valuate/pay?wait=1")
+        if not real_paid.get("paid"):
+            return redirect("/valuate/pay?wait=1")
+        order["paid"] = True
+        order["pay_method"] = real_paid.get("pay_method") or pay_method
+        order["paid_at"] = real_paid.get("paid_at")
+        session["pending_valuation"] = order
+        session["valuation_paid_no"] = order["order_no"]
+        logger.info(f"估值订单支付成功(官方) - 单号: {order['order_no']}, 渠道: {pay_method}")
+        return redirect("/valuate/result")
 
-    # 人工核验模式：提交凭证 → 待确认，不自动解锁
-    from datetime import datetime
-    submitted_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # 个人收款码模式：用户确认已付款 → 直接解锁报告（无需人工核验）
+    paid_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    order["paid"] = True
     order["pay_method"] = pay_method
-    order["review_status"] = "pending"
-    order["submitted_at"] = submitted_at
+    order["paid_at"] = paid_at
+    order["review_status"] = "confirmed"
     session["pending_valuation"] = order
-    store.update(order["order_no"], pay_method=pay_method, review_status="pending", submitted_at=submitted_at)
-    logger.info(f"用户提交支付凭证 - 单号: {order['order_no']}, 渠道: {pay_method}")
-    return redirect("/valuate/pay?submitted=1")
+    session["valuation_paid_no"] = order["order_no"]
+    store.update(order["order_no"], paid=True, pay_method=pay_method, paid_at=paid_at,
+                 review_status="confirmed")
+    logger.info(f"估值订单已支付并解锁 - 单号: {order['order_no']}, 渠道: {pay_method}")
+    return redirect("/valuate/result")
 
 
 @app.route("/valuate/pay/status")
