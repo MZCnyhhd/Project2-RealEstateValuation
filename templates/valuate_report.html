@@ -76,27 +76,6 @@
     </div>
 
     <div class="container mt-4 pb-5">
-        {% if not is_paid %}
-        <div class="alert alert-warning d-flex align-items-center shadow-sm mb-4" role="alert">
-            <i class="bi bi-gem fs-4 me-3"></i>
-            <div class="flex-grow-1">
-                <div class="fw-semibold">当前为「体验版」报告</div>
-                <div class="small mb-0">综合评分、估值结论、七层雷达图、Top3 加减因素免费查看；{{ valuation.dimensions_count }} 项维度逐项明细需解锁。</div>
-            </div>
-            <a href="/valuate/pay" class="btn btn-primary fw-bold ms-3 flex-shrink-0">
-                <i class="bi bi-unlock-fill me-1"></i>解锁 ¥{{ price }}
-            </a>
-        </div>
-        {% else %}
-        <div class="alert alert-success d-flex align-items-center shadow-sm mb-4" role="alert">
-            <i class="bi bi-patch-check-fill fs-4 me-3"></i>
-            <div>
-                <div class="fw-semibold">已解锁「完整版」报告</div>
-                <div class="small mb-0">{% if order %}订单号 <code>{{ order.order_no }}</code> · 支付时间 {{ order.paid_at }}{% endif %}</div>
-            </div>
-        </div>
-        {% endif %}
-
         <!-- 核心结论：雷达图 + 层级评分 + Top因素 -->
         <div class="row g-4 mb-4">
             <div class="col-md-5">
@@ -165,12 +144,11 @@
             </div>
         </div>
 
-        {% if is_paid %}
-        <!-- 完整维度明细（已解锁，全量展示） -->
+        <!-- 完整维度明细（已付费，全量展示） -->
         <div class="card stat-card shadow-sm mb-4" id="fullReport">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="text-success small fw-bold"><i class="bi bi-patch-check-fill me-1"></i>完整版 · 全量明细</span>
-                <small class="text-muted">共 {{ valuation.dimensions_count }} 项</small>
+                <span class="text-success small fw-bold"><i class="bi bi-patch-check-fill me-1"></i>已支付 · 完整版内容</span>
+                {% if order %}<small class="text-muted">订单号 <code>{{ order.order_no }}</code> · {{ order.paid_at }}</small>{% endif %}
             </div>
             <div class="card-body">
                 <h6 class="mb-3"><i class="bi bi-list-columns me-1"></i>全部维度评估明细 ({{ valuation.dimensions_count }}项)</h6>
@@ -198,44 +176,6 @@
                 {% endfor %}
             </div>
         </div>
-        {% else %}
-        <!-- 完整维度明细（未解锁：模糊预览 + 解锁入口） -->
-        <div class="card stat-card shadow-sm mb-4" id="fullReport">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="text-warning small fw-bold"><i class="bi bi-lock-fill me-1"></i>完整版内容 · 待解锁</span>
-                <small class="text-muted">共 {{ valuation.dimensions_count }} 项维度明细</small>
-            </div>
-            <div class="card-body">
-                <h6 class="mb-3"><i class="bi bi-list-columns me-1"></i>全部维度评估明细 ({{ valuation.dimensions_count }}项)</h6>
-                <div class="blur-section">
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0" style="font-size:.85rem;">
-                            <thead class="table-light"><tr><th>维度</th><th>分类</th><th>当前值</th><th>影响%</th><th>折合万元</th></tr></thead>
-                            <tbody>
-                            {% for f in valuation.all_factors[:14] %}
-                                <tr>
-                                    <td>{{ f.name }}</td>
-                                    <td><small class="text-muted">{{ f.category }}</small></td>
-                                    <td>{{ f.display_value }}</td>
-                                    <td class="{% if f.impact_pct > 0 %}text-success{% elif f.impact_pct < 0 %}text-danger{% endif %} fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</td>
-                                    <td class="{% if f.impact_wan > 0 %}text-success{% elif f.impact_wan < 0 %}text-danger{% endif %}">{{ "%+.1f"|format(f.impact_wan) }}万</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="blur-overlay">
-                        <i class="bi bi-lock-fill fs-1 text-secondary mb-2"></i>
-                        <div class="fw-bold mb-1">解锁查看全部 {{ valuation.dimensions_count }} 项维度明细</div>
-                        <p class="text-muted small mb-3">含每项维度的当前值、影响百分比与折合万元金额</p>
-                        <a href="/valuate/pay" class="btn btn-primary btn-lg fw-bold px-4">
-                            <i class="bi bi-unlock-fill me-1"></i>解锁完整报告 ¥{{ price }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
 
         <!-- 操作按钮 -->
         <div class="text-center">

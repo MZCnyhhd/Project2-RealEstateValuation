@@ -381,7 +381,7 @@ def _normalize_valuate_form():
 
 @app.route("/valuate/report", methods=["POST"])
 def valuate_report():
-    """全息估值 - 提交房源信息，先生成免费体验版报告（完整版可解锁）"""
+    """全息估值 - 提交房源信息，生成待支付订单后跳转收银台"""
     form_data = _normalize_valuate_form()
 
     if not form_data.get("community") or not form_data.get("area_size") or not form_data.get("price"):
@@ -407,7 +407,7 @@ def valuate_report():
 
     logger.info(f"估值订单创建 - 单号: {order['order_no']}, 小区: {order['community']}, "
                 f"面积: {order['area_size']}, 报价: {order['listing_price']}, 金额: ¥{VALUATION_PRICE}")
-    return redirect("/valuate/result")
+    return redirect("/valuate/pay")
 
 
 @app.route("/valuate/pay")
@@ -528,22 +528,18 @@ def valuate_pay_notify_alipay():
 
 @app.route("/valuate/result")
 def valuate_result():
-    """估值报告：综合评分/结论/雷达图/Top3 免费，182 维度完整明细需解锁（¥9.9）"""
+    """完整估值报告 - 仅支付成功后可访问（以服务端订单存储为权威来源）"""
     order_no = (session.get("pending_valuation") or {}).get("order_no") or session.get("valuation_paid_no")
     order = get_order_store().get(order_no) if order_no else None
     if not order:
         return redirect("/valuate")
+    if not order.get("paid"):
+        return redirect("/valuate/pay")
 
     session["pending_valuation"] = order
     session["valuation_paid_no"] = order["order_no"]
     valuation = evaluate_user_input(order["form_data"])
-    return render_template(
-        "valuate_report.html",
-        valuation=valuation,
-        order=order,
-        is_paid=bool(order.get("paid")),
-        price=VALUATION_PRICE,
-    )
+    return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True)
 
 
 @app.route("/valuate/unlock")
