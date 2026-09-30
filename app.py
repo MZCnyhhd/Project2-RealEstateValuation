@@ -10,6 +10,7 @@ from beijing_policy import apply_beijing_policy
 from valuation import evaluate_listing, evaluate_user_input, format_layout
 import payments
 import beijing_stats
+import listing_parser
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
@@ -424,6 +425,25 @@ def _new_order_no():
 def valuate_form():
     """全息估值 - 用户录入房源信息表单"""
     return render_template("valuate_form.html", price=VALUATION_PRICE)
+
+
+@app.route("/valuate/parse_paste", methods=["POST"])
+def valuate_parse_paste():
+    """粘贴房源文本 → 智能解析为表单字段预填。
+
+    合规约束：只解析用户主动提交的文本；不发起对任何第三方网站的请求；
+    原文即焚（不落盘、日志只记字段数量）；只提取事实字段。
+    """
+    payload = request.get_json(silent=True) or {}
+    text = (payload.get("text") or "").strip()
+    if len(text) < 10:
+        return jsonify({"ok": False, "error": "内容太短，请粘贴完整的房源文字信息"}), 400
+    if listing_parser.looks_like_url_only(text):
+        return jsonify({"ok": False, "error": "检测到链接。我们不会抓取第三方网站，请把房源的文字信息复制过来粘贴"}), 400
+    result = listing_parser.parse_listing_text_safe(text)
+    logger.info("粘贴解析完成: 提取 %d 个字段, 缺少 %d 项", result["filled_count"], len(result["missing"]))
+    return jsonify({"ok": True, "fields": result["fields"],
+                    "filled_count": result["filled_count"], "missing": result["missing"]})
 
 
 def _normalize_valuate_form():
