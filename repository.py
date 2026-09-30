@@ -195,6 +195,69 @@ class OrderStore:
             return o
 
 
+class HotListingStore:
+    """热门房源榜存储（人工维护的小规模真实房源清单，默认 hot_listings.json）。
+
+    用途：手动跟踪维护的"热门 100 套"，供前台榜单页展示挂牌价 vs 全息估值对比。
+    合规口径：人工采集的事实字段 + 来源/截止日期标注；不存储房源描述原文、图片、经纪人信息。
+    """
+
+    def __init__(self, path="hot_listings.json"):
+        self.path = path
+        self._lock = threading.Lock()
+
+    def _load(self):
+        if not os.path.exists(self.path):
+            return []
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data if isinstance(data, list) else []
+        except Exception:
+            return []
+
+    def _save(self, data):
+        try:
+            with open(self.path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    def all(self):
+        with self._lock:
+            return self._load()
+
+    def save(self, items):
+        with self._lock:
+            self._save(items)
+
+    def add(self, entry):
+        with self._lock:
+            data = self._load()
+            data.append(entry)
+            self._save(data)
+            return len(data)
+
+    def remove(self, idx):
+        with self._lock:
+            data = self._load()
+            if 0 <= idx < len(data):
+                removed = data.pop(idx)
+                self._save(data)
+                return removed
+        return None
+
+
+_hot_store = None
+
+
+def get_hot_store():
+    global _hot_store
+    if _hot_store is None:
+        _hot_store = HotListingStore(path=os.environ.get("HOT_LISTINGS_PATH", "hot_listings.json"))
+    return _hot_store
+
+
 _order_store = None
 
 

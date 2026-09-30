@@ -1,9 +1,10 @@
 import os
 import logging
 from math import ceil
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, session, jsonify, url_for
 
-from repository import get_repository, get_order_store
+from repository import get_repository, get_order_store, get_hot_store
 from mortgage import calculate_mortgage
 from llm_agent import build_agent_reply
 from beijing_policy import apply_beijing_policy
@@ -849,6 +850,87 @@ def admin_reject(order_no):
     get_order_store().update(order_no, review_status="rejected")
     logger.info("商家驳回订单 - 单号: %s", order_no)
     return redirect("/admin/orders")
+
+
+# ---------------------------------------------------------------------------
+# 热门房源榜（人工维护的小规模真实房源清单，展示挂牌价 vs 全息估值）
+# 合规口径：人工采集事实字段 + 来源/截止日期标注；不存储描述原文/图片/经纪人信息
+# ---------------------------------------------------------------------------
+def _estimate_hot_entry(entry):
+    """对一条热榜房源跑全息估值，补充 estimated_value_wan 与 deviation_pct。"""
+    try:
+        pseudo = {
+            "id": f"HOT-{entry.get('community', 'x')}",
+            "community": entry.get("community", ""),
+            "address": entry.get("address", ""),
+            "layout": entry.get("layout", ""),
+            "area": float(entry.get("area") or 0),
+            "price": float(entry.get("listed_price") or 0),
+            "tags": [],
+        }
+        valuation = evaluate_listing(pseudo, all_listings=load_listings())
+        est = valuation.get("estimated_value_wan")
+        if est:
+            entry["estimated_value_wan"] = round(float(est), 1)
+            listed = float(entry.get("listed_price") or 0)
+            if listed > 0:
+                entry["deviation_pct"] = round((listed - entry["estimated_value_wan"]) / entry["estimated_value_wan"] * 100, 1)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("热榜估值失败: %s", exc)
+    return entry
+
+
+@app.route("/hot")
+def hot_listings_page():
+    """热门房源榜（公开）：挂牌价 vs 全息估值对比。"""
+    items = get_hot_store().all()
+    for i, item in enumerate(items):
+        item["rank"] = i + 1
+    return render_template("hot_listings.html", items=items)
+
+
+@app.route("/admin/hot")
+@_admin_required
+def admin_hot():
+    items = get_hot_store().all()
+    return render_template("admin_hot.html", items=items, error=None)
+
+
+@app.route("/admin/hot/add", methods=["POST"])
+@_admin_required
+def admin_hot_add():
+    f = request.form
+    try:
+        entry = {
+            "community": (f.get("community") or "").strip(),
+            "address": (f.get("address") or "").strip(),
+            "layout": (f.get("layout") or "").strip(),
+            "area": float(f.get("area") or 0),
+            "listed_price": float(f.get("listed_price") or 0),
+            "source_note": (f.get("source_note") or "公开市场人工采集").strip(),
+        }
+    except (TypeError, ValueError):
+        return render_template("admin_hot.html", items=get_hot_store().all(),
+                               error="面积和挂牌价必须是数字")
+    if not entry["community"] or not entry["layout"] or entry["area"] <= 0 or entry["listed_price"] <= 0:
+        return render_template("admin_hot.html", items=get_hot_store().all(),
+                               error="小区名、户型、面积、挂牌价为必填项")
+    entry["unit_price"] = int(round(entry["listed_price"] / entry["area"] * 10000))
+    entry["as_of_date"] = datetime.now().strftime("%Y-%m-%d")
+    entry["added_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    _estimate_hot_entry(entry)
+    get_hot_store().add(entry)
+    logger.info("热榜新增: %s %s %s㎡ %s万", entry["community"], entry["layout"], entry["area"], entry["listed_price"])
+    return redirect("/admin/hot")
+
+
+@app.route("/admin/hot/<int:idx>/delete", methods=["POST"])
+@_admin_required
+def admin_hot_delete(idx):
+    removed = get_hot_store().remove(idx)
+    if removed:
+        logger.info("热榜移除: %s", removed.get("community"))
+    return redirect("/admin/hot")
 
 if __name__ == "__main__":
     logger.info("RealEstate Flask应用启动")

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>热榜维护 - 全息估值后台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; }
+        .hero-banner { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 1.25rem 0; }
+    </style>
+</head>
+<body>
+    <div class="hero-banner">
+        <div class="container d-flex align-items-center justify-content-between">
+            <div>
+                <h5 class="mb-0 fw-bold"><i class="bi bi-fire me-2"></i>热门房源榜维护</h5>
+                <small class="opacity-75">人工录入事实字段，系统自动跑估值并计算挂牌偏差 · <a href="/hot" target="_blank" class="text-white">查看前台榜单 ↗</a></small>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/admin/orders" class="btn btn-outline-light btn-sm">订单核验</a>
+                <a href="/admin/logout" class="btn btn-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i>退出</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        {% if error %}<div class="alert alert-danger py-2">{{ error }}</div>{% endif %}
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white"><strong class="small"><i class="bi bi-plus-circle me-1"></i>新增热门房源</strong></div>
+            <div class="card-body">
+                <form method="POST" action="/admin/hot/add" class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">小区名 *</label>
+                        <input type="text" class="form-control form-control-sm" name="community" required placeholder="如：天通苑本六区">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">位置/地址</label>
+                        <input type="text" class="form-control form-control-sm" name="address" placeholder="如：昌平区天通苑">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">户型 *</label>
+                        <input type="text" class="form-control form-control-sm" name="layout" required placeholder="如：4室2厅2卫">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label small mb-1">面积㎡ *</label>
+                        <input type="number" step="0.01" class="form-control form-control-sm" name="area" required placeholder="162.82">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label small mb-1">挂牌万 *</label>
+                        <input type="number" step="0.1" class="form-control form-control-sm" name="listed_price" required placeholder="373">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">来源备注</label>
+                        <input type="text" class="form-control form-control-sm" name="source_note" value="公开市场人工采集">
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>加入榜单</button>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-text mb-0">
+                            只录价格、面积、户型等事实字段；不录入房源描述原文、图片链接与经纪人个人信息。
+                            系统会自动跑全息估值并计算挂牌偏差。
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <strong class="small"><i class="bi bi-list-ol me-1"></i>榜单内容（{{ items | length }} 套）</strong>
+                <a href="/hot" target="_blank" class="small">前台预览 ↗</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-muted">
+                            <tr>
+                                <th class="ps-3">#</th>
+                                <th>小区 / 位置</th>
+                                <th>户型 · 面积</th>
+                                <th>挂牌价</th>
+                                <th>估值</th>
+                                <th>偏差</th>
+                                <th>来源</th>
+                                <th class="text-end pe-3">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for it in items %}
+                            <tr>
+                                <td class="ps-3">{{ loop.index }}</td>
+                                <td><strong>{{ it.community }}</strong>{% if it.address %}<br><small class="text-muted">{{ it.address }}</small>{% endif %}</td>
+                                <td><small>{{ it.layout }} · {{ it.area }}㎡</small></td>
+                                <td>{{ it.listed_price }} 万<br><small class="text-muted">{{ it.unit_price }} 元/㎡</small></td>
+                                <td>{{ it.estimated_value_wan if it.estimated_value_wan else '—' }}</td>
+                                <td>
+                                    {% if it.deviation_pct is defined and it.deviation_pct is not none %}
+                                    <span class="{% if it.deviation_pct > 0 %}text-danger{% else %}text-success{% endif %} fw-semibold">{{ '%+.1f'|format(it.deviation_pct) }}%</span>
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ it.source_note }}<br>{{ it.as_of_date }}</small></td>
+                                <td class="text-end pe-3">
+                                    <form method="POST" action="/admin/hot/{{ loop.index0 }}/delete" class="d-inline"
+                                          onsubmit="return confirm('确认从榜单移除 {{ it.community }}？')">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="8" class="text-center text-muted py-4">暂无数据，用上方表单添加第一套</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

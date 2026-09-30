@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>北京二手房热门榜 · 挂牌价 vs 全息估值</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; }
+        .hero-banner { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 2rem 0; margin-bottom: 2rem; }
+        .deviation-pos { color: #dc3545; }
+        .deviation-neg { color: #198754; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-gem"></i> 全息估值</a>
+            <div class="ms-auto d-flex gap-2">
+                <a class="btn btn-warning btn-sm fw-bold" href="/valuate"><i class="bi bi-gem"></i> 免费算我的房</a>
+                <a class="btn btn-outline-light btn-sm" href="/listings"><i class="bi bi-house"></i> 房源</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h4 class="mb-1"><i class="bi bi-fire me-2"></i>北京二手房热门榜</h4>
+            <p class="mb-0 small opacity-75">人工跟踪的热门在售房源 · 挂牌价 vs 全息估值逐套对比 · 数据持续人工更新</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        {% if items %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-muted">
+                            <tr>
+                                <th class="ps-3">#</th>
+                                <th>小区 / 位置</th>
+                                <th>户型</th>
+                                <th>面积</th>
+                                <th>挂牌价</th>
+                                <th>单价</th>
+                                <th>全息估值</th>
+                                <th>挂牌 vs 估值</th>
+                                <th class="pe-3">数据截止</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for it in items %}
+                            <tr>
+                                <td class="ps-3 fw-bold text-muted">{{ it.rank }}</td>
+                                <td>
+                                    <strong>{{ it.community }}</strong>
+                                    {% if it.address %}<br><small class="text-muted">{{ it.address }}</small>{% endif %}
+                                </td>
+                                <td><small>{{ it.layout }}</small></td>
+                                <td>{{ it.area }}㎡</td>
+                                <td class="fw-semibold">{{ it.listed_price }} 万</td>
+                                <td><small>{{ it.unit_price }} 元/㎡</small></td>
+                                <td>
+                                    {% if it.estimated_value_wan %}
+                                    <span class="fw-bold text-primary">{{ it.estimated_value_wan }} 万</span>
+                                    {% else %}<small class="text-muted">—</small>{% endif %}
+                                </td>
+                                <td>
+                                    {% if it.deviation_pct is defined and it.deviation_pct is not none %}
+                                        {% if it.deviation_pct > 0 %}
+                                        <span class="deviation-pos fw-semibold"><i class="bi bi-arrow-up-short"></i>高出估值 {{ it.deviation_pct }}%</span>
+                                        {% elif it.deviation_pct < 0 %}
+                                        <span class="deviation-neg fw-semibold"><i class="bi bi-arrow-down-short"></i>低于估值 {{ -it.deviation_pct }}%</span>
+                                        {% else %}
+                                        <span class="text-muted small">与估值持平</span>
+                                        {% endif %}
+                                    {% else %}<small class="text-muted">—</small>{% endif %}
+                                </td>
+                                <td class="pe-3"><small class="text-muted">{{ it.as_of_date }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-light border small mb-4">
+            <i class="bi bi-info-circle me-1"></i>
+            <strong>偏差怎么读</strong>：挂牌价 <span class="deviation-pos">高出估值</span> → 议价空间可能存在；
+            <span class="deviation-neg">低于估值</span> → 性价比信号。估值由全息估值引擎（7 层 × 182 维度）自动生成。
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="text-muted mt-3 mb-4">榜单正在筹备中，首批热门房源即将上线。</p>
+            <a href="/valuate" class="btn btn-warning fw-bold">先免费评估我的房子 →</a>
+        </div>
+        {% endif %}
+
+        <div class="alert alert-light border small mb-0">
+            <i class="bi bi-shield-check me-1"></i>
+            本榜单为人工跟踪维护的市场参考信息，仅收录价格、面积、户型等事实字段，
+            来源标注于每条记录（{{ items[0].source_note if items else '公开市场人工采集' }}），
+            数据截至各条记录标注日期，可能存在滞后；不包含房源图片、描述原文及经纪人信息，
+            不构成交易建议，实际信息以各平台实时展示为准。
+        </div>
+    </div>
+
+    <footer class="py-4 bg-light">
+        <div class="container text-center text-muted">
+            <p class="mb-0 small">&copy; 2026 房地产智能Agent · 全息估值引擎 v1.0</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
