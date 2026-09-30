@@ -233,23 +233,31 @@
                             <h6><i class="bi bi-building me-2"></i>房源基础信息</h6>
                         </div>
                         <div class="card-body">
-                            <!-- 粘贴智能解析 -->
-                            <div class="alert alert-light border mb-4">
+                            <!-- 粘贴智能解析（文字 / 截图） -->
+                            <div class="alert alert-light border mb-4" id="pasteHelper">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="bi bi-magic text-primary me-2"></i>
-                                    <strong class="small">已有房源信息？粘贴到这里自动填充</strong>
+                                    <strong class="small">已有房源信息？粘贴文字或截图，自动填充</strong>
                                 </div>
                                 <textarea id="pasteBox" class="form-control mb-2" rows="4"
-                                          placeholder="把在售房源的文字信息复制到这里，例如：&#10;天通苑本六区 4室2厅2卫 162.82㎡ 373万 高楼层(共28层) 2005年建 南北通透 有电梯&#10;粘贴后点「智能解析」，确认无误后再提交。"></textarea>
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                          placeholder="方式一：把在售房源的文字信息复制到这里，例如：&#10;天通苑本六区 4室2厅2卫 162.82㎡ 373万 高楼层(共28层) 2005年建 南北通透 有电梯&#10;方式二：直接把房源详情页截图粘贴/上传到下方。"></textarea>
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
                                     <button type="button" class="btn btn-primary btn-sm" id="parsePasteBtn">
-                                        <i class="bi bi-stars me-1"></i>智能解析并填充
+                                        <i class="bi bi-stars me-1"></i>解析文字
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="selectImgBtn">
+                                        <i class="bi bi-image me-1"></i>选择/粘贴截图
+                                    </button>
+                                    <input type="file" id="imgInput" accept="image/*" multiple class="d-none">
+                                    <button type="button" class="btn btn-outline-primary btn-sm d-none" id="parseImgBtn">
+                                        <i class="bi bi-eye me-1"></i>解析截图（<span id="imgCount">0</span> 张）
                                     </button>
                                     <span id="parseResult" class="small text-muted"></span>
                                 </div>
+                                <div id="imgPreview" class="d-none d-flex gap-2 mb-2 flex-wrap"></div>
                                 <div class="form-text mb-0 mt-2">
-                                    <i class="bi bi-shield-check me-1"></i>只解析你粘贴的文字（请勿只贴链接），原文即用即弃不保存；
-                                    只提取价格、面积、户型等事实信息，解析结果需你确认后提交。
+                                    <i class="bi bi-shield-check me-1"></i>只解析你主动提交的文字/截图（不会访问任何第三方网站），内容即用即弃不保存；
+                                    只提取价格、面积、户型等事实信息，解析结果需你确认后提交。截图解析由 AI 视觉服务完成。
                                 </div>
                             </div>
                             <div class="row g-3">
@@ -674,66 +682,141 @@
         // 初始化
         updateSummary();
 
-        // ===== 粘贴智能解析 =====
+        // ===== 粘贴智能解析（文字 / 截图）=====
+        const _fieldNameMap = { community: '小区名称', area_size: '面积', price: '报价' };
+
+        function applyFields(fields) {
+            let filled = 0;
+            Object.keys(fields).forEach(function (name) {
+                const el = document.querySelector('[name="' + name + '"]');
+                if (!el) return;
+                const val = String(fields[name]);
+                if (el.type === 'checkbox') {
+                    el.checked = (val === '1');
+                } else if (el.tagName === 'SELECT') {
+                    const opt = Array.from(el.options).find(function (o) { return o.value === val; });
+                    if (!opt) return;
+                    el.value = val;
+                } else {
+                    el.value = val;
+                }
+                el.classList.add('border-success', 'border-2');
+                setTimeout(function () { el.classList.remove('border-success', 'border-2'); }, 4000);
+                filled++;
+            });
+            if (filled && typeof updateSummary === 'function') updateSummary();
+            return filled;
+        }
+
+        function showResult(ok, msg) {
+            const out = document.getElementById('parseResult');
+            out.className = 'small ' + (ok ? 'text-success' : 'text-danger');
+            out.textContent = msg;
+        }
+
+        function buildMissingMsg(missing) {
+            if (!missing || !missing.length) return '。请核对后提交。';
+            return '；还缺：' + missing.map(function (m) { return _fieldNameMap[m] || m; }).join('、') + '（请手动补填）。请核对后提交。';
+        }
+
+        // 文字解析
         document.getElementById('parsePasteBtn').addEventListener('click', async function () {
             const btn = this;
             const box = document.getElementById('pasteBox');
-            const out = document.getElementById('parseResult');
             const text = (box.value || '').trim();
             if (text.length < 10) {
-                out.className = 'small text-danger';
-                out.textContent = '请先粘贴完整的房源文字信息（至少 10 个字）';
+                showResult(false, '请先粘贴完整的房源文字信息（至少 10 个字）');
                 return;
             }
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>解析中…';
             try {
                 const resp = await fetch('/valuate/parse_paste', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: text })
                 });
                 const data = await resp.json();
-                if (!data.ok) {
-                    out.className = 'small text-danger';
-                    out.textContent = data.error || '解析失败，请手动填写';
-                    return;
-                }
-                const fields = data.fields || {};
-                let filledNames = [];
-                Object.keys(fields).forEach(function (name) {
-                    const el = document.querySelector('[name="' + name + '"]');
-                    if (!el) return;
-                    const val = String(fields[name]);
-                    if (el.type === 'checkbox') {
-                        el.checked = (val === '1');
-                    } else if (el.tagName === 'SELECT') {
-                        const opt = Array.from(el.options).find(function (o) { return o.value === val; });
-                        if (!opt) return;
-                        el.value = val;
-                    } else {
-                        el.value = val;
-                    }
-                    el.classList.add('border-success', 'border-2');
-                    setTimeout(function () { el.classList.remove('border-success', 'border-2'); }, 4000);
-                    filledNames.push(el.tagName === 'SELECT' ? name : name);
-                    if (typeof updateSummary === 'function') updateSummary();
-                });
-                out.className = 'small text-success';
-                let msg = '已填充 ' + filledNames.length + ' 个字段';
-                if (data.missing && data.missing.length) {
-                    const nameMap = { community: '小区名称', area_size: '面积', price: '报价' };
-                    msg += '；还缺：' + data.missing.map(function (m) { return nameMap[m] || m; }).join('、') + '（请手动补填）';
-                }
-                msg += '。请核对后提交。';
-                out.textContent = msg;
+                if (!data.ok) { showResult(false, data.error || '解析失败，请手动填写'); return; }
+                const n = applyFields(data.fields || {});
+                showResult(true, '已填充 ' + n + ' 个字段' + buildMissingMsg(data.missing));
                 box.value = '';
             } catch (e) {
-                out.className = 'small text-danger';
-                out.textContent = '解析请求失败，请手动填写';
+                showResult(false, '解析请求失败，请手动填写');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-stars me-1"></i>智能解析并填充';
+                btn.innerHTML = '<i class="bi bi-stars me-1"></i>解析文字';
+            }
+        });
+
+        // 截图解析：选择文件 + Ctrl+V 粘贴截图
+        let imgUris = [];
+        const imgInput = document.getElementById('imgInput');
+        const preview = document.getElementById('imgPreview');
+
+        function refreshPreview() {
+            const cnt = document.getElementById('imgCount');
+            cnt.textContent = imgUris.length;
+            const btn = document.getElementById('parseImgBtn');
+            btn.classList.toggle('d-none', imgUris.length === 0);
+            preview.classList.toggle('d-none', imgUris.length === 0);
+            preview.innerHTML = '';
+            imgUris.forEach(function (uri, i) {
+                const wrap = document.createElement('div');
+                wrap.className = 'position-relative';
+                wrap.innerHTML = '<img src="' + uri + '" style="height:64px;border-radius:.375rem;border:1px solid #dee2e6;">';
+                const x = document.createElement('button');
+                x.type = 'button'; x.className = 'btn-close position-absolute'; x.style.cssText = 'top:-4px;right:-4px;font-size:.55rem;background-color:#fff;border-radius:50%;padding:.2rem;';
+                x.addEventListener('click', function () { imgUris.splice(i, 1); refreshPreview(); });
+                wrap.appendChild(x);
+                preview.appendChild(wrap);
+            });
+        }
+
+        function addImageFile(file) {
+            if (!file || !file.type || !file.type.startsWith('image/')) return;
+            if (file.size > 3 * 1024 * 1024) { showResult(false, '截图「' + file.name + '」超过 3MB，请压缩后重试'); return; }
+            if (imgUris.length >= 4) { showResult(false, '一次最多 4 张截图'); return; }
+            const reader = new FileReader();
+            reader.onload = function () { imgUris.push(reader.result); refreshPreview(); showResult(true, '已添加截图 ' + imgUris.length + ' 张，点「解析截图」开始识别'); };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('selectImgBtn').addEventListener('click', function () { imgInput.click(); });
+        imgInput.addEventListener('change', function () {
+            Array.from(imgInput.files || []).forEach(addImageFile);
+            imgInput.value = '';
+        });
+        document.getElementById('pasteHelper').addEventListener('paste', function (e) {
+            const items = (e.clipboardData && e.clipboardData.items) || [];
+            let hit = false;
+            for (const it of items) {
+                if (it.type && it.type.startsWith('image/')) {
+                    addImageFile(it.getAsFile()); hit = true;
+                }
+            }
+            if (hit) e.preventDefault();
+        });
+
+        document.getElementById('parseImgBtn').addEventListener('click', async function () {
+            const btn = this;
+            if (!imgUris.length) { showResult(false, '请先添加截图'); return; }
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>AI 识别中…';
+            try {
+                const resp = await fetch('/valuate/parse_image', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ images: imgUris })
+                });
+                const data = await resp.json();
+                if (!data.ok) { showResult(false, data.error || '解析失败'); return; }
+                const n = applyFields(data.fields || {});
+                showResult(true, '已从截图填充 ' + n + ' 个字段' + buildMissingMsg(data.missing));
+                imgUris = []; refreshPreview();
+            } catch (e) {
+                showResult(false, '解析请求失败，请手动填写');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-eye me-1"></i>解析截图（<span id="imgCount">' + imgUris.length + '</span> 张）';
             }
         });
     </script>

@@ -177,17 +177,73 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--count", type=int, default=400, help="新增套数（默认 400）")
     ap.add_argument("--out", default="mock_listings.json")
+    ap.add_argument("--mode", choices=["merge", "ten"], default="merge",
+                    help="merge=按分布批量生成；ten=替换为 10 套代表性示例房源")
     args = ap.parse_args()
 
     with open(args.out, encoding="utf-8") as f:
         existing = json.load(f)
-    existing_ids = {x["id"] for x in existing}
 
+    if args.mode == "ten":
+        # 保留用户真实提交回流（U- 前缀），其余替换为 10 套精选示例
+        user_real = [x for x in existing if x.get("id", "").startswith("U-")]
+        merged = TEN_DEMO + user_real
+        with open(args.out, "w", encoding="utf-8") as f:
+            json.dump(merged, f, ensure_ascii=False, indent=2)
+        print(f"替换为 {len(TEN_DEMO)} 套代表性示例房源（保留 {len(user_real)} 套用户真实房源），总计 {len(merged)} 套")
+        return
+
+    existing_ids = {x["id"] for x in existing}
     fresh = [x for x in generate(args.count) if x["id"] not in existing_ids]
     merged = fresh + existing  # 新生成的排前面
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(merged, f, ensure_ascii=False, indent=2)
     print(f"新增 {len(fresh)} 套，总计 {len(merged)} 套（原有 {len(existing)} 套保留）")
+
+
+# ---------------------------------------------------------------------------
+# 10 套代表性示例房源（覆盖北京二手房的典型户型/价位/板块档位）
+# 全部为虚构数据，title/community/description 显性标注"示例"
+# ---------------------------------------------------------------------------
+_T = "[示例] "
+_DEMO_NOTE = "虚假示例房源：本条为产品演示用的虚构数据，不对应任何真实在售房屋，请勿据此交易。"
+
+TEN_DEMO = [
+    {"id": "DEMO-01", "title": _T + "刚需电梯两居，近地铁满五唯一", "community": "回龙观·示范家园",
+     "address": "昌平区回龙观", "layout": "2室2厅1卫", "area": 89.0, "price": 415.0,
+     "tags": ["示例房源", "近地铁", "满五唯一", "精装"], "description": _DEMO_NOTE + "89㎡两居，精装，2008年建，代表昌平地铁刚需盘。"},
+    {"id": "DEMO-02", "title": _T + "海淀学区三居，重点小学划片", "community": "中关村·示范公寓",
+     "address": "海淀区中关村", "layout": "3室1厅1卫", "area": 91.0, "price": 980.0,
+     "tags": ["示例房源", "学区房", "南北通透"], "description": _DEMO_NOTE + "91㎡三居，代表海淀学区房价位。"},
+    {"id": "DEMO-03", "title": _T + "核心区老公房两居，对口位移方便", "community": "广外·示范里",
+     "address": "西城区广安门", "layout": "2室1厅1卫", "area": 58.0, "price": 505.0,
+     "tags": ["示例房源", "1995年建", "无电梯"], "description": _DEMO_NOTE + "58㎡老公房两居，代表西城老破小价位。"},
+    {"id": "DEMO-04", "title": _T + "望京改善三居，双卫全明格局", "community": "望京·示范园",
+     "address": "朝阳区望京", "layout": "3室2厅2卫", "area": 121.0, "price": 820.0,
+     "tags": ["示例房源", "南北通透", "电梯房"], "description": _DEMO_NOTE + "121㎡三居，代表朝阳改善盘。"},
+    {"id": "DEMO-05", "title": _T + "远郊低总价两居，首套上车盘", "community": "良乡·示范家园",
+     "address": "房山区良乡", "layout": "2室2厅1卫", "area": 88.0, "price": 185.0,
+     "tags": ["示例房源", "低总价", "随时看房"], "description": _DEMO_NOTE + "88㎡两居，代表远郊上车盘价位。"},
+    {"id": "DEMO-06", "title": _T + "朝阳公园大平层，四居双阳台", "community": "朝阳公园·示范府",
+     "address": "朝阳区朝阳公园", "layout": "4室2厅3卫", "area": 205.0, "price": 1680.0,
+     "tags": ["示例房源", "大平层", "豪华装修"], "description": _DEMO_NOTE + "205㎡大平层，代表高端改善价位。"},
+    {"id": "DEMO-07", "title": _T + "核心区小开间，低总价上车", "community": "广安门·示范小寓",
+     "address": "西城区广安门", "layout": "1室1厅1卫", "area": 29.6, "price": 208.0,
+     "tags": ["示例房源", "低总价", "临地铁"], "description": _DEMO_NOTE + "29.6㎡开间，代表小户型总价段。"},
+    {"id": "DEMO-08", "title": _T + "通州次新电梯两居，满五唯一", "community": "梨园·示范城",
+     "address": "通州区梨园", "layout": "2室2厅2卫", "area": 89.0, "price": 305.0,
+     "tags": ["示例房源", "满五唯一", "电梯房"], "description": _DEMO_NOTE + "89㎡两居，代表通州次新盘。"},
+    {"id": "DEMO-09", "title": _T + "亦庄豪装四居，园区环境", "community": "亦庄·示范郡",
+     "address": "经开区亦庄", "layout": "4室2厅2卫", "area": 168.0, "price": 1020.0,
+     "tags": ["示例房源", "豪华装修", "人车分流"], "description": _DEMO_NOTE + "168㎡四居，代表亦庄改善价位。"},
+    {"id": "DEMO-10", "title": _T + "丽泽南向三居，商务区配套", "community": "丽泽·示范苑",
+     "address": "丰台区丽泽", "layout": "3室2厅2卫", "area": 106.0, "price": 565.0,
+     "tags": ["示例房源", "满五唯一", "南北通透"], "description": _DEMO_NOTE + "106㎡三居，代表丰台丽泽板块。"},
+]
+for _i, _d in enumerate(TEN_DEMO):
+    _d["image_url"] = IMAGE_POOL[_i % len(IMAGE_POOL)]
+    _d["latitude"] = None
+    _d["longitude"] = None
 
 
 if __name__ == "__main__":

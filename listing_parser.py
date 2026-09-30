@@ -219,3 +219,121 @@ def parse_listing_text_safe(text: str) -> dict:
     except Exception as e:  # noqa: BLE001
         logger.warning("粘贴解析异常: %s", type(e).__name__)
         return {"fields": {}, "filled_count": 0, "missing": ["community", "area_size", "price"]}
+
+
+# ---------------------------------------------------------------------------
+# 截图视觉解析（Qwen-VL）：用户粘贴房源详情页截图 → 提取事实字段
+# 合规边界同上：只处理用户主动提交的图片，不发起对第三方网站的请求；
+# 图片即焚（不落盘、不写日志内容），只提取事实字段，需用户确认后提交。
+# ---------------------------------------------------------------------------
+_ORIENTATIONS = {"南", "东南", "西南", "东", "西", "北"}
+_DECOR_SET = {"毛坯", "简装", "精装", "豪装"}
+_ELEV_RATIO = {"1T2", "2T4", "2T6", "3T8"}
+_CN_DIGIT = {"一": 1, "两": 2, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "八": 8}
+
+VL_PROMPT = """你是房产信息提取助手。图片是二手房详情页截图（可能包含"基本信息""房源特色""户型分间尺寸表"等板块）。
+请只提取图片中**明确写了的客观事实**，输出 JSON（不要输出任何其他文字）：
+{
+  "community": "小区名，若图中没有则为 null",
+  "address": "详细地址，若没有则为 null",
+  "area_size": 建筑面积数字(㎡),
+  "price": "若图中出现总价（万）则填数字，否则 null",
+  "layout_rooms": 室数, "layout_halls": 厅数, "layout_kitchens": 厨房数, "layout_baths": 卫数,
+  "floor": "所在楼层数字，如'低楼层'这种描述没有具体数字则 null",
+  "total_floors": 总楼层数字,
+  "orientation": "房屋朝向，只能是 南/东南/西南/东/西/北 之一，否则 null",
+  "decoration": "装修情况，只能是 毛坯/简装/精装/豪装 之一，否则 null",
+  "north_south": "南北通透填 1，否则 0",
+  "has_elevator": "配备电梯有填 1 无填 0，没有提及则 null",
+  "elevator_ratio": "梯户比例，如 三梯八户 → 3T8，两梯四户 → 2T4",
+  "five_year_only": "满五年/满五唯一填 1，否则 0",
+  "has_mortgage": "有抵押填 1，无抵押填 0，没有提及则 null",
+  "subway_distance": "距地铁的米数数字，没有则 null"
+}
+规则：数字去掉单位；没有的信息填 null；禁止编造。"""
+
+
+def _normalize_vl_output(raw: dict) -> dict:
+    """把 VL 返回的 JSON 清洗成表单字段（白名单键 + 值域校验）。"""
+    fields = {}
+
+    def _num(key, lo, hi):
+        v = raw.get(key)
+        if v is None or v == "":
+            return
+        m = re.search(r"-?\d+(?:\.\d+)?", str(v))  # 容忍 '300米'/'127.85㎡' 这类带单位输出
+        if not m:
+            return
+        try:
+            v = float(m.group(0))
+        except (TypeError, ValueError):
+            return
+        if lo <= v <= hi:
+            fields[key] = round(v, 1) if v != int(v) else int(v)
+
+    _num("area_size", 20, 800)
+    _num("price", 30, 30000)
+    _num("layout_rooms", 0, 10)
+    _num("layout_halls", 0, 8)
+    _num("layout_kitchens", 0, 5)
+    _num("layout_baths", 0, 5)
+    _num("floor", 1, 80)
+    _num("total_floors", 1, 99)
+    _num("subway_distance", 10, 5000)
+    if fields.get("floor") and fields.get("total_floors") and fields["floor"] > fields["total_floors"]:
+        fields.pop("floor")
+
+    for key, allowed in (("orientation", _ORIENTATIONS), ("decoration", _DECOR_SET)):
+        v = str(raw.get(key) or "").strip()
+        if v in allowed:
+            fields[key] = v
+
+    me = re.search(r"([一二两三四五六八\d])\s*梯\s*([一二两三四五六八\d])\s*户", str(raw.get("elevator_ratio") or ""))
+    if me:
+        a = _CN_DIGIT.get(me.group(1), me.group(1))
+        b = _CN_DIGIT.get(me.group(2), me.group(2))
+        candidate = f"{a}T{b}"
+        if candidate in _ELEV_RATIO:
+            fields["elevator_ratio"] = candidate
+
+    for key in ("community", "address"):
+        v = str(raw.get(key) or "").strip()
+        if v and 1 < len(v) <= 25 and not any(w in v for w in _COMMUNITY_STOP):
+            fields[key] = v
+
+    for key in ("north_south", "has_elevator", "five_year_only", "has_mortgage"):
+        v = raw.get(key)
+        if v is not None and str(v) in ("0", "1"):
+            fields[key] = str(v)
+    return fields
+
+
+def parse_images_with_vl(data_uris):
+    """调用 Qwen-VL 解析截图。返回 (fields, error)；无 Key 时 error 提示配置。"""
+    api_key = os.environ.get("QWEN_API_KEY", "").strip()
+    if not api_key:
+        return {}, ("图片解析需要 AI 视觉服务：请在环境变量配置 QWEN_API_KEY（阿里云百炼），"
+                    "文字粘贴解析不受影响")
+    try:
+        from openai import OpenAI
+        client = OpenAI(
+            api_key=api_key,
+            base_url=os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1").strip(),
+        )
+        model = os.environ.get("QWEN_VL_MODEL", "qwen-vl-max").strip()
+        content = [{"type": "text", "text": VL_PROMPT}]
+        for uri in data_uris:
+            content.append({"type": "image_url", "image_url": {"url": uri}})
+        resp = client.chat.completions.create(model=model, temperature=0, messages=[
+            {"role": "user", "content": content}])
+        out = resp.choices[0].message.content or ""
+        m = re.search(r"\{.*\}", out, re.S)
+        if not m:
+            return {}, "AI 未返回有效结果，请重试或改用文字粘贴"
+        import json as _json
+        raw = _json.loads(m.group(0))
+        return _normalize_vl_output(raw if isinstance(raw, dict) else {}), None
+    except Exception as e:  # noqa: BLE001
+        logger.warning("VL 解析失败: %s %s", type(e).__name__, str(e)[:120])
+        return {}, ("AI 解析调用失败，请稍后重试或改用文字粘贴"
+                    f"（{type(e).__name__}）")

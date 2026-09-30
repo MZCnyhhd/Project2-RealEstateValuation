@@ -447,6 +447,33 @@ def valuate_parse_paste():
                     "filled_count": result["filled_count"], "missing": result["missing"]})
 
 
+@app.route("/valuate/parse_image", methods=["POST"])
+def valuate_parse_image():
+    """房源详情页截图 → Qwen-VL 视觉解析为表单字段预填。
+
+    合规约束：只处理用户主动上传的截图；不发起对任何第三方网站的请求；
+    图片即焚（不落盘、日志只记数量）；只提取事实字段，需用户确认后提交。
+    """
+    payload = request.get_json(silent=True) or {}
+    images = payload.get("images") or []
+    if not isinstance(images, list) or not images:
+        return jsonify({"ok": False, "error": "请先选择或粘贴房源截图"}), 400
+    if len(images) > 4:
+        return jsonify({"ok": False, "error": "一次最多 4 张截图"}), 400
+    for uri in images:
+        if not isinstance(uri, str) or not uri.startswith("data:image/"):
+            return jsonify({"ok": False, "error": "图片格式不正确"}), 400
+        if len(uri) > 4_500_000:  # base64 后约 3MB 原图
+            return jsonify({"ok": False, "error": "单张截图过大（>3MB），请压缩后重试"}), 400
+
+    fields, error = listing_parser.parse_images_with_vl(images)
+    if error:
+        return jsonify({"ok": False, "error": error}), 503
+    logger.info("截图解析完成: 提取 %d 个字段", len(fields))
+    missing = [k for k in ("community", "area_size", "price") if not fields.get(k)]
+    return jsonify({"ok": True, "fields": fields, "filled_count": len(fields), "missing": missing})
+
+
 def _normalize_valuate_form():
     """提取并归一化估值表单字段"""
     form_data = {}
