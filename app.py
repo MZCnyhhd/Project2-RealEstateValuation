@@ -546,7 +546,6 @@ def valuate_report():
         "paid": False,
         "pay_method": None,
         "wx_code_url": None,
-        "ali_qr_code": None,
     }
     session["pending_valuation"] = order
     get_order_store().save(order)
@@ -617,9 +616,7 @@ def valuate_pay_confirm():
     if not order:
         return redirect("/valuate")
 
-    pay_method = request.form.get("pay_method", "wechat")
-    if pay_method not in ("wechat", "alipay"):
-        pay_method = "wechat"
+    pay_method = "wechat"
 
     # 套餐以服务端定义为准：前端只提交 key，价格不可被篡改
     plan = get_plan(request.form.get("plan") or order.get("plan"))
@@ -629,7 +626,7 @@ def valuate_pay_confirm():
     order["amount"] = plan["price"]
 
     store = get_order_store()
-    official = payments.WX_CONFIGURED or payments.ALI_CONFIGURED
+    official = payments.WX_CONFIGURED
 
     from datetime import datetime
 
@@ -679,7 +676,7 @@ def valuate_pay_status():
 @app.route("/valuate/pay/notify/wechat", methods=["POST"])
 def valuate_pay_notify_wechat():
     """微信支付异步回调：验签 + 标记订单已支付。"""
-    body = request.get_data(as_text=True)
+    body = request.get_data()
     out_trade_no, paid = payments.verify_wechat_notify(dict(request.headers), body)
     if out_trade_no and paid:
         from datetime import datetime
@@ -690,22 +687,6 @@ def valuate_pay_notify_wechat():
         logger.info("微信支付到账 - 单号: %s", out_trade_no)
         return jsonify({"code": "SUCCESS", "message": "成功"})
     return jsonify({"code": "FAIL", "message": "验签失败"}), 400
-
-
-@app.route("/valuate/pay/notify/alipay", methods=["POST"])
-def valuate_pay_notify_alipay():
-    """支付宝异步回调：验签 + 标记订单已支付。"""
-    form = request.form.to_dict()
-    out_trade_no, paid = payments.verify_alipay_notify(form)
-    if out_trade_no and paid:
-        from datetime import datetime
-        get_order_store().update(
-            out_trade_no, paid=True, pay_method="alipay",
-            paid_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        )
-        logger.info("支付宝支付到账 - 单号: %s", out_trade_no)
-        return "success"
-    return "failure", 400
 
 
 @app.route("/valuate/result")

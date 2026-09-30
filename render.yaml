@@ -32,3 +32,6 @@ services:
         sync: false
       - key: PRICE_PRO_PLUS
         sync: false
+      # 订单存储后端：json（默认，Render 临时盘会清）或 sqlite（需挂载持久磁盘才真正持久）
+      - key: ORDERS_BACKEND
+        sync: false

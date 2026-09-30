@@ -142,7 +142,7 @@ def get_repository(filename="mock_listings.json"):
 
 
 class OrderStore:
-    """服务端订单存储 —— 供微信/支付宝支付回调按 out_trade_no 查询订单。
+    """服务端订单存储 —— 供微信支付回调按 out_trade_no 查询订单。
 
     注意：当前用 JSON 文件实现（与 DATA_BACKEND=json 一致）。
     Render 等临时文件系统会在重启时清空，但支付回调通常在用户付款后数秒内到达，
@@ -195,12 +195,80 @@ class OrderStore:
             return o
 
 
+class SqliteOrderStore:
+    """订单存储 —— SQLite 后端，适合本地开发或挂载了持久盘的部署（Render 付费磁盘 / 容器卷）。
+
+    与 OrderStore 接口一致：每条订单整体以 JSON 存于 data 列，避免频繁改表结构。
+    注意：Render Free 实例文件系统仍是临时的，只有挂载持久磁盘（或改用外部数据库）
+    时 SQLite 才真正持久；否则行为与 JSON 版相同（部署即清空）。
+    """
+
+    def __init__(self, db_path="orders.db"):
+        self.db_path = db_path
+        self._lock = threading.Lock()
+        self._ensure_schema()
+
+    def _connect(self):
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _ensure_schema(self):
+        with self._connect() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS orders (order_no TEXT PRIMARY KEY, data TEXT)"
+            )
+
+    def save(self, order):
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO orders (order_no, data) VALUES (?, ?)",
+                    (order["order_no"], json.dumps(order, ensure_ascii=False)),
+                )
+
+    def get(self, order_no):
+        with self._lock:
+            with self._connect() as conn:
+                row = conn.execute(
+                    "SELECT data FROM orders WHERE order_no = ?", (order_no,)
+                ).fetchone()
+            return json.loads(row["data"]) if row else None
+
+    def all(self):
+        with self._lock:
+            with self._connect() as conn:
+                rows = conn.execute("SELECT data FROM orders ORDER BY order_no").fetchall()
+        return {json.loads(r["data"])["order_no"]: json.loads(r["data"]) for r in rows}
+
+    def update(self, order_no, **fields):
+        with self._lock:
+            with self._connect() as conn:
+                row = conn.execute(
+                    "SELECT data FROM orders WHERE order_no = ?", (order_no,)
+                ).fetchone()
+                if not row:
+                    return None
+                o = json.loads(row["data"])
+                o.update(fields)
+                conn.execute(
+                    "INSERT OR REPLACE INTO orders (order_no, data) VALUES (?, ?)",
+                    (order_no, json.dumps(o, ensure_ascii=False)),
+                )
+                return o
+
+
 _order_store = None
 
 
 def get_order_store():
     global _order_store
     if _order_store is None:
-        _order_store = OrderStore(path=os.environ.get("ORDERS_PATH", "orders.json"))
+        backend = os.environ.get("ORDERS_BACKEND", "json").strip().lower()
+        if backend == "sqlite":
+            path = os.environ.get("ORDERS_PATH", "orders.db")
+            _order_store = SqliteOrderStore(path=path)
+        else:
+            _order_store = OrderStore(path=os.environ.get("ORDERS_PATH", "orders.json"))
     return _order_store
 
