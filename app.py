@@ -6,7 +6,8 @@ from flask import Flask, render_template, request, redirect, session, jsonify, u
 
 from repository import get_repository, get_order_store, get_hot_store
 from mortgage import calculate_mortgage
-from llm_agent import build_agent_reply
+from llm_agent import build_agent_reply, general_chat
+from house_car_agent import build_house_car_reply
 from beijing_policy import apply_beijing_policy
 from valuation import evaluate_listing, evaluate_user_input, format_layout
 import payments
@@ -342,6 +343,47 @@ def calculator():
         error=error,
         policy_meta=policy_meta,
     )
+
+
+# ============ 房·车智能推荐客服 ============
+@app.route("/chat")
+def chat_page():
+    return render_template("chat.html")
+
+
+FALLBACK_REPLY = (
+    "这个问题我还在学习中 🤔 您可以：\n"
+    "• 试试「预算500万推荐个三居室」「20万左右推荐辆续航500的电车」\n"
+    "• 回复「转人工」接入专属客服"
+)
+
+
+@app.route("/chat/api", methods=["POST"])
+def chat_api():
+    payload = request.get_json(silent=True) or {}
+    message = payload.get("message", "")
+    if not isinstance(message, str) or not message.strip():
+        return jsonify({"ok": False, "error": "message 不能为空"}), 400
+
+    logger.info(f"房车客服请求 - 消息: {message[:100]}...")
+    reply, meta = build_house_car_reply(message)
+    if reply is not None:
+        logger.info(f"房车客服响应 - 规则引擎 {meta.get('intent')}")
+        return jsonify({"ok": True, "reply": reply, "meta": meta, "engine": "rule"})
+
+    # 规则引擎未识别 -> LLM 通用客服 -> 失败兜底（三级降级）
+    try:
+        reply = general_chat(message)
+        logger.info("房车客服响应 - LLM 生成")
+        return jsonify({"ok": True, "reply": reply, "meta": {"intent": "LLM 生成"}, "engine": "llm"})
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(f"房车客服 LLM 失败，使用兜底话术: {exc}")
+        return jsonify({
+            "ok": True,
+            "reply": FALLBACK_REPLY,
+            "meta": {"intent": "未识别", "engine": "fallback"},
+            "engine": "fallback",
+        })
 
 
 @app.route("/agent/chat", methods=["POST"])

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>房·车智能推荐客服</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; display: flex; flex-direction: column; height: 100vh; }
+        .chat-area { flex: 1; overflow-y: auto; padding: 20px 12px; }
+        .msg { display: flex; margin-bottom: 14px; }
+        .msg.user { justify-content: flex-end; }
+        .bubble { max-width: 82%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+        .bot .bubble { background: #fff; border: 1px solid #e0e6ee; border-top-left-radius: 4px; }
+        .user .bubble { background: #0d6efd; color: #fff; border-top-right-radius: 4px; }
+        .meta { font-size: 11px; color: #9aa7b4; margin-top: 4px; }
+        .msg.user .meta { text-align: right; }
+        .chip { font-size: 12.5px; padding: 5px 12px; background: #fff; border: 1px solid #cdd8e6; border-radius: 16px; color: #0d6efd; cursor: pointer; }
+        .chip:hover { background: #eef4fc; }
+        .engine-badge { font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-gem"></i> 全息估值</a>
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <span class="badge text-bg-secondary engine-badge" id="engineBadge">引擎：规则引擎</span>
+                <a class="btn btn-warning btn-sm fw-bold" href="/valuate"><i class="bi bi-gem"></i> 估值</a>
+                <a class="btn btn-outline-light btn-sm" href="/calculator"><i class="bi bi-calculator"></i> 计算器</a>
+                <a class="btn btn-outline-light btn-sm" href="/hot"><i class="bi bi-fire"></i> 热门榜</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="chat-area" id="chat">
+        <div class="container" style="max-width: 780px;">
+            <div class="msg bot">
+                <div>
+                    <div class="bubble">您好 👋 我是「房·车智能推荐客服助手」！
+🏠 房产：按预算/居室/区域<b>智能推荐房源</b>，解答房贷、购房政策
+🚗 汽车：按预算/续航/车型<b>智能推荐车辆</b>，解答充电、保养
+
+直接试试下方的常见问题，或自由提问～</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border-top py-2" style="flex-shrink: 0;">
+        <div class="container d-flex gap-2 flex-wrap" style="max-width: 780px;" id="chips"></div>
+    </div>
+
+    <div class="bg-white border-top p-3" style="flex-shrink: 0;">
+        <div class="container d-flex gap-2" style="max-width: 780px;">
+            <input id="input" class="form-control" placeholder="试试：预算500万推荐个三居室 / 20万左右推荐辆续航500的电车"
+                   onkeydown="if(event.key==='Enter')send()">
+            <button class="btn btn-primary px-4" onclick="send()">发送</button>
+        </div>
+    </div>
+
+<script>
+const chat = document.getElementById("chat");
+const container = chat.querySelector(".container");
+
+function addMsg(role, text, meta) {
+    const div = document.createElement("div");
+    div.className = "msg " + role;
+    const inner = document.createElement("div");
+    const b = document.createElement("div");
+    b.className = "bubble";
+    b.innerHTML = text;
+    inner.appendChild(b);
+    if (meta) {
+        const m = document.createElement("div");
+        m.className = "meta";
+        m.textContent = meta;
+        inner.appendChild(m);
+    }
+    div.appendChild(inner);
+    container.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+const ENGINE_LABEL = { rule: "规则引擎", llm: "LLM（Qwen）", fallback: "兜底话术" };
+function setBadge(engine, intent) {
+    document.getElementById("engineBadge").textContent =
+        "引擎：" + (ENGINE_LABEL[engine] || engine) + (intent ? " · " + intent : "");
+}
+
+function send(preset) {
+    const input = document.getElementById("input");
+    const text = (preset || input.value).trim();
+    if (!text) return;
+    input.value = "";
+    addMsg("user", text, "我");
+    fetch("/chat/api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.ok) { addMsg("bot", "服务异常，请稍后重试。"); return; }
+        setBadge(d.engine, d.meta && d.meta.intent);
+        addMsg("bot", d.reply.replace(/\n/g, "<br>"),
+            "意图：" + (d.meta && d.meta.intent || "-") + " · 引擎：" + (ENGINE_LABEL[d.engine] || d.engine));
+    })
+    .catch(() => addMsg("bot", "网络异常，请稍后重试。"));
+}
+
+const QUICK = ["预算500万推荐个三居室", "20万左右推荐辆续航500的电车", "北京二套首付多少", "预约看房", "转人工"];
+document.getElementById("chips").innerHTML =
+    QUICK.map(q => `<span class="chip" onclick="send('${q}')">${q}</span>`).join("");
+</script>
+</body>
+</html>

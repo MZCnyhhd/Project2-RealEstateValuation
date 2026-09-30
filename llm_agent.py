@@ -196,3 +196,30 @@ def build_agent_reply(message: str) -> Tuple[str, Dict]:
         logger.warning(f"阿里云百炼大模型处理失败，回退到规则解析: {str(e)}")
         # 任何 LLM 异常都回退规则解析，保证服务可用
         return build_rule_reply(message)
+
+
+# ============ 通用客服 LLM（房·车智能客服使用）============
+CS_SYSTEM_PROMPT = """你是「房·车智能推荐客服助手」，服务一个同时经营北京房产信息与新能源车的平台。
+职责：
+1. 帮用户咨询北京房产（房价、房贷、购房政策、房源推荐）
+2. 帮用户咨询新能源车（车型、续航、充电、购车优惠）
+要求：简洁友好，150 字以内；涉及具体价格政策时提醒以门店/最新政策为准；
+不确定时建议用户回复「转人工」；不要编造房源和车型参数。
+"""
+
+
+def general_chat(message: str) -> str:
+    """通用客服对话（不限房贷场景）。LLM 不可用时抛异常，由调用方兜底。"""
+    client = _load_openai_client()
+    if client is None:
+        raise RuntimeError("LLM 不可用：缺少 QWEN_API_KEY 或 openai 依赖")
+    model = os.environ.get("QWEN_MODEL", "qwen-turbo").strip()
+    resp = client.chat.completions.create(
+        model=model,
+        temperature=0.5,
+        messages=[
+            {"role": "system", "content": CS_SYSTEM_PROMPT},
+            {"role": "user", "content": message},
+        ],
+    )
+    return (resp.choices[0].message.content or "").strip()
