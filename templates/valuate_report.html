@@ -157,6 +157,62 @@
             </div>
         </div>
 
+        <!-- 行情基准（政府公开数据） -->
+        {% if benchmark %}
+        <div class="card stat-card shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="mb-3">
+                    <i class="bi bi-graph-up-arrow me-1"></i>行情基准
+                    <span class="badge {% if benchmark.band_source == 'official' %}bg-success{% else %}bg-secondary{% endif %} ms-2 fs-6">
+                        {% if benchmark.band_source == 'official' %}北京市公共数据开放平台 · 市住建委{% else %}演示样例数据{% endif %}
+                    </span>
+                </h6>
+                <div class="row text-center mb-3">
+                    <div class="col-md-4 mb-2">
+                        <div class="small text-muted">你的报价</div>
+                        <div class="fs-4 fw-bold">¥{{ benchmark.price_wan }} 万</div>
+                        <small class="text-muted">单价约 {{ benchmark.unit_price }} 元/㎡</small>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <div class="small text-muted">所处成交价格段</div>
+                        <div class="fs-4 fw-bold">{{ benchmark.band }}</div>
+                        {% if benchmark.band_share_pct %}
+                        <small class="text-muted">
+                            {% if benchmark.band_source == 'official' %}{{ benchmark.band_month }}月{% else %}该段{% endif %}
+                            成交 {{ benchmark.band_deals }} 套 · 占全市 {{ benchmark.band_share_pct }}%
+                        </small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <div class="small text-muted">所在区热度</div>
+                        {% if benchmark.district_source and benchmark.district %}
+                        <div class="fs-4 fw-bold">{{ benchmark.district }}区</div>
+                        <small class="text-muted">月成交 {{ benchmark.district_deals }} 套{% if benchmark.district_rank %} · 全市第 {{ benchmark.district_rank }}/{{ benchmark.district_total }}{% endif %}</small>
+                        {% elif benchmark.district %}
+                        <div class="fs-4 fw-bold">{{ benchmark.district }}区</div>
+                        <small class="text-muted">区域明细待官方数据接入</small>
+                        {% else %}
+                        <div class="fs-4 fw-bold text-muted">—</div>
+                        <small class="text-muted">地址中未识别到行政区</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if benchmark.inventory %}
+                <div class="alert alert-light border py-2 px-3 mb-2 small">
+                    <i class="bi bi-house-door me-1"></i>全市在售存量房约
+                    <strong>{{ benchmark.inventory.sets_wan }}</strong> 万套
+                    （口径日期 {{ benchmark.inventory.as_of_date }} · 来源：北京市公共数据开放平台）
+                </div>
+                {% endif %}
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-info-circle me-1"></i>行情数据为北京存量房（二手住宅）网签统计口径，
+                    {% if benchmark.band_source == 'official' %}统计期 {{ benchmark.band_month }}{% else %}当前为演示样例，正式数据接入后自动替换{% endif %}。
+                    用于为估值提供市场锚点，不构成交易建议。
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- 完整维度明细（已付费，全量展示） -->
         <div class="card stat-card shadow-sm mb-4" id="fullReport">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">

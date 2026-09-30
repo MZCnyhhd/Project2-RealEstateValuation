@@ -9,9 +9,27 @@ from llm_agent import build_agent_reply
 from beijing_policy import apply_beijing_policy
 from valuation import evaluate_listing, evaluate_user_input, format_layout
 import payments
+import beijing_stats
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
+
+
+def _refresh_market_data_bg():
+    """启动时后台刷新北京行情官方数据（失败不影响服务，CSV 兜底）。"""
+    import threading
+
+    def _run():
+        try:
+            if beijing_stats.refresh_from_api():
+                logger.info("北京行情官方数据已刷新")
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("行情数据刷新失败（使用本地 CSV 兜底）: %s", exc)
+
+    threading.Thread(target=_run, daemon=True).start()
+
+
+_refresh_market_data_bg()
 
 # 配置日志
 logging.basicConfig(
@@ -722,6 +740,17 @@ def valuate_result():
     session["valuation_paid_no"] = order["order_no"]
     valuation = evaluate_user_input(order["form_data"])
 
+    # 行情基准（渠道1：政府公开数据；无官方数据时为演示样例并在卡片上标注）
+    _fd = order["form_data"]
+    try:
+        benchmark = beijing_stats.get_market_benchmark(
+            _fd.get("price"), _fd.get("area_size"),
+            f"{_fd.get('community', '')}{_fd.get('address', '')}",
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("行情基准生成失败: %s", exc)
+        benchmark = None
+
     # 报告生成后，把该房产回流到 Demo 房源库（同一订单仅入库一次）
     if not order.get("listing_id"):
         listing = _build_listing_from_form(order["form_data"], order["order_no"])
@@ -736,7 +765,7 @@ def valuate_result():
                 logger.error("加入 Demo 房源失败 - 单号: %s, 错误: %s", order["order_no"], exc)
 
     return render_template("valuate_report.html", valuation=valuation, order=order, is_paid=True,
-                           layout_text=format_layout(order["form_data"]))
+                           layout_text=format_layout(order["form_data"]), benchmark=benchmark)
 
 
 @app.route("/valuate/unlock")

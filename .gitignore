@@ -4,3 +4,4 @@ __pycache__/
 realestate.db
 orders.json
 .workbuddy/
+data_beijing/raw/

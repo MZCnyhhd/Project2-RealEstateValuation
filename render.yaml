@@ -32,3 +32,9 @@ services:
         sync: false
       - key: PRICE_PRO_PLUS
         sync: false
+      # 订单存储后端：json（默认，Render 临时盘会清）或 sqlite（需挂载持久磁盘才真正持久）
+      - key: ORDERS_BACKEND
+        sync: false
+      # 北京市公共数据开放平台 API 唯一标识码（行情基准数据自动刷新；不填则用仓库内置 CSV）
+      - key: BJ_DATA_USERKEY
+        sync: false
