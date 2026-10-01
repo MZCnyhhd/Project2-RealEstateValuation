@@ -48,10 +48,37 @@ DEFAULTS = {
 }
 
 
-def _load_openai_client():
+def _resolve_llm_config(purpose: str = "chat"):
+    """按用途解析 LLM 配置。
+
+    purpose="chat"（房·车客服对话）：优先 MiMo（MIMO_API_KEY），回退 Qwen。
+    purpose="extract"（房贷参数提取，依赖严格 JSON 字段）：固定用 Qwen。
+    返回 dict(api_key/base_url/model/provider) 或 None（无可用 Key）。
+    """
+    if purpose == "chat":
+        api_key = os.environ.get("MIMO_API_KEY", "").strip()
+        if api_key:
+            return {
+                "api_key": api_key,
+                "base_url": os.environ.get("MIMO_BASE_URL", "https://api.xiaomimimo.com/v1").strip(),
+                "model": os.environ.get("MIMO_MODEL", "mimo-v2.5").strip(),
+                "provider": "MiMo",
+            }
     api_key = os.environ.get("QWEN_API_KEY", "").strip()
-    if not api_key:
-        logger.warning("阿里云百炼 API Key 未设置")
+    if api_key:
+        return {
+            "api_key": api_key,
+            "base_url": os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1").strip(),
+            "model": os.environ.get("QWEN_MODEL", "qwen-turbo").strip(),
+            "provider": "Qwen",
+        }
+    return None
+
+
+def _load_openai_client(purpose: str = "chat"):
+    config = _resolve_llm_config(purpose)
+    if config is None:
+        logger.warning("LLM API Key 未设置（MIMO_API_KEY / QWEN_API_KEY）")
         return None
     try:
         from openai import OpenAI
@@ -59,22 +86,18 @@ def _load_openai_client():
         logger.error(f"导入OpenAI库失败: {str(e)}")
         return None
 
-    kwargs = {"api_key": api_key}
-    # 阿里云百炼 API base URL
-    base_url = os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1").strip()
-    if base_url:
-        kwargs["base_url"] = base_url
-    logger.info("阿里云百炼客户端初始化成功")
-    return OpenAI(**kwargs)
+    logger.info("LLM 客户端初始化成功: %s (%s)", config["provider"], config["model"])
+    return OpenAI(api_key=config["api_key"], base_url=config["base_url"])
 
 
 def _llm_extract_params(message: str) -> Tuple[Dict, list]:
-    client = _load_openai_client()
+    client = _load_openai_client(purpose="extract")
     if client is None:
         raise RuntimeError("LLM 不可用：缺少 QWEN_API_KEY 或 openai 依赖")
 
-    model = os.environ.get("QWEN_MODEL", "qwen-turbo").strip()
-    logger.info(f"调用阿里云百炼模型: {model}")
+    config = _resolve_llm_config(purpose="extract")
+    model = config["model"]
+    logger.info(f"调用模型: {model}")
     
     try:
         resp = client.chat.completions.create(
@@ -210,12 +233,12 @@ CS_SYSTEM_PROMPT = """你是「房·车智能推荐客服助手」，服务一�
 
 def general_chat(message: str) -> str:
     """通用客服对话（不限房贷场景）。LLM 不可用时抛异常，由调用方兜底。"""
-    client = _load_openai_client()
+    client = _load_openai_client(purpose="chat")
     if client is None:
-        raise RuntimeError("LLM 不可用：缺少 QWEN_API_KEY 或 openai 依赖")
-    model = os.environ.get("QWEN_MODEL", "qwen-turbo").strip()
+        raise RuntimeError("LLM 不可用：缺少 MIMO_API_KEY / QWEN_API_KEY 或 openai 依赖")
+    config = _resolve_llm_config(purpose="chat")
     resp = client.chat.completions.create(
-        model=model,
+        model=config["model"],
         temperature=0.5,
         messages=[
             {"role": "system", "content": CS_SYSTEM_PROMPT},

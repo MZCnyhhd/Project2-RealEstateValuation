@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .env
+local_secrets.py
 realestate.db
 orders.json
 .workbuddy/
