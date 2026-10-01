@@ -13,7 +13,7 @@ from mortgage import calculate_mortgage
 
 SYSTEM_PROMPT = """你是北京房贷测算助手。你的任务是从用户中文输入中提取结构化参数。
 你只能输出 JSON，不要输出其他文本。
-字段要求：
+字段名必须严格使用以下英文键，禁止使用中文键名：
 - total_price_wan: 总价，单位万
 - down_payment_ratio_pct: 首付比例，百分比数值
 - years: 贷款年限（整数）
@@ -26,11 +26,9 @@ SYSTEM_PROMPT = """你是北京房贷测算助手。你的任务是从用户中�
 - loan_type: commercial 或 fund 或 combined
 
 如果用户没有提及某字段，不要臆造，放在 missing_fields 里。
-JSON 格式：
-{
-  "params": {...},
-  "missing_fields": []
-}
+输出示例（严格遵循此结构和键名）：
+用户：预算800万，首付35%，贷30年，等额本息
+输出：{"params": {"total_price_wan": 800, "down_payment_ratio_pct": 35, "years": 30, "repayment_method": "equal_payment"}, "missing_fields": ["annual_rate_pct", "monthly_income", "monthly_debt", "purchase_type", "housing_type", "loan_type"]}
 """
 
 
@@ -49,36 +47,26 @@ DEFAULTS = {
 
 
 def _resolve_llm_config(purpose: str = "chat"):
-    """按用途解析 LLM 配置。
+    """解析 LLM 配置。全项目统一接入小米 MiMo 开放平台（OpenAI 兼容协议）。
 
-    purpose="chat"（房·车客服对话）：优先 MiMo（MIMO_API_KEY），回退 Qwen。
-    purpose="extract"（房贷参数提取，依赖严格 JSON 字段）：固定用 Qwen。
-    返回 dict(api_key/base_url/model/provider) 或 None（无可用 Key）。
+    purpose 仅为兼容历史调用（chat=客服对话 / extract=房贷参数提取），配置同源。
+    返回 dict(api_key/base_url/model/provider) 或 None（未配置 MIMO_API_KEY）。
     """
-    if purpose == "chat":
-        api_key = os.environ.get("MIMO_API_KEY", "").strip()
-        if api_key:
-            return {
-                "api_key": api_key,
-                "base_url": os.environ.get("MIMO_BASE_URL", "https://api.xiaomimimo.com/v1").strip(),
-                "model": os.environ.get("MIMO_MODEL", "mimo-v2.5").strip(),
-                "provider": "MiMo",
-            }
-    api_key = os.environ.get("QWEN_API_KEY", "").strip()
-    if api_key:
-        return {
-            "api_key": api_key,
-            "base_url": os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1").strip(),
-            "model": os.environ.get("QWEN_MODEL", "qwen-turbo").strip(),
-            "provider": "Qwen",
-        }
-    return None
+    api_key = os.environ.get("MIMO_API_KEY", "").strip()
+    if not api_key:
+        return None
+    return {
+        "api_key": api_key,
+        "base_url": os.environ.get("MIMO_BASE_URL", "https://api.xiaomimimo.com/v1").strip(),
+        "model": os.environ.get("MIMO_MODEL", "mimo-v2.5").strip(),
+        "provider": "MiMo",
+    }
 
 
 def _load_openai_client(purpose: str = "chat"):
     config = _resolve_llm_config(purpose)
     if config is None:
-        logger.warning("LLM API Key 未设置（MIMO_API_KEY / QWEN_API_KEY）")
+        logger.warning("LLM API Key 未设置（MIMO_API_KEY）")
         return None
     try:
         from openai import OpenAI
@@ -93,7 +81,7 @@ def _load_openai_client(purpose: str = "chat"):
 def _llm_extract_params(message: str) -> Tuple[Dict, list]:
     client = _load_openai_client(purpose="extract")
     if client is None:
-        raise RuntimeError("LLM 不可用：缺少 QWEN_API_KEY 或 openai 依赖")
+        raise RuntimeError("LLM 不可用：缺少 MIMO_API_KEY 或 openai 依赖")
 
     config = _resolve_llm_config(purpose="extract")
     model = config["model"]
@@ -246,7 +234,7 @@ def general_chat(message: str, tool_context: str = None) -> str:
     """
     client = _load_openai_client(purpose="chat")
     if client is None:
-        raise RuntimeError("LLM 不可用：缺少 MIMO_API_KEY / QWEN_API_KEY 或 openai 依赖")
+        raise RuntimeError("LLM 不可用：缺少 MIMO_API_KEY 或 openai 依赖")
     config = _resolve_llm_config(purpose="chat")
     user_content = message
     if tool_context:

@@ -38,12 +38,7 @@ services:
       # 北京市公共数据开放平台 API 唯一标识码（行情基准数据自动刷新；不填则用仓库内置 CSV）
       - key: BJ_DATA_USERKEY
         sync: false
-      # 阿里云百炼 API Key（截图视觉解析 + 房贷参数提取用；不填则走规则引擎降级）
-      - key: QWEN_API_KEY
-        sync: false
-      - key: QWEN_VL_MODEL
-        sync: false
-      # 小米 MiMo 开放平台 API Key（房·车智能客服 LLM 对话用；不填则客服走兜底话术）
+      # 小米 MiMo 开放平台 API Key（全项目唯一 LLM：智能客服对话 / 房贷参数提取 / 截图视觉解析）
       # 获取：https://mimo.mi.com ；模型默认 mimo-v2.5，接口 https://api.xiaomimimo.com/v1
       - key: MIMO_API_KEY
         sync: false

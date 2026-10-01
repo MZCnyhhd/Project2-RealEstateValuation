@@ -126,15 +126,15 @@ def _parse_address(text):
 def _llm_fill_missing(text, fields):
     """LLM 增强：仅用于补小区名/地址等难提取字段。任何异常静默跳过。"""
     need = [k for k in ("community", "address") if not fields.get(k)]
-    if not need or not os.environ.get("QWEN_API_KEY", "").strip():
+    if not need or not os.environ.get("MIMO_API_KEY", "").strip():
         return fields
     try:
         from openai import OpenAI
         client = OpenAI(
-            api_key=os.environ["QWEN_API_KEY"].strip(),
-            base_url=os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1").strip(),
+            api_key=os.environ["MIMO_API_KEY"].strip(),
+            base_url=os.environ.get("MIMO_BASE_URL", "https://api.xiaomimimo.com/v1").strip(),
         )
-        model = os.environ.get("QWEN_MODEL", "qwen-turbo").strip()
+        model = os.environ.get("MIMO_MODEL", "mimo-v2.5").strip()
         prompt = ("从下面的房源信息中提取JSON：{\"community\":\"小区名\",\"address\":\"详细地址\"}。"
                   "没有的信息不要编造，对应值为 null。只输出 JSON。\n\n" + text[:1500])
         resp = client.chat.completions.create(
@@ -309,18 +309,18 @@ def _normalize_vl_output(raw: dict) -> dict:
 
 
 def parse_images_with_vl(data_uris):
-    """调用 Qwen-VL 解析截图。返回 (fields, error)；无 Key 时 error 提示配置。"""
-    api_key = os.environ.get("QWEN_API_KEY", "").strip()
+    """调用 MiMo 多模态解析截图。返回 (fields, error)；无 Key 时 error 提示配置。"""
+    api_key = os.environ.get("MIMO_API_KEY", "").strip()
     if not api_key:
-        return {}, ("图片解析需要 AI 视觉服务：请在环境变量配置 QWEN_API_KEY（阿里云百炼），"
+        return {}, ("图片解析需要 AI 视觉服务：请在环境变量配置 MIMO_API_KEY（小米 MiMo 开放平台），"
                     "文字粘贴解析不受影响")
     try:
         from openai import OpenAI
         client = OpenAI(
             api_key=api_key,
-            base_url=os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1").strip(),
+            base_url=os.environ.get("MIMO_BASE_URL", "https://api.xiaomimimo.com/v1").strip(),
         )
-        model = os.environ.get("QWEN_VL_MODEL", "qwen-vl-max").strip()
+        model = os.environ.get("MIMO_MODEL", "mimo-v2.5").strip()
         content = [{"type": "text", "text": VL_PROMPT}]
         for uri in data_uris:
             content.append({"type": "image_url", "image_url": {"url": uri}})
