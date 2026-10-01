@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, redirect, session, jsonify, u
 from repository import get_repository, get_order_store, get_hot_store
 from mortgage import calculate_mortgage
 from llm_agent import build_agent_reply, general_chat
-from house_car_agent import build_house_car_reply
+from house_car_agent import build_house_car_reply, HUMAN_KEYWORDS
 from beijing_policy import apply_beijing_policy
 from valuation import evaluate_listing, evaluate_user_input, format_layout
 import payments
@@ -366,18 +366,28 @@ def chat_api():
         return jsonify({"ok": False, "error": "message 不能为空"}), 400
 
     logger.info(f"房车客服请求 - 消息: {message[:100]}...")
-    reply, meta = build_house_car_reply(message)
-    if reply is not None:
-        logger.info(f"房车客服响应 - 规则引擎 {meta.get('intent')}")
-        return jsonify({"ok": True, "reply": reply, "meta": meta, "engine": "rule"})
 
-    # 规则引擎未识别 -> LLM 通用客服 -> 失败兜底（三级降级）
+    # 转人工是明确业务动作，直接返回，不经大模型
+    if any(k in message for k in HUMAN_KEYWORDS):
+        return jsonify({"ok": True, "engine": "rule",
+                        "reply": "已为您转接人工客服 👩‍💼\n当前排队 1 人，预计等待 30 秒…（人工坐席服务时间 9:00-21:00）",
+                        "meta": {"intent": "转人工"}})
+
+    # 工具层：收集结构化结果（推荐卡片 / FAQ 答案），作为大模型的真实数据上下文
+    tool_text, tool_meta = build_house_car_reply(message)
+    tool_text = tool_text if tool_text != "请输入您的问题～" else None
+
+    # 大模型主引擎：基于工具结果组织回复；失败时降级
     try:
-        reply = general_chat(message)
-        logger.info("房车客服响应 - LLM 生成")
-        return jsonify({"ok": True, "reply": reply, "meta": {"intent": "LLM 生成"}, "engine": "llm"})
+        reply = general_chat(message, tool_context=tool_text)
+        logger.info("房车客服响应 - LLM 生成（工具上下文: %s）", tool_meta.get("intent"))
+        return jsonify({"ok": True, "reply": reply,
+                        "meta": {"intent": tool_meta.get("intent", "LLM 生成"), "engine": "llm"},
+                        "engine": "llm"})
     except Exception as exc:  # noqa: BLE001
-        logger.warning(f"房车客服 LLM 失败，使用兜底话术: {exc}")
+        logger.warning(f"房车客服 LLM 失败，降级规则引擎: {exc}")
+        if tool_text:
+            return jsonify({"ok": True, "reply": tool_text, "meta": tool_meta, "engine": "rule"})
         return jsonify({
             "ok": True,
             "reply": FALLBACK_REPLY,

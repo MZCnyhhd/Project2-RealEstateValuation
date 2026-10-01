@@ -226,25 +226,37 @@ CS_SYSTEM_PROMPT = """你是「房·车智能推荐客服助手」，服务一�
 职责边界（只回答以下业务范围）：
 1. 北京房产：房价、房贷、购房政策/税费/限购、房源推荐、看房预约
 2. 小米汽车：SU7 / YU7 系列车型的价格、续航、充电、智能座舱、购车权益、试驾预约（只介绍小米汽车，其他品牌礼貌说明不代理）
-要求：
-- 无关话题（闲聊、民俗、新闻、天气、其他行业咨询等）：不要展开回答，礼貌说明你只负责房产与小米汽车业务，并用一句话引导用户回到业务，或建议回复「转人工」
+
+【内部工具结果使用规则】
+- 若用户消息附带【内部工具结果】：那是系统推荐工具/知识库检索出的真实数据（房源卡片、车型卡片、FAQ 答案），你必须基于这些数据组织回复，用自然亲切的口吻重新表达，保留关键参数（价格/户型/续航/链接等），不要新增数据里不存在的房源、车型或价格。
+- 若没有附带工具结果：基于你的业务知识回答，但不要编造具体房源或车型参数，可给出建议并引导用户补充预算/需求。
+
+【通用要求】
+- 无关话题（闲聊、民俗、新闻、天气、其他行业）：不要展开回答，礼貌说明你只负责房产与小米汽车业务，并用一句话引导用户回到业务，或建议回复「转人工」
 - 简洁友好，150 字以内；涉及具体价格政策时提醒以门店/最新政策为准
 - 不确定时建议用户回复「转人工」；不要编造房源和车型参数
 """
 
 
-def general_chat(message: str) -> str:
-    """通用客服对话（不限房贷场景）。LLM 不可用时抛异常，由调用方兜底。"""
+def general_chat(message: str, tool_context: str = None) -> str:
+    """通用客服对话主引擎（不限房贷场景）。LLM 不可用时抛异常，由调用方降级。
+
+    tool_context: 内部工具/知识库检索出的真实数据（房源卡片、车型卡片、FAQ 答案），
+    非空时大模型必须基于它组织回复，保证参数真实。
+    """
     client = _load_openai_client(purpose="chat")
     if client is None:
         raise RuntimeError("LLM 不可用：缺少 MIMO_API_KEY / QWEN_API_KEY 或 openai 依赖")
     config = _resolve_llm_config(purpose="chat")
+    user_content = message
+    if tool_context:
+        user_content = f"{message}\n\n【内部工具结果（真实数据，回复必须基于它）】\n{tool_context}"
     resp = client.chat.completions.create(
         model=config["model"],
         temperature=0.5,
         messages=[
             {"role": "system", "content": CS_SYSTEM_PROMPT},
-            {"role": "user", "content": message},
+            {"role": "user", "content": user_content},
         ],
     )
     return (resp.choices[0].message.content or "").strip()
