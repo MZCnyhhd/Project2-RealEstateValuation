@@ -121,7 +121,7 @@ def landing():
 @app.route("/robots.txt")
 def robots_txt():
     """爬虫规则：允许全部搜索引擎与大模型联网爬虫收录"""
-    return app.send_static_file("robots.txt")
+    return app.send_static_file("robots.txt"), 200, {"Cache-Control": "public, max-age=300"}
 
 
 @app.route("/sitemap.xml")
@@ -135,7 +135,8 @@ def sitemap_xml():
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
            + urls + "</urlset>")
-    return xml, 200, {"Content-Type": "application/xml; charset=utf-8"}
+    return xml, 200, {"Content-Type": "application/xml; charset=utf-8",
+                      "Cache-Control": "public, max-age=300"}
 
 
 @app.route("/listings")
