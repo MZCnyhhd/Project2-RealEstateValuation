@@ -265,10 +265,11 @@
     <div class="hero-banner">
         <div class="container">
             <h2><i class="bi bi-gem me-2"></i>房地产全息价值评估</h2>
-            <p class="mb-2 opacity-90">7层 × 183维度，AI 驱动的房产估值引擎。填写房源信息，生成专业估值报告。</p>
+            <p class="mb-2 opacity-90">7层 × 183维度，显性与隐性因素分离的房产估值引擎。<b>手动填写或免费文字解析</b>即可生成「当前市场成交价中枢」，全程无需任何密钥。</p>
             <div class="d-flex gap-3 flex-wrap">
                 <span class="price-tag"><i class="bi bi-gem me-1"></i>专业版 ¥{{ price }}：7层 × 183维度完整报告</span>
                 <span class="price-tag"><i class="bi bi-shield-check me-1"></i>含税费测算 · 成交建议 · 政策校验</span>
+                <span class="price-tag"><i class="bi bi-unlock me-1"></i>填写/文字解析免费 · 访客无需密钥</span>
             </div>
         </div>
     </div>
@@ -317,23 +318,49 @@
                             <h6><i class="bi bi-building me-2"></i>房源基础信息</h6>
                         </div>
                         <div class="card-body">
-                            <!-- 粘贴智能解析（文字 / 截图） -->
+                            <!-- 解析入口：① 免费文字解析（无需密钥） ② 截图 AI 识别（可选增强） -->
                             <div class="alert alert-light border mb-4" id="pasteHelper">
-                                <div class="d-flex align-items-center mb-2 flex-wrap">
+                                <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
                                     <a href="https://bj.lianjia.com/ershoufang/" target="_blank" rel="noopener"
                                        class="small text-decoration-none">
-                                        <i class="bi bi-box-arrow-up-right me-1"></i>去链家找在售房源，把「户型图」「基本信息」粘贴到这里
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>去链家等平台复制房源「户型图 / 基本信息」文字或截图，粘到下方自动识别
                                     </a>
+                                    <span id="aiStatusBadge" class="badge rounded-pill bg-light border text-secondary ms-auto">AI 状态检测中…</span>
                                 </div>
-                                <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                    <button type="button" class="btn btn-outline-primary btn-sm d-none" id="parseImgBtn">
-                                        <span class="parse-idle"><i class="bi bi-eye me-1"></i>解析截图（<span id="imgCount">0</span> 张）</span>
-                                        <span class="parse-busy d-none"><span class="spinner-border spinner-border-sm me-1"></span>AI 识别中…（通常 10~40 秒，请稍候）</span>
-                                    </button>
-                                    <span id="parseTimer" class="small text-muted"></span>
-                                    <span id="parseResult" class="small text-muted"></span>
+
+                                <!-- ① 免费文字解析：正则提取，0 密钥，始终可用 -->
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold mb-1">
+                                        <i class="bi bi-tag-fill text-success me-1"></i>① 免费文字解析（粘贴房源文字，正则自动提取 · 无需任何密钥）
+                                    </label>
+                                    <div class="input-group">
+                                        <textarea id="pasteTextArea" class="form-control" rows="2"
+                                                  placeholder="例：xx小区 89.5㎡ 报价520万 3室1厅 中楼层/共18层 南北通透 精装修 2015年建 近地铁300米"></textarea>
+                                        <button class="btn btn-success" type="button" id="parsePasteBtn">
+                                            <i class="bi bi-magic me-1"></i>免费解析
+                                        </button>
+                                    </div>
+                                    <div class="form-text">只提取事实字段、原文不保存；解析后可逐项正确修改再提交。</div>
                                 </div>
-                                <div id="imgPreview" class="d-none d-flex gap-2 mb-2 flex-wrap"></div>
+
+                                <!-- ② 截图 AI 识别：可选增强，无密钥时优雅降级 -->
+                                <div>
+                                    <label class="form-label small fw-bold mb-1">
+                                        <i class="bi bi-eye me-1"></i>② 截图 AI 识别（可选增强 · 粘贴/选择户型图与基本信息截图）
+                                    </label>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="parseImgBtn">
+                                            <span class="parse-idle"><i class="bi bi-eye me-1"></i>解析截图（<span id="imgCount">0</span> 张）</span>
+                                            <span class="parse-busy d-none"><span class="spinner-border spinner-border-sm me-1"></span>AI 识别中…（通常 10~40 秒）</span>
+                                        </button>
+                                        <span id="parseTimer" class="small text-muted"></span>
+                                        <span id="parseResult" class="small text-muted"></span>
+                                    </div>
+                                    <div id="imgPreview" class="d-none d-flex gap-2 mb-2 flex-wrap"></div>
+                                    <div id="aiHint" class="small text-muted d-none">
+                                        <i class="bi bi-info-circle me-1"></i>截图 AI 识别未开启：站长尚未配置免费视觉密钥。您仍可手动填写，或用上方「① 免费文字解析」。
+                                    </div>
+                                </div>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -1175,8 +1202,71 @@
             if (hit) e.preventDefault();
         });
 
+        // ===== AI 状态探测 + 免费文字解析 =====
+        let aiVision = false;
+        function showInfo(msg) {
+            const out = document.getElementById('parseResult');
+            out.className = 'small text-info';
+            out.textContent = msg;
+        }
+        // 启动时探测截图 AI 是否可用（不暴露密钥），决定前端降级策略
+        (function () {
+            fetch('/valuate/ai_status').then(function (r) { return r.json(); })
+                .then(function (d) {
+                    aiVision = !!(d && d.vision);
+                    const badge = document.getElementById('aiStatusBadge');
+                    const hint = document.getElementById('aiHint');
+                    if (aiVision) {
+                        badge.className = 'badge rounded-pill bg-success-subtle border border-success text-success ms-auto';
+                        badge.textContent = '🤖 截图 AI 识别已开启';
+                        if (hint) hint.classList.add('d-none');
+                    } else {
+                        badge.className = 'badge rounded-pill bg-light border text-secondary ms-auto';
+                        badge.textContent = '🔑 访客无需任何密钥 · AI 未开启';
+                        if (hint) hint.classList.remove('d-none');
+                    }
+                })
+                .catch(function () {
+                    const badge = document.getElementById('aiStatusBadge');
+                    if (badge) { badge.textContent = '🔑 访客无需任何密钥'; }
+                });
+        })();
+
+        // ① 免费文字解析（正则，无需密钥，始终可用）
+        document.getElementById('parsePasteBtn').addEventListener('click', async function () {
+            const btn = this;
+            const ta = document.getElementById('pasteTextArea');
+            const text = (ta.value || '').trim();
+            if (text.length < 10) { showResult(false, '请先粘贴完整的房源文字信息（至少 10 字）'); return; }
+            btn.disabled = true;
+            const t0 = Date.now();
+            showInfo('正在免费解析…');
+            try {
+                const resp = await fetch('/valuate/parse_paste', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                let data;
+                try { data = await resp.json(); } catch (e) { throw new Error('HTTP ' + resp.status); }
+                if (!data.ok) { showResult(false, data.error || ('解析失败（HTTP ' + resp.status + '）')); return; }
+                const n = applyFields(data.fields || {});
+                const secs = ((Date.now() - t0) / 1000).toFixed(1);
+                showResult(true, '已免费解析并填充 ' + n + ' 个字段，耗时 ' + secs + ' 秒' + buildMissingMsg(data.missing));
+                const first = document.querySelector('.ai-filled');
+                if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (e) {
+                showResult(false, '解析请求失败：' + (e && e.message ? e.message : '网络异常') + '，请重试或手动填写');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
         document.getElementById('parseImgBtn').addEventListener('click', async function () {
             const btn = this;
+            if (!aiVision) {
+                showInfo('截图 AI 识别未开启（站长未配置免费视觉密钥）。您可直接手动填写，或用上方「① 免费文字解析」粘贴房源文字自动提取，同样精准。');
+                return;
+            }
             if (!imgUris.length) { showResult(false, '请先添加截图'); return; }
             const timerEl = document.getElementById('parseTimer');
             const t0 = Date.now();

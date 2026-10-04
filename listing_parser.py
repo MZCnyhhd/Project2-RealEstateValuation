@@ -430,6 +430,17 @@ def _vl_build_clients():
     return clients
 
 
+def vision_available():
+    """截图 AI 识别是否可用（仅判断服务器是否配置了视觉密钥，绝不暴露密钥本身）。
+
+    供前端优雅降级：访客无需填写任何密钥；无密钥时前端提示「手动填写 / 免费文字解析」。
+    """
+    try:
+        return len(_vl_build_clients()) > 0
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def _vl_call_with_fallback(clients, uri, timeout=60):
     """单张截图按 主力→备用 顺序尝试；返回 (输出, finish, 服务商)。全部失败抛最后异常。"""
     last_err = None
@@ -461,11 +472,8 @@ def parse_images_with_vl(data_uris):
         logger.warning("视觉客户端初始化失败: %s %s", type(e).__name__, str(e)[:120])
         return {}, ("AI 视觉服务初始化失败（%s），请稍后重试或改用文字粘贴" % type(e).__name__), None, None
     if not clients:
-        missing = [k for k in ("DEEPSEEK_API_KEY", "MIMO_API_KEY")
-                   if not os.environ.get(k, "").strip()]
-        return {}, ("图片解析需要 AI 视觉服务：服务器缺少环境变量 " + "、".join(missing)
-                    + "（Render Dashboard → Environment 填入密钥后保存即自动重新部署），"
-                      "文字粘贴解析不受影响"), None, None
+        return {}, ("截图 AI 识别未开启：站长尚未在服务器配置视觉密钥（访客无需填写任何密钥）。"
+                    "您可直接手动填写，或用「免费文字解析」粘贴房源文字自动提取，同样精准。"), None, None
     try:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 

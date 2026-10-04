@@ -540,6 +540,22 @@ def valuate_parse_image():
                     "floor_plan_index": fp_index if isinstance(fp_index, int) else None})
 
 
+@app.route("/valuate/ai_status")
+def valuate_ai_status():
+    """前端优雅降级：返回截图 AI 识别是否可用（只判断服务器是否配置密钥，绝不暴露密钥本身）。
+
+    访客全程无需填写任何密钥；无密钥时前端提示「手动填写 / 免费文字解析」。
+    """
+    try:
+        available = listing_parser.vision_available()
+    except Exception:  # noqa: BLE001
+        available = False
+    return jsonify({
+        "vision": bool(available),
+        "note": "已开启" if available else "站长未配置密钥（访客无需填写）",
+    })
+
+
 def _normalize_valuate_form():
     """提取并归一化估值表单字段"""
     form_data = {}
