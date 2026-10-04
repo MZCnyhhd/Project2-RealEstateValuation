@@ -1,124 +1,60 @@
-# RealEstate Demo (Flask)
+# 北京房产估值引擎 · RealEstate Valuation
 
-一个用于演示的房源检索网站（Flask + Bootstrap），支持：
+**在线使用（免费，无需注册/密钥）：<https://realestate-flask-demo.onrender.com/valuate>**
 
-- 列表筛选（价格/面积）
-- 关键词搜索（title/community/address/description）
-- 标签多选过滤
-- 排序（价格/面积升降序）
-- 分页（带省略号窗口）
-- 收藏（Session）与对比（最多 5 条）
-- JSON / SQLite 数据后端可切换
+输入小区名称 + 面积 + 挂牌价，立即估算这套北京二手房的**当前市场成交价中枢**与浮动区间。它输出的不是"建议挂牌价"，而是把台面上的显性因素实事求是地算出来。
 
-## 在线访问（Render）
+## 它解决什么问题
 
-> 部署成功后，你会得到一个公网 URL，可直接放到简历中。
+北京二手房市场里，挂牌价与真实成交价长期存在明显偏差。本工具把定价拆成两层：
 
-### 1) 推送到 GitHub
+- **显性因素（参与计算）**：面积、户型、楼层、朝向、装修、房龄、电梯、供暖、学区、地铁距离等 **183 个可观测维度**，按 7 层结构量化，并对照「同小区成交样本」基准锚点修正；
+- **隐性因素（只声明区间，不参与计算）**：议价空间、买卖双方动机等无法在台面上验证的信息，以浮动区间呈现，不假装能算。
 
-把本项目推到你的 GitHub 仓库。
+## 核心功能
 
-### 2) Render 创建 Web Service
+- **免费文字解析**：粘贴房源文字（如"xx小区 89.5平米 报价520万 3室1厅 中楼层/共18层 南北通透 精装修"），正则引擎自动提取 10+ 字段，无需任何密钥
+- **成交价中枢估算**：7 层 × 183 维度显性因素量化模型，相对"典型参照房"打分并加阻尼系数，杜绝正常配置虚增
+- **市场锚点三级降级**：同小区成交样本单价中位数 → 官方价格段分布 → 挂牌价×成交折价
+- **房源检索**：列表筛选、关键词搜索、标签过滤、收藏对比、热门房源榜（挂牌价 vs 估值偏差）
+- **北京购房工具**：房贷计算器、北京限购政策校验、税费测算
+- **可选 AI 增强**：截图识别户型图自动填表（DeepSeek / MiMo 视觉模型，站长配置密钥后开启；未配置时优雅降级，不影响免费功能）
+- **完整估值报告**：¥9.9，微信 Native 支付 / 个人收款码
 
-在 Render 控制台选择：
+## 技术栈
 
-- New -> Web Service
-- 选择你的 GitHub repo
+- **后端**：Python Flask + Gunicorn，部署于 Render（Docker-free，`render.yaml` 一键部署）
+- **估值引擎**：纯 Python 数学模型，**不依赖大模型**——访客全程无需任何 API Key
+- **AI 集成**：DeepSeek 视觉模型（主力）+ MiMo（备用）自动降级链；Qwen 结构化字段提取；规则引擎兜底
+- **支付**：微信支付 Native v3（含平台证书 RSA 验签），未配置商户号时回退个人收款码
+- **数据合规**：只使用自有房源数据与用户主动提交的内容（UGC 即焚），不爬取任何第三方平台
 
-配置如下：
-
-- Build Command
-
-```bash
-pip install -r requirements.txt
-```
-
-- Start Command
-
-```bash
-gunicorn wsgi:application --bind 0.0.0.0:$PORT
-```
-
-### 3) Render 环境变量（建议设置）
-
-- `SECRET_KEY`
-  - 任意长随机字符串
-  - 用于 Session（收藏/对比）
-
-可选：
-
-- `DATA_BACKEND`
-  - `json`（默认）
-  - `sqlite`
-
-当 `DATA_BACKEND=sqlite` 时可选：
-
-- `SQLITE_PATH`
-  - 默认 `realestate.db`
-- `SQLITE_AUTO_IMPORT`
-  - `1`：启动时自动从 `mock_listings.json` 导入到 SQLite
-  - `0`：不自动导入
-
-接入大模型 Agent 时可选：
-
-- `OPENAI_API_KEY`
-  - 大模型服务密钥
-- `OPENAI_MODEL`
-  - 默认 `gpt-4.1-mini`
-- `OPENAI_BASE_URL`
-  - 可选，自定义网关地址
-
-## 本地运行（Windows / Conda）
-
-1) 创建并激活环境（示例）
-
-```bash
-conda create -n PythonProject-RealEstate python=3.12
-conda activate PythonProject-RealEstate
-```
-
-2) 安装依赖
+## 本地运行
 
 ```bash
 pip install -r requirements.txt
-```
-
-3) 启动
-
-```bash
 python app.py
 ```
 
-打开：
+打开 <http://127.0.0.1:5000/>，估值入口 `/valuate`。
 
-- http://127.0.0.1:5000/
+## 部署（Render）
 
-## 数据扩容（可选）
-
-如果你想生成更多房源：
-
-```bash
-python update_images.py
-```
-
-注意：如果要从 Unsplash 拉取新图片，需要可用的 Access Key（当前仓库内 Key 可能失效/403）。
+1. 推送本仓库到 GitHub
+2. Render 新建 Web Service，Build Command `pip install -r requirements.txt`，Start Command `gunicorn wsgi:application --bind 0.0.0.0:$PORT`
+3. 环境变量（均可选）：`DATA_BACKEND=json|sqlite`、`SECRET_KEY`、`ORDERS_BACKEND=sqlite`（订单持久化）、`DEEPSEEK_API_KEY`（开启截图 AI，可选）
 
 ## 主要路由
 
-- `/`：列表（筛选/搜索/排序/分页）
-- `/listing/<id>`：详情
-- `/favorites`：收藏列表
-- `/compare`：对比页面
-- `/calculator`：北京房价计算器（含 Agent 问答）
-- `/agent/chat`：Agent 对话接口（POST）
+| 路由 | 说明 |
+|---|---|
+| `/valuate` | 房产估值（183 维度表单 + 免费文字解析） |
+| `/` | 房源列表（筛选/搜索/排序/分页） |
+| `/hot` | 热门房源榜（挂牌价 vs 估值偏差） |
+| `/calculator` | 北京房贷计算器 |
+| `/compare` | 多房对比 |
 
-## 北京政策参数化（示例）
+## 数据与合规声明
 
-- 配置文件：`beijing_policy.py`
-- 可配置维度：
-  - `purchase_type`：`first_home` / `second_home`
-  - `housing_type`：`normal` / `non_normal`
-  - `loan_type`：`commercial` / `fund` / `combined`
-- 每组策略可调：
-  - `min_down_pct`（最低首付比例）
-  - `default_rate_pct`（默认年化利率）
+- 房源演示数据为 DEMO 口径；行情基准引用北京市公共数据开放平台（存量房网签统计），展示均标注来源
+- 不抓取贝壳/链家等第三方平台数据；用户提交的房源文字/截图仅用于当场解析，不落盘留存

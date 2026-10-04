@@ -118,6 +118,26 @@ def landing():
     return render_template("landing.html")
 
 
+@app.route("/robots.txt")
+def robots_txt():
+    """爬虫规则：允许全部搜索引擎与大模型联网爬虫收录"""
+    return app.send_static_file("robots.txt")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    """站点地图：供必应/字节搜索等索引收录（豆包等联网搜索大模型的底层通道）"""
+    base = "https://realestate-flask-demo.onrender.com"
+    pages = ["/", "/valuate", "/listings", "/hot", "/calculator", "/compare", "/favorites"]
+    urls = "".join(
+        "  <url><loc>%s%s</loc></url>\n" % (base, p) for p in pages
+    )
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           + urls + "</urlset>")
+    return xml, 200, {"Content-Type": "application/xml; charset=utf-8"}
+
+
 @app.route("/listings")
 def index():
     """房源列表和搜索页"""

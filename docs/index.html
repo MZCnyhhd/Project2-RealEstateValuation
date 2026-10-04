@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>北京房产估值 - 免费估算二手房成交价中枢</title>
+<meta name="description" content="北京二手房免费估值工具：输入小区与面积，立即估算当前市场成交价中枢与浮动区间。183 维度显性因素量化模型，区分显性与隐性定价因素，访客无需注册、无需任何 API 密钥。">
+<meta name="keywords" content="北京房产估值,二手房估值,成交价估算,卖房定价,北京房价,免费房屋估价">
+<meta property="og:title" content="北京房产估值引擎 - 免费估算二手房成交价中枢">
+<meta property="og:description" content="输入小区名称+面积+挂牌价，立即估算当前市场成交价中枢。显性因素量化计算，隐性因素只声明区间不假装能算。">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"PingFang SC","Microsoft YaHei",sans-serif; color:#1a1a2e; background:#f7f8fa; line-height:1.7; }
+  .hero { max-width:860px; margin:0 auto; padding:72px 24px 40px; text-align:center; }
+  .hero h1 { font-size:34px; font-weight:600; letter-spacing:1px; }
+  .hero h1 span { color:#0f6e56; }
+  .hero p.sub { margin-top:14px; font-size:17px; color:#555; }
+  .cta { display:inline-block; margin-top:32px; background:#0f6e56; color:#fff; text-decoration:none;
+         font-size:18px; font-weight:600; padding:16px 44px; border-radius:10px; }
+  .cta:hover { background:#085041; }
+  .note { margin-top:12px; font-size:13px; color:#888; }
+  .grid { max-width:960px; margin:32px auto; padding:0 24px; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:26px 22px; }
+  .card h3 { font-size:17px; font-weight:600; margin-bottom:10px; }
+  .card p { font-size:14px; color:#555; }
+  .how { max-width:860px; margin:24px auto; padding:0 24px 64px; }
+  .how h2 { font-size:22px; font-weight:600; text-align:center; margin-bottom:24px; }
+  .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+  .step { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px; font-size:14px; }
+  .step b { display:block; color:#0f6e56; font-size:15px; margin-bottom:6px; }
+  footer { text-align:center; font-size:12px; color:#999; padding:24px 16px 40px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>北京房产估值引擎 · <span>成交价中枢</span></h1>
+  <p class="sub">不推荐挂牌价，只算台面上的显性因素 —— 免费估算这套房当前市场的真实成交价。</p>
+  <a class="cta" href="https://realestate-flask-demo.onrender.com/valuate">立即免费估值 →</a>
+  <p class="note">无需注册 · 无需 API 密钥 · 手动填写或粘贴文字 10 秒出结果</p>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>① 免费文字解析</h3>
+    <p>把房源文字（"xx小区 89.5平米 报价520万 3室1厅 中楼层/共18层 南北通透"）粘贴进来，自动提取 10+ 字段，逐项可改。</p>
+  </div>
+  <div class="card">
+    <h3>② 183 维度显性因素模型</h3>
+    <p>面积、户型、楼层、朝向、装修、房龄、电梯、学区、地铁等 7 层结构量化，对照同小区成交样本锚点修正。</p>
+  </div>
+  <div class="card">
+    <h3>③ 成交价中枢 + 浮动区间</h3>
+    <p>议价空间、买卖动机等隐性因素不假装能算，只以浮动区间声明 —— 报告实事求是，¥9.9 解锁完整版。</p>
+  </div>
+</div>
+
+<div class="how">
+  <h2>三步出结果</h2>
+  <div class="steps">
+    <div class="step"><b>Step 1 · 粘贴或填写</b>从链家等平台复制房源文字粘贴，或直接手动填小区、面积、报价。</div>
+    <div class="step"><b>Step 2 · 核对字段</b>自动提取的字段逐项核对，补充楼层、朝向、装修等已知信息。</div>
+    <div class="step"><b>Step 3 · 查看估值</b>立即得到当前市场成交价中枢与浮动区间，完整报告 ¥9.9 可选。</div>
+  </div>
+</div>
+
+<footer>
+  行情基准引用北京市公共数据开放平台（存量房网签统计）· 不抓取第三方平台数据 · 用户提交内容仅用于当场解析，不落盘留存
+</footer>
+</body>
+</html>
