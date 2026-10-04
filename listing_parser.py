@@ -450,15 +450,22 @@ def _vl_call_with_fallback(clients, uri, timeout=60):
 def parse_images_with_vl(data_uris):
     """调用视觉大模型解析截图（DeepSeek 主力，MiMo 备用）：多张并行、每张独立调用。
 
-    返回 (fields, error, warning)；部分图片成功即返回已提取字段，
-    失败项作为 warning 提示；全部无结果才返回 error。
+    恒返回 4 元组 (fields, error, warning, floor_plan_index)；
+    部分图片成功即返回已提取字段，失败项作为 warning 提示；全部无结果才返回 error。
     """
     if not data_uris:
-        return {}, None, None
-    clients = _vl_build_clients()
+        return {}, None, None, None
+    try:
+        clients = _vl_build_clients()
+    except Exception as e:  # noqa: BLE001
+        logger.warning("视觉客户端初始化失败: %s %s", type(e).__name__, str(e)[:120])
+        return {}, ("AI 视觉服务初始化失败（%s），请稍后重试或改用文字粘贴" % type(e).__name__), None, None
     if not clients:
-        return {}, ("图片解析需要 AI 视觉服务：请配置 DEEPSEEK_API_KEY 或 MIMO_API_KEY（环境变量），"
-                    "文字粘贴解析不受影响"), None
+        missing = [k for k in ("DEEPSEEK_API_KEY", "MIMO_API_KEY")
+                   if not os.environ.get(k, "").strip()]
+        return {}, ("图片解析需要 AI 视觉服务：服务器缺少环境变量 " + "、".join(missing)
+                    + "（Render Dashboard → Environment 填入密钥后保存即自动重新部署），"
+                      "文字粘贴解析不受影响"), None, None
     try:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -510,4 +517,4 @@ def parse_images_with_vl(data_uris):
     except Exception as e:  # noqa: BLE001
         logger.warning("VL 解析失败: %s %s", type(e).__name__, str(e)[:120])
         return {}, ("AI 解析调用失败，请稍后重试或改用文字粘贴"
-                    f"（{type(e).__name__}）"), None
+                    f"（{type(e).__name__}）"), None, None

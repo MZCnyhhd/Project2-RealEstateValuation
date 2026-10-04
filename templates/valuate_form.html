@@ -1192,8 +1192,10 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ images: imgUris })
                 });
-                const data = await resp.json();
-                if (!data.ok) { showResult(false, data.error || '解析失败'); return; }
+                let data;
+                try { data = await resp.json(); }
+                catch (e) { throw new Error('HTTP ' + resp.status); }
+                if (!data.ok) { showResult(false, data.error || ('解析失败（HTTP ' + resp.status + '）')); return; }
                 const n = applyFields(data.fields || {});
                 const secs = ((Date.now() - t0) / 1000).toFixed(1);
                 showResult(true, '已从截图填充 ' + n + ' 个字段，耗时 ' + secs + ' 秒' + buildMissingMsg(data.missing) + (data.warning ? '；' + data.warning : ''));
@@ -1204,7 +1206,7 @@
                     setFloorPlan(fpUri, true);  // AI 判定为户型图的那张，自动展示在左侧（不覆盖手动选择，不打扰提示语）
                 }
             } catch (e) {
-                showResult(false, '解析请求失败，请手动填写');
+                showResult(false, '解析请求失败：' + (e && e.message ? e.message : '网络异常') + '，请重试或手动填写');
             } finally {
                 clearInterval(timer);
                 timerEl.textContent = '耗时 ' + ((Date.now() - t0) / 1000).toFixed(1) + ' 秒';

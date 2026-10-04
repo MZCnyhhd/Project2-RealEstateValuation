@@ -520,7 +520,13 @@ def valuate_parse_image():
         if len(uri) > 4_500_000:  # base64 后约 3MB 原图
             return jsonify({"ok": False, "error": "单张截图过大（>3MB），请压缩后重试"}), 400
 
-    fields, error, warning, fp_index = listing_parser.parse_images_with_vl(images)
+    fields, error, warning, fp_index = None, None, None, None
+    try:
+        fields, error, warning, fp_index = listing_parser.parse_images_with_vl(images)
+    except Exception as exc:  # noqa: BLE001  # 任何异常都回 JSON，绝不回 500 HTML
+        logger.error("截图解析路由异常: %s %s", type(exc).__name__, str(exc)[:200])
+        return jsonify({"ok": False,
+                        "error": "服务器解析异常（%s），请稍后重试或改用文字粘贴" % type(exc).__name__}), 503
     if error:
         return jsonify({"ok": False, "error": error}), 503
     logger.info("截图解析完成: 提取 %d 个字段", len(fields))
