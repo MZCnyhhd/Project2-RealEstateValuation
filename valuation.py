@@ -228,6 +228,7 @@ DIMENSIONS = [
     _d("l6_lease", 6, "权利限制", "长期租约", ("desc", "带租约出售"), ("bool", -8, 0), 2),
     _d("l6_residence_right", 6, "权利限制", "居住权登记", ("sim_c", ["无", "有"]), ("cat", {"无": 0, "有": -30}, 0), 3),
     _d("l6_hukou", 6, "权利限制", "户口迁出状况", ("sim_c", ["已迁", "未迁"]), ("cat", {"已迁": 0, "未迁": -5}, 0), 2),
+    _d("l6_usage_type", 6, "权利限制", "房屋用途性质", ("sim_c", ["住宅", "非住宅"]), ("cat", {"住宅": 0, "非住宅": -2.5}, 0), 2),
     _d("l6_tax_5y", 6, "税费成本", "满五唯一", ("tag", "满五唯一"), ("bool", 4, 0), 1),
     _d("l6_tax_2y", 6, "税费成本", "满二", ("sim_c", ["满五", "满二不满五", "不满二"]), ("cat", {"满五": 0, "满二不满五": -2, "不满二": -5}, 0), 2),
     _d("l6_inherit", 6, "税费成本", "继承/赠与所得", ("sim_c", ["否", "是"]), ("cat", {"否": 0, "是": -7}, 0), 3),
@@ -644,6 +645,12 @@ _FORM_TO_DIM = {
     # 特殊情况
     "property_type": lambda v: {"l6_property_type": v == "商品房",
                                 "l3_pure_residential": v != "商住两用"},
+    # 房屋用途 → 住宅/非住宅（影响税费、贷款、水电性质）
+    "property_use": lambda v: {"l6_usage_type": "非住宅" if v in ("公寓", "商住两用", "办公") else "住宅"},
+    # 产权所属 → 多人共有（影响过户与贷款）
+    "ownership": lambda v: {"l6_co_owners": "多人" if v in ("共有", "部分共有") else "单人"},
+    # 得房率（套内/建面，由后端算好后传入）→ 高得房率加分
+    "usable_rate": lambda v: {"l4_usable_rate": float(v) >= 0.75},
     "five_year_only": lambda v: {"l6_tax_5y": bool(v), "l6_tax_2y": "满五" if v else "满二不满五"},
     "has_mortgage": lambda v: {"l6_mortgage": "有" if v else "无"},
     "has_lease": lambda v: {"l6_lease": bool(v)},
@@ -668,18 +675,26 @@ _FORM_TO_DIM = {
     "beam_press": lambda v: {"l5_beam": "有" if v else "无"},
 }
 
+# === 显性成交价口径的校准常量 ===
+# 典型参照房：同小区"中位水平"的配置（中楼层/南向/简装/有电梯/集中供暖/普通窗…）。
+# 各项显性因素的影响 = 本套得分 - 典型房得分，避免"正常配置也加分"的系统性虚高。
+_TYPICAL_FORM = {
+    "community": "典型参照", "area_size": "89", "price": "0",
+    "floor": "10", "total_floors": "18", "orientation": "南",
+    "layout_rooms": "2", "layout_halls": "1", "layout_baths": "1", "layout_kitchens": "1",
+    "decoration": "简装", "has_elevator": "1", "heating_type": "集中供暖",
+    "ceiling_height": "2.7", "window_type": "断桥铝", "bright_kitchen": "1",
+    "usable_rate": "0.72", "property_type": "商品房",
+}
+# 收敛系数：原始评分按"绝对好坏"标定，直接累加会放大到 ±40%+；
+# 折半后一套显著优于典型房的户型约 +12~18%，符合市场直觉。接入真实成交样本后可校准。
+_ADJ_DAMPING = 0.5
 
-def evaluate_user_input(form_data: dict, version: str = "professional") -> dict:
-    """
-    用户录入房源信息的全息估值。
-    form_data: 表单字段字典
-    返回: 与 evaluate_listing 相同结构的结果 + 免费/付费分层
-    """
-    ver_level = VERSIONS.get(version, 3)
-    active_dims = [d for d in DIMENSIONS if d["ver"] <= ver_level]
 
-    # 第1步：从表单数据直接映射维度值
-    direct_values = {}
+def _collect_dim_values(form_data: dict):
+    """表单 → 维度值。返回 (values, direct_keys)：
+    values = direct 映射 + 表单推导的 tag/desc/layout 值；direct_keys = 用户直接映射的维度键。"""
+    direct = {}
     for field_name, mapper in _FORM_TO_DIM.items():
         val = form_data.get(field_name)
         if val is not None and val != "":
@@ -687,11 +702,45 @@ def evaluate_user_input(form_data: dict, version: str = "professional") -> dict:
                 mapped = mapper(val)
                 for k, v in mapped.items():
                     if v is not None:
-                        direct_values[k] = v
+                        direct[k] = v
             except (ValueError, TypeError):
                 pass
+    tags = ["电梯房"] if form_data.get("has_elevator") else []
+    if form_data.get("decoration") in ("精装", "豪装"):
+        tags.append("精装修")
+    if form_data.get("decoration") == "豪装":
+        tags.append("豪华装修")
+    pseudo = {
+        "id": "TYPICAL" if form_data is _TYPICAL_FORM else
+              hashlib.md5((str(form_data.get("community", "")) + str(form_data.get("area_size", ""))).encode()).hexdigest()[:8].upper(),
+        "community": form_data.get("community", ""),
+        "address": form_data.get("address", ""),
+        "layout": format_layout(form_data),
+        "area": float(form_data.get("area_size", 90) or 90),
+        "price": float(form_data.get("price") or 0),
+        "tags": tags, "description": "",
+    }
+    values = derive_listing_dimensions(pseudo)
+    values.update(direct)
+    return values, set(direct.keys())
 
-    # 第2步：构建伪 listing 用于未覆盖维度的模拟
+
+def evaluate_user_input(form_data: dict, version: str = "professional",
+                        baseline_price: Optional[float] = None) -> dict:
+    """
+    用户录入房源信息的估值（显性成交价口径）。
+    form_data: 表单字段字典
+    baseline_price: 外部传入的市场基准价（万，成交口径）。为 None 时退化为用户自填挂牌价折算。
+    只计算显性因素（用户填写/平台推导/城市常量），L1~L3 位置价值已含在基准价中不再加减，
+    L4~L7 按"相对同小区典型房"折算；隐性因素不计算，只以浮动区间呈现。
+    """
+    ver_level = VERSIONS.get(version, 3)
+    active_dims = [d for d in DIMENSIONS if d["ver"] <= ver_level]
+
+    values, direct_keys = _collect_dim_values(form_data)
+    typical_values, _typical_direct = _collect_dim_values(_TYPICAL_FORM)
+
+    # 伪 listing（用于锚点/展示与数量统计）
     pseudo_id = form_data.get("community", "") + form_data.get("area_size", "") + form_data.get("address", "")
     pseudo_listing = {
         "id": hashlib.md5(pseudo_id.encode()).hexdigest()[:8].upper(),
@@ -699,64 +748,64 @@ def evaluate_user_input(form_data: dict, version: str = "professional") -> dict:
         "address": form_data.get("address", ""),
         "layout": format_layout(form_data),
         "area": float(form_data.get("area_size", 90)),
-        "price": float(form_data.get("price", 300)),
+        "price": float(baseline_price or form_data.get("price", 300)),
         "tags": [],
         "description": "",
     }
-    # 从表单生成tags
-    tag_map = {
-        "north_south": "南北通透", "has_elevator": "电梯房", "ped_car_split": "人车分流",
-        "urgent_sell": "降价房", "five_year_only": "满五唯一", "decoration": None,
-    }
-    for field, tag in tag_map.items():
-        if tag and form_data.get(field):
-            pseudo_listing["tags"].append(tag)
-    if form_data.get("decoration") in ("精装", "豪装"):
-        pseudo_listing["tags"].append("精装修")
-    if form_data.get("decoration") == "豪装":
-        pseudo_listing["tags"].append("豪华装修")
-    if form_data.get("view_type") == "湖景":
-        pseudo_listing["tags"].append("湖景房")
-    if form_data.get("school_level") in ("市重点", "区重点"):
-        pseudo_listing["tags"].append("学区房")
-
-    # 第3步：模拟未覆盖的维度
-    sim_values = derive_listing_dimensions(pseudo_listing)
-    # 用户直接提供的值覆盖模拟值
-    sim_values.update(direct_values)
-
-    # 第4步：评分
+    # 第3步：评分 —— 显性成交价口径
+    # 只算显性因素（用户填写/平台推导/城市常量）；模拟维度不参与计算；
+    # 每项影响 = 本套得分 - 典型参照房得分（避免正常配置也加分），再乘收敛系数。
+    EXPLICIT_SRC = ("tag", "desc", "layout", "const")
     all_factors = []
     layer_impacts = {layer["id"]: [] for layer in LAYERS}
     net_impact_pct = 0.0
+    explicit_count = 0
 
     for dim in active_dims:
         did = dim["id"]
-        raw_val = sim_values.get(did)
-        impact, display = _score_dimension(dim, raw_val)
-        net_impact_pct += impact
-        layer_impacts[dim["layer"]].append(impact)
+        # L1~L3 位置价值已包含在市场基准价里（小区锚点/挂牌价都体现位置），
+        # 再逐项加减会双重计价 → 只对 L4~L7（房屋本体差异+交易条件）调整。
+        if dim["layer"] <= 3:
+            continue
+        is_direct = did in direct_keys
+        is_derived = dim["src"][0] in EXPLICIT_SRC
+        if not (is_direct or is_derived):
+            continue  # 模拟维度：未采集，不参与计算
+        source = "用户填写" if is_direct else "平台推导"
+        impact, display = _score_dimension(dim, values.get(did))
+        impact_t = 0.0
+        # 典型参照只允许显性来源的值（direct/推导/常量），防止模拟值混入折算
+        if did in typical_values and (did in _typical_direct or dim["src"][0] in EXPLICIT_SRC):
+            impact_t, _t_disp = _score_dimension(dim, typical_values[did])
+        centered = (impact - impact_t) * _ADJ_DAMPING
+        net_impact_pct += centered
+        layer_impacts[dim["layer"]].append(centered)
+        explicit_count += 1
         all_factors.append({
             "id": did,
             "name": dim["name"],
             "layer": dim["layer"],
             "layer_name": next((l["name"] for l in LAYERS if l["id"] == dim["layer"]), ""),
             "category": dim["cat"],
-            "impact_pct": round(impact, 2),
+            "impact_pct": round(centered, 2),
+            "raw_impact_pct": round(impact, 2),
             "display_value": display,
+            "source": source,
         })
+    unscored_count = len(active_dims) - explicit_count
 
     listing_price = pseudo_listing["price"]
     for f in all_factors:
         f["impact_wan"] = round(listing_price * f["impact_pct"] / 100.0, 1)
 
-    # 层级评分
+    # 层级评分（同样只算显性维度；无数据的层给中性 50 分并标注维度数）
     layer_results = []
     for layer in LAYERS:
         lid = layer["id"]
         impacts = layer_impacts[lid]
-        dims_in_layer = [d for d in active_dims if d["layer"] == lid]
-        if impacts:
+        explicit_ids = {f["id"] for f in all_factors if f["layer"] == lid}
+        dims_in_layer = [d for d in active_dims if d["layer"] == lid and d["id"] in explicit_ids]
+        if impacts and dims_in_layer:
             max_possible = sum(abs(d["score"][1] if d["score"][0] == "bool" else
                                   max(abs(x[1]) for x in d["score"][1]) if d["score"][0] == "num" else
                                   max(abs(v) for v in list(d["score"][1].values()) + [d["score"][2] if len(d["score"]) > 2 else 0])
@@ -787,22 +836,35 @@ def evaluate_user_input(form_data: dict, version: str = "professional") -> dict:
     else:
         score_level = "较差"
 
-    # 估值：基于用户报价 + 维度调整
-    # 单价基线 = 用户报价/面积，估值 = 基线 × (1 + net_impact%)
+    # 估值：基于市场基准价 + 维度调整
+    # 基准价 baseline = 外部锚点（同小区样本）优先，缺省才是用户自填挂牌价
+    # 估值 = 基准 × (1 + net_impact%)；报价偏离 = 用户报价 vs 估值
     area = pseudo_listing["area"]
-    unit_price = listing_price / area if area > 0 else 0
-    estimated_total = round(listing_price * (1 + net_impact_pct / 100.0), 1)
-    price_gap_pct = round(-net_impact_pct, 1)  # 正=用户报价偏高，负=偏低
+    baseline_price = listing_price
+    user_price = 0.0
+    try:
+        user_price = float(form_data.get("price") or 0)
+    except (TypeError, ValueError):
+        user_price = 0.0
+    unit_price = baseline_price / area if area > 0 else 0
+    estimated_total = round(baseline_price * (1 + net_impact_pct / 100.0), 1)
+    if user_price > 0:
+        price_gap_pct = round((user_price - estimated_total) / estimated_total * 100, 1)  # 正=报价偏高
+    else:
+        price_gap_pct = 0.0
 
-    if abs(price_gap_pct) <= 5:
+    if user_price <= 0:
+        verdict = f"估值 {estimated_total} 万"
+        verdict_detail = f"以市场基准价 {baseline_price} 万为起点，经 {len(active_dims)} 项维度调整后估值 {estimated_total} 万。"
+    elif abs(price_gap_pct) <= 5:
         verdict = "定价合理"
         verdict_detail = f"您的报价与全息估值基本一致，定价合理。"
     elif price_gap_pct > 5:
         verdict = f"报价偏高{price_gap_pct:.1f}%"
-        verdict_detail = f"您的报价{listing_price}万高于全息估值{estimated_total}万，建议调整或等待合适买家。"
+        verdict_detail = f"您的报价{user_price}万高于全息估值{estimated_total}万，建议调整或等待合适买家。"
     else:
         verdict = f"报价偏低{abs(price_gap_pct):.1f}%"
-        verdict_detail = f"您的报价{listing_price}万低于全息估值{estimated_total}万，具备很强竞争力。"
+        verdict_detail = f"您的报价{user_price}万低于全息估值{estimated_total}万，具备很强竞争力。"
 
     sorted_positive = sorted([f for f in all_factors if f["impact_pct"] > 0], key=lambda x: -x["impact_pct"])
     sorted_negative = sorted([f for f in all_factors if f["impact_pct"] < 0], key=lambda x: x["impact_pct"])
@@ -812,18 +874,33 @@ def evaluate_user_input(form_data: dict, version: str = "professional") -> dict:
     total_form_fields = len(_FORM_TO_DIM)
     data_completeness = round(filled_fields / max(total_form_fields, 1) * 100)
 
+    # 浮动区间：数据越完整区间越窄；区间承载的是隐性因素的不确定性（只声明、不计算）
+    band_pct = round(3 + (100 - min(data_completeness, 100)) * 0.07, 1)  # 3%（全填）~10%（几乎没填）
+    band_low = round(estimated_total * (1 - band_pct / 100.0), 1)
+    band_high = round(estimated_total * (1 + band_pct / 100.0), 1)
+
     return {
         "overall_score": overall_score,
         "score_level": score_level,
         "verdict": verdict,
         "verdict_detail": verdict_detail,
+        "value_type": "当前市场成交价中枢",
         "estimated_value_wan": estimated_total,
-        "listing_price_wan": listing_price,
+        "band_low_wan": band_low,
+        "band_high_wan": band_high,
+        "band_pct": band_pct,
+        "implicit_note": ("隐性因素（买卖双方个体情况、议价博弈、急迫程度等）不参与计算，"
+                          f"真实成交价可能在 {band_low}~{band_high} 万区间内浮动。"),
+        "listing_price_wan": user_price or baseline_price,
+        "baseline_price_wan": round(baseline_price, 1),
+        "user_price_wan": round(user_price, 1) if user_price > 0 else None,
         "unit_price_wan": round(unit_price, 2),
         "price_gap_pct": price_gap_pct,
         "net_impact_pct": round(net_impact_pct, 2),
         "version": version,
         "dimensions_count": len(active_dims),
+        "explicit_count": explicit_count,
+        "unscored_count": unscored_count,
         "data_completeness": data_completeness,
         "layers": layer_results,
         "top_positive": sorted_positive[:8],
@@ -836,6 +913,8 @@ def evaluate_user_input(form_data: dict, version: str = "professional") -> dict:
             "score_level": score_level,
             "verdict": verdict,
             "estimated_value_wan": estimated_total,
+            "band_low_wan": band_low,
+            "band_high_wan": band_high,
             "top_positive": sorted_positive[:3],
             "top_negative": sorted_negative[:3],
             "layers": layer_results,

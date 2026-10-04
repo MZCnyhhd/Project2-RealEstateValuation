@@ -59,8 +59,11 @@
                 </div>
                 <div class="col-md-3 text-center">
                     <div class="mb-2">
-                        <small class="opacity-75">全息估值</small>
+                        <small class="opacity-75">{{ valuation.value_type or '全息估值' }}</small>
                         <div class="fs-3 fw-bold">{{ valuation.estimated_value_wan }}<small class="fs-6">万</small></div>
+                        {% if valuation.band_low_wan %}
+                        <small class="text-muted">区间 {{ valuation.band_low_wan }} ~ {{ valuation.band_high_wan }} 万</small>
+                        {% endif %}
                     </div>
                     <div>
                         <small class="opacity-75">您的报价</small>
@@ -70,6 +73,23 @@
                         <span class="badge bg-light text-dark">数据完整度 {{ valuation.data_completeness }}%</span>
                         <span class="badge bg-light text-dark">{{ valuation.dimensions_count }}维度</span>
                     </div>
+                    {% if valuation.anchor %}
+                    <div class="mt-2 small text-start border rounded p-2 bg-light-subtle">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="opacity-75">定价基准</span>
+                            <span class="fw-bold">{{ valuation.anchor.baseline }} 万</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <span class="opacity-75">来源</span>
+                            <span>{{ valuation.anchor.source }}
+                                <span class="badge bg-{% if valuation.anchor.confidence == '中' %}success{% elif valuation.anchor.confidence == '低' %}warning{% else %}secondary{% endif %} ms-1">置信度{{ valuation.anchor.confidence }}</span>
+                            </span>
+                        </div>
+                        {% if valuation.anchor.note %}
+                        <div class="opacity-75 mt-1">{{ valuation.anchor.note }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -220,20 +240,29 @@
                 {% if order %}<small class="text-muted">订单号 <code>{{ order.order_no }}</code> · {{ order.paid_at }}</small>{% endif %}
             </div>
             <div class="card-body">
-                <h6 class="mb-3"><i class="bi bi-list-columns me-1"></i>全部维度评估明细 ({{ valuation.dimensions_count }}项)</h6>
+                <div class="alert alert-light border d-flex align-items-start py-2 px-3 mb-3" role="note">
+                    <i class="bi bi-info-circle text-secondary me-2 mt-1"></i>
+                    <div class="small mb-0">
+                        本报告只计算<b>显性因素</b>（您填写的事实 + 平台推导 + 城市公开常量），共 <b>{{ valuation.explicit_count }}</b> 项参与计算；
+                        其余 <b>{{ valuation.unscored_count }}</b> 项因未采集不产生加减价。
+                        <span class="text-muted">{{ valuation.implicit_note }}</span>
+                    </div>
+                </div>
+                <h6 class="mb-3"><i class="bi bi-list-columns me-1"></i>显性因素评估明细 ({{ valuation.explicit_count }}项)</h6>
 
                 {% for layer in valuation.layers %}
                 <div class="mb-4">
-                    <h6 class="text-primary border-bottom pb-1">第{{ layer.id }}层：{{ layer.name }} <small class="text-muted">(权重{{ (layer.weight*100)|int }}% · 得分{{ layer.score }})</small></h6>
+                    <h6 class="text-primary border-bottom pb-1">第{{ layer.id }}层：{{ layer.name }} <small class="text-muted">(权重{{ (layer.weight*100)|int }}% · 得分{{ layer.score }} · 已采集{{ layer.factors_count }}项)</small></h6>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover mb-0" style="font-size:.85rem;">
-                            <thead class="table-light"><tr><th>维度</th><th>分类</th><th>当前值</th><th>影响%</th><th>折合万元</th></tr></thead>
+                            <thead class="table-light"><tr><th>维度</th><th>分类</th><th>当前值</th><th>数据来源</th><th>影响%</th><th>折合万元</th></tr></thead>
                             <tbody>
                             {% for f in valuation.all_factors if f.layer == layer.id %}
                                 <tr>
                                     <td>{{ f.name }}</td>
                                     <td><small class="text-muted">{{ f.category }}</small></td>
                                     <td>{{ f.display_value }}</td>
+                                    <td><small class="badge {% if f.source == '用户填写' %}bg-primary{% elif f.source == '城市常量' %}bg-secondary{% else %}bg-info text-dark{% endif %}">{{ f.source }}</small></td>
                                     <td class="{% if f.impact_pct > 0 %}text-success{% elif f.impact_pct < 0 %}text-danger{% endif %} fw-bold">{{ "%+.1f"|format(f.impact_pct) }}%</td>
                                     <td class="{% if f.impact_wan > 0 %}text-success{% elif f.impact_wan < 0 %}text-danger{% endif %}">{{ "%+.1f"|format(f.impact_wan) }}万</td>
                                 </tr>

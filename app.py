@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 from math import ceil
 from datetime import datetime
@@ -10,6 +11,7 @@ from llm_agent import build_agent_reply, general_chat
 from house_car_agent import build_house_car_reply, HUMAN_KEYWORDS
 from beijing_policy import apply_beijing_policy
 from valuation import evaluate_listing, evaluate_user_input, format_layout
+import market_anchor
 import payments
 import beijing_stats
 import listing_parser
@@ -431,7 +433,7 @@ PLANS = {
     "standard": {
         "key": "standard",
         "name": "全息估值报告 · 完整版",
-        "desc": "7层 × 182维度逐项明细 · 每项折合万元 · 可打印报告",
+        "desc": "7层 × 183维度逐项明细 · 每项折合万元 · 可打印报告",
         "price": _env_price("PRICE_STANDARD", VALUATION_PRICE),
         "kind": "report",
         "fulfill": "在线即时交付",
@@ -518,12 +520,18 @@ def valuate_parse_image():
         if len(uri) > 4_500_000:  # base64 后约 3MB 原图
             return jsonify({"ok": False, "error": "单张截图过大（>3MB），请压缩后重试"}), 400
 
-    fields, error = listing_parser.parse_images_with_vl(images)
+    fields, error, warning, fp_index = listing_parser.parse_images_with_vl(images)
     if error:
         return jsonify({"ok": False, "error": error}), 503
     logger.info("截图解析完成: 提取 %d 个字段", len(fields))
-    missing = [k for k in ("community", "area_size", "price") if not fields.get(k)]
-    return jsonify({"ok": True, "fields": fields, "filled_count": len(fields), "missing": missing})
+    # "还缺 N 个字段"按估值核心字段计数（不止必填 3 项，其余可选信息不逐一点名）
+    core_keys = ("community", "area_size", "price", "layout_rooms", "layout_halls",
+                 "layout_baths", "floor_frac", "orientation", "decoration",
+                 "build_year")
+    missing = [k for k in core_keys if not fields.get(k)]
+    return jsonify({"ok": True, "fields": fields, "filled_count": len(fields),
+                    "missing": missing, "warning": warning or "",
+                    "floor_plan_index": fp_index if isinstance(fp_index, int) else None})
 
 
 def _normalize_valuate_form():
@@ -542,6 +550,43 @@ def _normalize_valuate_form():
     for field in checkbox_fields:
         if field not in form_data:
             form_data[field] = ""
+
+    # 楼层两个控件：
+    # 已知 = "n/m"（所在楼层/总楼层，如 2/6）→ floor=n, total_floors=m
+    # 未填或格式不合法 → 按「未知」档位换算代表层数（低4/中14/高26，对应估值楼层分档）
+    frac = (form_data.get("floor_frac") or "").strip()
+    mf = re.match(r"^(\d{1,2})\s*/\s*(\d{1,3})$", frac)
+    if mf and 1 <= int(mf.group(1)) <= int(mf.group(2)) <= 99:
+        form_data["floor"] = mf.group(1)
+        form_data["total_floors"] = mf.group(2)
+        form_data.pop("floor_band", None)
+    else:
+        band = (form_data.get("floor_band") or "").strip()
+        if band:
+            form_data["floor"] = {"低楼层": "4", "中楼层": "14", "高楼层": "26"}.get(band, "")
+    # 得房率 = 套内/建面（引擎 l4_usable_rate 维度需要；套内>建面视为填错丢弃）
+    try:
+        _in = float(form_data.get("interior_area") or 0)
+        _ar = float(form_data.get("area_size") or 0)
+    except ValueError:
+        _in = _ar = 0.0
+    if _in > 0 and _ar > 0 and _in <= _ar:
+        form_data["usable_rate"] = round(_in / _ar, 3)
+    else:
+        form_data.pop("interior_area", None)
+        form_data.pop("usable_rate", None)
+
+    form_data.pop("floor_frac", None)
+    # 挂牌时间(日期) → 挂牌天数：填了日期以日期为准（比手填天数更准）
+    ld = (form_data.get("list_date") or "").strip()
+    if ld:
+        try:
+            days = (datetime.now() - datetime.strptime(ld, "%Y-%m-%d")).days
+            if 0 <= days <= 3650:
+                form_data["listing_days"] = str(days)
+        except ValueError:
+            pass
+    form_data.pop("list_date", None)
     return form_data
 
 
@@ -616,7 +661,11 @@ def _build_listing_from_form(form_data, order_no):
     title = f"{community} {layout}，{highlight}"
 
     bits = [f"建筑面积约{area:g}㎡，{layout}"]
-    if form_data.get("floor"):
+    if form_data.get("floor") and form_data.get("total_floors"):
+        bits.append(f"位于{form_data['floor']}/{form_data['total_floors']}层")
+    elif form_data.get("floor_band"):
+        bits.append(f"位于{form_data['floor_band']}")
+    elif form_data.get("floor"):
         bits.append(f"位于{form_data['floor']}层")
     if form_data.get("orientation"):
         bits.append(f"{form_data['orientation']}朝向")
@@ -838,10 +887,22 @@ def valuate_result():
 
     session["pending_valuation"] = order
     session["valuation_paid_no"] = order["order_no"]
-    valuation = evaluate_user_input(order["form_data"])
+    _fd = order["form_data"]
+
+    # 市场基准锚点：优先同小区房源样本单价中位数，缺省才用用户挂牌价
+    try:
+        anchor = market_anchor.get_baseline(
+            _fd.get("community", ""), _fd.get("area_size"), _fd.get("price"),
+            listings=get_repository().list_listings(),
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("市场锚点计算失败，回退挂牌价: %s", exc)
+        anchor = {"baseline": float(_fd.get("price") or 0), "source": "用户挂牌价",
+                  "confidence": "低", "unit_price": None, "samples": 0, "note": ""}
+    valuation = evaluate_user_input(_fd, baseline_price=anchor.get("baseline") or None)
+    valuation["anchor"] = anchor
 
     # 行情基准（渠道1：政府公开数据；无官方数据时为演示样例并在卡片上标注）
-    _fd = order["form_data"]
     try:
         benchmark = beijing_stats.get_market_benchmark(
             _fd.get("price"), _fd.get("area_size"),

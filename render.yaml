@@ -39,8 +39,20 @@ services:
       - key: BJ_DATA_USERKEY
         sync: false
       # 小米 MiMo 开放平台 API Key（全项目唯一 LLM：智能客服对话 / 房贷参数提取 / 截图视觉解析）
-      # 获取：https://mimo.mi.com ；模型默认 mimo-v2.5，接口 https://api.xiaomimimo.com/v1
+      # 获取：https://mimo.mi.com ；接口 https://api.xiaomimimo.com/v1
+      # 文本对话（客服/参数提取）用 MIMO_MODEL（默认 mimo-v2.5）；截图视觉解析用 MIMO_VL_MODEL
+      # （默认 mimo-v2.6-flash，用户 2026-10-03 拍板；备选 mimo-v2.6-pro-ultraspeed 实测最快 2~3 秒）
       - key: MIMO_API_KEY
         sync: false
       - key: MIMO_MODEL
+        sync: false
+      - key: MIMO_VL_MODEL
+        sync: false
+      # DeepSeek 开放平台（https://platform.deepseek.com）——截图视觉解析主力（关思考模式，实测 2~3 秒），
+      # MiMo 自动降为备用；不配则直接用 MiMo
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: DEEPSEEK_VL_MODEL
         sync: false

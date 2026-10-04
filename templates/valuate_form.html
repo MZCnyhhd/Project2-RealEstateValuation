@@ -12,34 +12,55 @@
             --brand-blue: #667eea;
             --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        body { background-color: #f8f9fa; }
+        html { scroll-behavior: smooth; }
+        body { background: linear-gradient(180deg, #f2f4fb 0%, #f8f9fa 320px); }
 
         /* Hero */
         .hero-banner {
-            background: var(--brand-gradient);
+            background: linear-gradient(135deg, #5a72e8 0%, #764ba2 55%, #9259b3 100%);
             color: #fff;
-            padding: 2.5rem 0;
-            margin-bottom: 2rem;
+            padding: 3rem 0;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
         }
+        .hero-banner::after {
+            content: "\F5A1";
+            font-family: "bootstrap-icons";
+            position: absolute;
+            right: -1.5rem; bottom: -2.5rem;
+            font-size: 12rem;
+            opacity: .08;
+            pointer-events: none;
+        }
+        .hero-banner h2 { font-weight: 800; letter-spacing: .02em; }
         .hero-banner .price-tag {
             font-size: .85rem;
-            background: rgba(255,255,255,.15);
-            padding: .25rem .75rem;
+            background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.22);
+            padding: .35rem .85rem;
             border-radius: 1rem;
+            backdrop-filter: blur(4px);
         }
 
-        /* Stepper */
+        /* Stepper（粘性，滚动时悬顶） */
         .stepper {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            position: relative;
-            margin-bottom: 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            background: rgba(248,249,250,.94);
+            backdrop-filter: blur(10px);
+            padding: .65rem 0 .35rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 0 .75rem .75rem;
         }
         .stepper::before {
             content: "";
             position: absolute;
-            top: 1.1rem;
+            top: 1.25rem;
             left: 10%;
             right: 10%;
             height: 2px;
@@ -50,7 +71,7 @@
             position: relative;
             z-index: 1;
             text-align: center;
-            background: #f8f9fa;
+            background: transparent;
             padding: 0 .5rem;
             cursor: pointer;
             flex: 1;
@@ -67,13 +88,13 @@
             font-weight: 700;
             transition: all .2s;
         }
-        .step:hover .step-icon { border-color: var(--brand-blue); color: var(--brand-blue); }
-        .step.active .step-icon { background: var(--brand-gradient); border-color: transparent; color: #fff; }
+        .step:hover .step-icon { border-color: var(--brand-blue); color: var(--brand-blue); transform: translateY(-2px); }
+        .step.active .step-icon { background: var(--brand-gradient); border-color: transparent; color: #fff; box-shadow: 0 .35rem .9rem rgba(102,126,234,.35); }
         .step-label { font-size: .8rem; color: #6c757d; font-weight: 500; }
-        .step.active .step-label { color: var(--brand-purple); }
+        .step.active .step-label { color: var(--brand-purple); font-weight: 700; }
         @media (max-width: 767px) {
             .stepper { margin-bottom: 1.25rem; }
-            .stepper::before { top: .85rem; }
+            .stepper::before { top: 1rem; }
             .step-icon { width: 1.75rem; height: 1.75rem; line-height: 1.75rem; font-size: .8rem; }
             .step-label { display: none; }
         }
@@ -83,12 +104,15 @@
             border: none;
             border-radius: 1rem;
             background: #fff;
-            box-shadow: 0 .125rem .5rem rgba(0,0,0,.04);
+            box-shadow: 0 .125rem .5rem rgba(30,34,90,.05);
             margin-bottom: 1.5rem;
             overflow: hidden;
+            scroll-margin-top: 92px;
+            transition: box-shadow .25s ease;
         }
+        .val-section:hover { box-shadow: 0 .45rem 1.4rem rgba(102,126,234,.12); }
         .val-section .section-header {
-            background: #f8f9ff;
+            background: linear-gradient(90deg, #f4f5ff 0%, #fafbff 100%);
             padding: 1rem 1.25rem;
             border-bottom: 1px solid #eef0ff;
             display: flex;
@@ -102,42 +126,40 @@
             background: var(--brand-gradient);
             color: #fff;
             font-size: .8rem; font-weight: 700;
+            box-shadow: 0 .25rem .6rem rgba(118,75,162,.28);
         }
         .val-section .section-header h6 {
             margin: 0; font-weight: 700; color: #4a4a68;
         }
-        .val-section .card-body { padding: 1.25rem; }
+        .val-section .card-body { padding: 1.35rem; }
         .form-label { font-size: .88rem; color: #555; margin-bottom: .35rem; }
         .form-control, .form-select { font-size: .92rem; }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 .2rem rgba(102,126,234,.15);
+        }
 
-        /* Sticky summary */
-        .sticky-summary {
-            position: sticky;
-            top: 1rem;
-            z-index: 1020;
+        /* 粘贴解析区（虚线投放框） */
+        #pasteHelper {
+            border: 2px dashed #ccd2ee !important;
+            border-radius: .9rem !important;
+            background: #fbfcff;
+            transition: border-color .2s, background .2s;
         }
-        .summary-card {
-            border: none;
-            border-radius: 1rem;
-            background: #fff;
-            box-shadow: 0 .25rem 1rem rgba(0,0,0,.08);
+        #pasteHelper:hover, #pasteHelper.dragover {
+            border-color: var(--brand-blue) !important;
+            background: #f4f6ff;
         }
-        .summary-card .card-header {
-            background: var(--brand-gradient);
-            color: #fff;
-            border: none;
-            border-radius: 1rem 1rem 0 0;
-            padding: 1rem 1.25rem;
-        }
+
+        /* 提交区 */
         .price-board {
             background: #f8f9ff;
             border-radius: .75rem;
             padding: 1rem;
             text-align: center;
-            margin-bottom: 1rem;
         }
         .price-board .unit-price {
-            font-size: 1.75rem;
+            font-size: 1.9rem;
             font-weight: 800;
             color: var(--brand-purple);
             line-height: 1;
@@ -151,18 +173,79 @@
             border: none;
             color: #332200;
             font-weight: 700;
+            box-shadow: 0 .4rem 1rem rgba(253,160,133,.35);
+            transition: transform .15s ease, box-shadow .2s ease;
         }
-        .btn-submit:hover { filter: brightness(1.05); }
+        .btn-submit:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 .55rem 1.2rem rgba(253,160,133,.45); }
+        .btn-submit:active { transform: translateY(0); }
 
-        /* Mobile bottom CTA */
-        .mobile-cta {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: #fff;
-            box-shadow: 0 -.25rem 1rem rgba(0,0,0,.08);
-            padding: .75rem 1rem;
-            z-index: 1030;
+        /* 户型图容器 */
+        .floor-plan-box {
+            border: 2px dashed #ccd2ee;
+            border-radius: .9rem;
+            background: #fbfcff;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: .75rem;
         }
+        .floor-plan-box img {
+            max-width: 100%;
+            max-height: 420px;   /* 适中偏大：利用卡片上下空白，不撑满全卡 */
+            cursor: zoom-in;
+            border-radius: .5rem;
+        }
+        .floor-plan-empty { text-align: center; color: #98a0b8; font-size: .85rem; }
+        .floor-plan-empty i { font-size: 1.8rem; }
+
+        /* 房屋属性内部分组子卡片 */
+        .subcard {
+            border: 1px solid #eef0ff;
+            border-radius: .75rem;
+            background: #fff;
+            height: 100%;
+            overflow: hidden;
+        }
+        .subcard-head {
+            background: linear-gradient(90deg, #f0f2ff 0%, #fafbff 100%);
+            padding: .55rem .9rem;
+            font-size: .85rem;
+            font-weight: 700;
+            color: #4a4a68;
+            border-bottom: 1px solid #eef0ff;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+        .subcard-body { padding: .9rem; }
+        .highlight-wrap {
+            border: 1px dashed #d9def5;
+            border-radius: .6rem;
+            padding: .55rem .7rem;
+            background: #fbfcff;
+        }
+
+        /* 图片放大预览（点击遮罩关闭） */
+        .img-lightbox {
+            position: fixed; inset: 0;
+            background: rgba(13,16,32,.85);
+            z-index: 3000;
+            display: none;
+            align-items: center; justify-content: center;
+            cursor: zoom-out;
+            padding: 2rem;
+        }
+        .img-lightbox.show { display: flex; }
+        .img-lightbox img {
+            max-width: 94vw; max-height: 94vh;
+            border-radius: .6rem;
+            box-shadow: 0 2rem 5rem rgba(0,0,0,.55);
+        }
+        #imgPreview img { cursor: zoom-in; }
+
+        /* AI 识别填充的字体（蓝色），手动修改后恢复 */
+        .ai-filled { color: #0d6efd !important; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -182,9 +265,9 @@
     <div class="hero-banner">
         <div class="container">
             <h2><i class="bi bi-gem me-2"></i>房地产全息价值评估</h2>
-            <p class="mb-2 opacity-90">7层 × 182维度，AI 驱动的房产估值引擎。填写房源信息，生成专业估值报告。</p>
+            <p class="mb-2 opacity-90">7层 × 183维度，AI 驱动的房产估值引擎。填写房源信息，生成专业估值报告。</p>
             <div class="d-flex gap-3 flex-wrap">
-                <span class="price-tag"><i class="bi bi-gem me-1"></i>专业版 ¥{{ price }}：7层 × 182维度完整报告</span>
+                <span class="price-tag"><i class="bi bi-gem me-1"></i>专业版 ¥{{ price }}：7层 × 183维度完整报告</span>
                 <span class="price-tag"><i class="bi bi-shield-check me-1"></i>含税费测算 · 成交建议 · 政策校验</span>
             </div>
         </div>
@@ -223,9 +306,9 @@
         </div>
 
         <form action="/valuate/report" method="POST" id="valuateForm">
-            <div class="row g-4">
-                <!-- 左侧表单 -->
-                <div class="col-lg-8">
+            <div class="row g-4 justify-content-center">
+                <!-- 居中表单列 -->
+                <div class="col-12 col-lg-11 col-xl-10">
 
                     <!-- 1. 房源基础 -->
                     <div class="card val-section" id="section-basic">
@@ -236,51 +319,51 @@
                         <div class="card-body">
                             <!-- 粘贴智能解析（文字 / 截图） -->
                             <div class="alert alert-light border mb-4" id="pasteHelper">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-magic text-primary me-2"></i>
-                                    <strong class="small">已有房源信息？粘贴文字或截图，自动填充</strong>
+                                <div class="d-flex align-items-center mb-2 flex-wrap">
+                                    <a href="https://bj.lianjia.com/ershoufang/" target="_blank" rel="noopener"
+                                       class="small text-decoration-none">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>去链家找在售房源，把「户型图」「基本信息」粘贴到这里
+                                    </a>
                                 </div>
-                                <textarea id="pasteBox" class="form-control mb-2" rows="4"
-                                          placeholder="方式一：把在售房源的文字信息复制到这里，例如：&#10;天通苑本六区 4室2厅2卫 162.82㎡ 373万 高楼层(共28层) 2005年建 南北通透 有电梯&#10;方式二：直接把房源详情页截图粘贴/上传到下方。"></textarea>
                                 <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                    <button type="button" class="btn btn-primary btn-sm" id="parsePasteBtn">
-                                        <i class="bi bi-stars me-1"></i>解析文字
-                                    </button>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" id="selectImgBtn">
-                                        <i class="bi bi-image me-1"></i>选择/粘贴截图
-                                    </button>
-                                    <input type="file" id="imgInput" accept="image/*" multiple class="d-none">
                                     <button type="button" class="btn btn-outline-primary btn-sm d-none" id="parseImgBtn">
-                                        <i class="bi bi-eye me-1"></i>解析截图（<span id="imgCount">0</span> 张）
+                                        <span class="parse-idle"><i class="bi bi-eye me-1"></i>解析截图（<span id="imgCount">0</span> 张）</span>
+                                        <span class="parse-busy d-none"><span class="spinner-border spinner-border-sm me-1"></span>AI 识别中…（通常 10~40 秒，请稍候）</span>
                                     </button>
+                                    <span id="parseTimer" class="small text-muted"></span>
                                     <span id="parseResult" class="small text-muted"></span>
                                 </div>
                                 <div id="imgPreview" class="d-none d-flex gap-2 mb-2 flex-wrap"></div>
-                                <div class="form-text mb-0 mt-2">
-                                    <i class="bi bi-shield-check me-1"></i>只解析你主动提交的文字/截图（不会访问任何第三方网站），内容即用即弃不保存；
-                                    只提取价格、面积、户型等事实信息，解析结果需你确认后提交。截图解析由 AI 视觉服务完成。
-                                </div>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">小区名称 <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control required-field" name="community" required placeholder="如：金茂府">
+                                    <input type="text" class="form-control required-field" name="community" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">详细地址</label>
-                                    <input type="text" class="form-control" name="address" placeholder="如：朝阳区花园路96号院">
+                                    <input type="text" class="form-control" name="address">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">建筑面积(㎡) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control required-field" name="area_size" id="area_size" required placeholder="如：89.5">
+                                    <input type="number" step="0.1" class="form-control required-field" name="area_size" id="area_size" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">报价/挂牌价(万) <span class="text-danger">*</span></label>
-                                    <input type="number" step="1" class="form-control required-field" name="price" id="price" required placeholder="如：520">
+                                    <input type="number" step="1" class="form-control required-field" name="price" id="price" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">建筑年代</label>
-                                    <input type="number" class="form-control" name="build_year" placeholder="如：2018" min="1950" max="2026">
+                                    <input type="number" class="form-control" name="build_year" min="1950" max="2026">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">套内面积(㎡)</label>
+                                    <input type="number" step="0.1" class="form-control" name="interior_area">
+                                    <div class="form-text" id="usableRateHint">得房率 — （填套内面积自动计算）</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">上次交易年份</label>
+                                    <input type="number" class="form-control" name="last_trade_year" min="1980" max="2026">
                                 </div>
                             </div>
                         </div>
@@ -293,91 +376,152 @@
                             <h6><i class="bi bi-door-open me-2"></i>房屋属性</h6>
                         </div>
                         <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">室</label>
-                                    <input type="number" class="form-control" name="layout_rooms" value="3" min="0" max="10">
+                            <div class="row g-3 mb-3">
+                                <!-- 左：户型图 -->
+                                <div class="col-lg-6">
+                                    <div class="subcard h-100 d-flex flex-column">
+                                        <div class="subcard-head"><i class="bi bi-image me-1"></i>户型图</div>
+                                        <div class="subcard-body d-flex flex-grow-1">
+                                            <div class="floor-plan-box flex-grow-1" id="floorPlanBox">
+                                                <img id="floorPlanImg" alt="户型图" class="d-none">
+                                                <div class="floor-plan-empty" id="floorPlanEmpty">
+                                                    <i class="bi bi-image"></i>
+                                                    <div>上传户型图后在此显示</div>
+                                                    <div class="small">点「设为户型图」展示在此 · 点击可放大</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">厅</label>
-                                    <input type="number" class="form-control" name="layout_halls" value="2" min="0" max="5">
+                                <!-- 右：户型图信息 -->
+                                <div class="col-lg-6">
+                                    <div class="subcard h-100">
+                                        <div class="subcard-head"><i class="bi bi-grid-1x2 me-1"></i>户型图信息</div>
+                                        <div class="subcard-body">
+                                            <!-- 动态房间表：户型图上有什么房间就显示什么行（格式同链家：房间/面积/朝向/窗型） -->
+                                            <div class="row g-2 small text-secondary fw-bold mb-1">
+                                                <div class="col-4">房间</div>
+                                                <div class="col-2">面积(㎡)</div>
+                                                <div class="col-2">朝向</div>
+                                                <div class="col-3">窗型</div>
+                                                <div class="col-1"></div>
+                                            </div>
+                                            <div id="roomRows"></div>
+                                            <div id="roomEmpty" class="small text-secondary mb-1">暂无房间：点「添加房间」手动填写，或上传户型图点「解析截图」自动识别</div>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="addRoomBtn"><i class="bi bi-plus-lg me-1"></i>添加房间</button>
+                                            <div class="form-text mt-1">按户型图逐间填写；解析截图后自动生成，可增删修改</div>
+                                            <!-- 提交用隐藏字段：房间明细串 + 户型数量（由房间表自动统计） -->
+                                            <input type="hidden" name="room_detail" id="roomDetailInput">
+                                            <input type="hidden" name="layout_rooms">
+                                            <input type="hidden" name="layout_halls">
+                                            <input type="hidden" name="layout_baths">
+                                            <input type="hidden" name="layout_kitchens">
+                                            <input type="hidden" name="layout_balconies">
+                                            <input type="hidden" name="layout_terraces">
+                                            <input type="hidden" name="layout_gardens">
+                                            <input type="hidden" name="layout_storages">
+                                            <div class="mt-3">
+                                                <label class="form-label">户型亮点</label>
+                                                    <div class="highlight-wrap d-flex flex-wrap gap-3">
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="north_south" value="1" id="ck_ns"><label class="form-check-label" for="ck_ns">南北通透</label></div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_elevator" value="1" id="ck_ev"><label class="form-check-label" for="ck_ev">有电梯</label></div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="squareness" value="1" id="ck_sq"><label class="form-check-label" for="ck_sq">户型方正</label></div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="dry_wet_sep" value="1" id="ck_dw"><label class="form-check-label" for="ck_dw">干湿分离</label></div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="bright_bath" value="1" id="ck_bb"><label class="form-check-label" for="ck_bb">明卫(有窗)</label></div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="bright_kitchen" value="1" id="ck_bk"><label class="form-check-label" for="ck_bk">明厨(有窗)</label></div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_central_ac" value="1" id="ck_ac"><label class="form-check-label" for="ck_ac">中央空调</label></div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_fresh_air" value="1" id="ck_fa"><label class="form-check-label" for="ck_fa">新风系统</label></div>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">卫</label>
-                                    <input type="number" class="form-control" name="layout_baths" value="1" min="0" max="5">
-                                </div>
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">厨</label>
-                                    <input type="number" class="form-control" name="layout_kitchens" value="1" min="0" max="5">
-                                </div>
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">阳台</label>
-                                    <input type="number" class="form-control" name="layout_balconies" value="1" min="0" max="10">
-                                </div>
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">露台</label>
-                                    <input type="number" class="form-control" name="layout_terraces" value="0" min="0" max="10">
-                                </div>
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">花园</label>
-                                    <input type="number" class="form-control" name="layout_gardens" value="0" min="0" max="10">
-                                </div>
-                                <div class="col-4 col-md-2">
-                                    <label class="form-label">储藏室</label>
-                                    <input type="number" class="form-control" name="layout_storages" value="0" min="0" max="5">
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="form-label">所在楼层</label>
-                                    <input type="number" class="form-control" name="floor" placeholder="如：12">
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="form-label">总楼层</label>
-                                    <input type="number" class="form-control" name="total_floors" placeholder="如：28">
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <label class="form-label">朝向</label>
-                                    <select class="form-select" name="orientation">
-                                        <option value="南">南</option>
-                                        <option value="东南">东南</option>
-                                        <option value="西南">西南</option>
-                                        <option value="东">东</option>
-                                        <option value="西">西</option>
-                                        <option value="北">北</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <label class="form-label">装修状况</label>
-                                    <select class="form-select" name="decoration">
-                                        <option value="毛坯">毛坯</option>
-                                        <option value="简装">简装</option>
-                                        <option value="精装" selected>精装</option>
-                                        <option value="豪装">豪装</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <label class="form-label">梯户比</label>
-                                    <select class="form-select" name="elevator_ratio">
-                                        <option value="1T2">1梯2户</option>
-                                        <option value="2T4" selected>2梯4户</option>
-                                        <option value="2T6">2梯6户</option>
-                                        <option value="3T8">3梯8户</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 col-md-4">
-                                    <label class="form-label">层高(米)</label>
-                                    <input type="number" step="0.1" class="form-control" name="ceiling_height" placeholder="如：2.9" value="2.8">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">户型亮点</label>
-                                    <div class="d-flex flex-wrap gap-3">
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="north_south" value="1" id="ck_ns"><label class="form-check-label" for="ck_ns">南北通透</label></div>
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_elevator" value="1" id="ck_ev" checked><label class="form-check-label" for="ck_ev">有电梯</label></div>
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="squareness" value="1" id="ck_sq" checked><label class="form-check-label" for="ck_sq">户型方正</label></div>
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="dry_wet_sep" value="1" id="ck_dw"><label class="form-check-label" for="ck_dw">干湿分离</label></div>
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="bright_bath" value="1" id="ck_bb"><label class="form-check-label" for="ck_bb">明卫(有窗)</label></div>
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="bright_kitchen" value="1" id="ck_bk"><label class="form-check-label" for="ck_bk">明厨(有窗)</label></div>
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_central_ac" value="1" id="ck_ac"><label class="form-check-label" for="ck_ac">中央空调</label></div>
-                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="has_fresh_air" value="1" id="ck_fa"><label class="form-check-label" for="ck_fa">新风系统</label></div>
+                            </div>
+                            <!-- 下排：其他信息 -->
+                            <div class="subcard">
+                                <div class="subcard-head"><i class="bi bi-sliders me-1"></i>其他信息</div>
+                                <div class="subcard-body">
+                                    <div class="row g-3">
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label">楼层情况（楼层/层高）</label>
+                                            <input type="text" class="form-control" name="floor_frac" placeholder="请选择">
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label">楼层情况（未知）</label>
+                                            <select class="form-select" name="floor_band">
+                                                <option value="" selected>请选择</option>
+                                                <option value="低楼层">低楼层</option>
+                                                <option value="中楼层">中楼层</option>
+                                                <option value="高楼层">高楼层</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label">朝向</label>
+                                            <select class="form-select" name="orientation">
+                                                <option value="">请选择</option>
+                                                <option value="南">南</option>
+                                                <option value="南北">南北</option>
+                                                <option value="东南">东南</option>
+                                                <option value="西南">西南</option>
+                                                <option value="东">东</option>
+                                                <option value="西">西</option>
+                                                <option value="北">北</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label">装修状况</label>
+                                            <select class="form-select" name="decoration">
+                                                <option value="">请选择</option>
+                                                <option value="毛坯">毛坯</option>
+                                                <option value="简装">简装</option>
+                                                <option value="精装">精装</option>
+                                                <option value="豪装">豪装</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label">梯户比</label>
+                                            <select class="form-select" name="elevator_ratio">
+                                                <option value="">请选择</option>
+                                                <option value="1T2">1梯2户</option>
+                                                <option value="2T4">2梯4户</option>
+                                                <option value="2T6">2梯6户</option>
+                                                <option value="3T8">3梯8户</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label">层高(米)</label>
+                                            <input type="number" step="0.1" class="form-control" name="ceiling_height">
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <label class="form-label">户型结构</label>
+                                            <select class="form-select" name="layout_structure">
+                                                <option value="">请选择</option>
+                                                <option value="平层">平层</option>
+                                                <option value="错层">错层</option>
+                                                <option value="跃层">跃层</option>
+                                                <option value="复式">复式</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <label class="form-label">建筑类型</label>
+                                            <select class="form-select" name="building_type">
+                                                <option value="">请选择</option>
+                                                <option value="塔楼">塔楼</option>
+                                                <option value="板楼">板楼</option>
+                                                <option value="塔板结合">塔板结合</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <label class="form-label">建筑结构</label>
+                                            <select class="form-select" name="building_structure">
+                                                <option value="">请选择</option>
+                                                <option value="钢混">钢混</option>
+                                                <option value="砖混">砖混</option>
+                                                <option value="混合">混合</option>
+                                                <option value="钢结构">钢结构</option>
+                                                <option value="砖木">砖木</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -394,19 +538,19 @@
                             <div class="row g-3">
                                 <div class="col-6 col-md-3">
                                     <label class="form-label">容积率</label>
-                                    <input type="number" step="0.1" class="form-control" name="far" placeholder="如：2.5">
+                                    <input type="number" step="0.1" class="form-control" name="far">
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <label class="form-label">绿化率(%)</label>
-                                    <input type="number" class="form-control" name="green_rate" placeholder="如：35">
+                                    <input type="number" class="form-control" name="green_rate">
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <label class="form-label">物业费(元/㎡/月)</label>
-                                    <input type="number" step="0.1" class="form-control" name="property_fee" placeholder="如：3.5">
+                                    <input type="number" step="0.1" class="form-control" name="property_fee">
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <label class="form-label">车位配比</label>
-                                    <input type="number" step="0.1" class="form-control" name="parking_ratio" placeholder="如：1.2">
+                                    <input type="number" step="0.1" class="form-control" name="parking_ratio">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">物业/开发商品牌</label>
@@ -423,22 +567,22 @@
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">总户数</label>
-                                    <input type="number" class="form-control" name="total_units" placeholder="如：800">
+                                    <input type="number" class="form-control" name="total_units">
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">楼间距(米)</label>
-                                    <input type="number" class="form-control" name="building_gap" placeholder="如：45">
+                                    <input type="number" class="form-control" name="building_gap">
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check"><input class="form-check-input" type="checkbox" name="ped_car_split" value="1" id="ck_pc"><label class="form-check-label" for="ck_pc">人车分流</label></div>
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">距最近地铁站(米)</label>
-                                    <input type="number" class="form-control" name="subway_distance" placeholder="如：500">
+                                    <input type="number" class="form-control" name="subway_distance">
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">距CBD通勤(分钟)</label>
-                                    <input type="number" class="form-control" name="cbd_commute" placeholder="如：35">
+                                    <input type="number" class="form-control" name="cbd_commute">
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">对口学校等级</label>
@@ -451,21 +595,22 @@
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">距三甲医院(分钟)</label>
-                                    <input type="number" class="form-control" name="hospital_min" placeholder="如：15">
+                                    <input type="number" class="form-control" name="hospital_min">
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">距最近公园(米)</label>
-                                    <input type="number" class="form-control" name="park_distance" placeholder="如：800">
+                                    <input type="number" class="form-control" name="park_distance">
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">距大型商超(米)</label>
-                                    <input type="number" class="form-control" name="mall_distance" placeholder="如：1200">
+                                    <input type="number" class="form-control" name="mall_distance">
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">噪音环境</label>
                                     <select class="form-select" name="noise_level">
+                                        <option value="">请选择</option>
                                         <option value="安静">安静</option>
-                                        <option value="一般" selected>一般</option>
+                                        <option value="一般">一般</option>
                                         <option value="临街">临街</option>
                                         <option value="临高架">临高架/铁路</option>
                                     </select>
@@ -473,6 +618,7 @@
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">窗外景观</label>
                                     <select class="form-select" name="view_type">
+                                        <option value="">请选择</option>
                                         <option value="无遮挡">无遮挡(开阔)</option>
                                         <option value="公园景">公园/绿化景</option>
                                         <option value="湖景">湖景/水景</option>
@@ -495,16 +641,50 @@
                                 <div class="col-md-6">
                                     <label class="form-label">产权类型</label>
                                     <select class="form-select" name="property_type">
-                                        <option value="商品房" selected>商品房</option>
+                                        <option value="">请选择</option>
+                                        <option value="商品房">商品房</option>
                                         <option value="已购公房">已购公房(房改房)</option>
                                         <option value="经适房">经济适用房</option>
                                         <option value="共有产权">共有产权房</option>
                                         <option value="商住两用">商住两用</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
+                                    <label class="form-label">房屋用途</label>
+                                    <select class="form-select" name="property_use">
+                                        <option value="">请选择</option>
+                                        <option value="普通住宅">普通住宅</option>
+                                        <option value="公寓">公寓</option>
+                                        <option value="商住两用">商住两用</option>
+                                        <option value="别墅">别墅</option>
+                                        <option value="办公">办公/写字楼</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">产权所属</label>
+                                    <select class="form-select" name="ownership">
+                                        <option value="">请选择</option>
+                                        <option value="非共有">非共有(独占)</option>
+                                        <option value="共有">共有</option>
+                                        <option value="部分共有">部分共有</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">挂牌时间</label>
+                                    <input type="date" class="form-control" name="list_date">
+                                    <div class="form-text">填日期自动换算挂牌天数</div>
+                                </div>
+                                <div class="col-md-4">
                                     <label class="form-label">挂牌天数</label>
-                                    <input type="number" class="form-control" name="listing_days" placeholder="如：45">
+                                    <input type="number" class="form-control" name="listing_days">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">房本备件</label>
+                                    <select class="form-select" name="cert_photos">
+                                        <option value="">请选择</option>
+                                        <option value="已上传房本照片">已上传房本照片</option>
+                                        <option value="未上传房本照片">未上传房本照片</option>
+                                    </select>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">交易标签</label>
@@ -547,6 +727,7 @@
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">供暖方式</label>
                                     <select class="form-select" name="heating_type">
+                                        <option value="">请选择</option>
                                         <option value="集中供暖">集中供暖</option>
                                         <option value="地暖">地暖</option>
                                         <option value="自采暖">自采暖</option>
@@ -556,6 +737,7 @@
                                 <div class="col-6 col-md-4">
                                     <label class="form-label">窗户类型</label>
                                     <select class="form-select" name="window_type">
+                                        <option value="">请选择</option>
                                         <option value="断桥铝">断桥铝(双层中空)</option>
                                         <option value="塑钢">塑钢</option>
                                         <option value="铝合金">铝合金(单层)</option>
@@ -565,35 +747,23 @@
                         </div>
                     </div>
 
-                    <!-- 5. 提交区（桌面端显示，移动端被底部 CTA 替代） -->
-                    <div class="card val-section d-none d-lg-block" id="section-submit">
-                        <div class="card-body text-center py-4" style="background: var(--brand-gradient); color: #fff; border-radius: 1rem;">
-                            <p class="mb-3 opacity-90"><i class="bi bi-info-circle me-1"></i>填写越完整，估值越精准（当前支持 182 个评估维度）</p>
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold px-5 text-dark">
-                                <i class="bi bi-lock-fill me-2"></i>提交并支付 ¥{{ price }}
-                            </button>
-                            <p class="mb-1 mt-2 small opacity-75">支付后立即生成完整估值报告</p>
-                            <p class="mb-0 small opacity-75">提交即表示同意将所填房源信息用于本次估值计算与产品改进（仅限房产事实信息，不含身份证等敏感个人信息）</p>
+                    <!-- 5. 确认并提交（估算单价 + 必填检查 + 提交） -->
+                    <div class="card val-section" id="section-submit">
+                        <div class="section-header">
+                            <span class="section-num">5</span>
+                            <h6><i class="bi bi-check2-circle me-2"></i>确认并提交</h6>
                         </div>
-                    </div>
-                </div>
-
-                <!-- 右侧摘要 -->
-                <div class="col-lg-4">
-                    <div class="sticky-summary">
-                        <div class="card summary-card">
-                            <div class="card-header">
-                                <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>订单摘要</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="price-board">
-                                    <div class="text-muted small mb-1">估算单价</div>
-                                    <div class="unit-price" id="unitPrice">--</div>
-                                    <div class="text-muted small">万 / ㎡</div>
+                        <div class="card-body">
+                            <div class="row g-4 align-items-center">
+                                <div class="col-md-4">
+                                    <div class="price-board">
+                                        <div class="text-muted small mb-1">估算单价</div>
+                                        <div class="unit-price" id="unitPrice">--</div>
+                                        <div class="text-muted small">万 / ㎡</div>
+                                    </div>
                                 </div>
-
-                                <h6 class="fw-bold mb-2">必填项检查</h6>
-                                <div class="mb-3">
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold mb-2"><i class="bi bi-list-check me-1"></i>必填项检查</h6>
                                     <div class="check-item pending mb-1" id="check-community">
                                         <i class="bi bi-circle"></i> <span>小区名称</span>
                                     </div>
@@ -603,13 +773,16 @@
                                     <div class="check-item pending mb-1" id="check-price">
                                         <i class="bi bi-circle"></i> <span>挂牌报价</span>
                                     </div>
+                                    <p class="text-muted small mt-2 mb-0">填写越完整，估值越精准（当前支持 183 个评估维度）</p>
                                 </div>
-
-                                <button type="submit" class="btn btn-submit btn-lg w-100 fw-bold">
-                                    <i class="bi bi-lock-fill me-2"></i>提交并支付 ¥{{ price }}
-                                </button>
-                                <p class="text-muted small text-center mt-2 mb-0">支付后解锁 182 维度完整报告</p>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-submit btn-lg w-100 fw-bold">
+                                        <i class="bi bi-lock-fill me-2"></i>提交并支付 ¥{{ price }}
+                                    </button>
+                                    <p class="text-muted small text-center mt-2 mb-0">支付后立即生成 183 维度完整报告</p>
+                                </div>
                             </div>
+                            <p class="text-muted small text-center mt-3 mb-0"><i class="bi bi-shield-check me-1"></i>提交即表示同意将所填房源信息用于本次估值计算与产品改进（仅限房产事实信息，不含身份证等敏感个人信息）</p>
                         </div>
                     </div>
                 </div>
@@ -617,18 +790,13 @@
         </form>
     </div>
 
-    <!-- 移动端固定提交栏 -->
-    <div class="mobile-cta d-lg-none">
-        <button type="submit" form="valuateForm" class="btn btn-submit w-100 fw-bold">
-            <i class="bi bi-lock-fill me-2"></i>提交并支付 ¥{{ price }}
-        </button>
-    </div>
-
     <footer class="py-4 bg-light d-none d-lg-block">
         <div class="container text-center text-muted">
             <p class="mb-0">&copy; 2026 房地产智能Agent · 全息估值引擎 v1.0</p>
         </div>
     </footer>
+
+    <div class="img-lightbox" id="imgLightbox"><img id="lightboxImg" alt="图片预览"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -670,6 +838,24 @@
         areaInput.addEventListener('input', updateSummary);
         document.querySelector('[name="community"]').addEventListener('input', updateSummary);
 
+        // 得房率 = 套内/建面，实时提示（对应引擎 l4_usable_rate 维度）
+        const interiorInput = document.querySelector('[name="interior_area"]');
+        function updateUsableRate() {
+            const hint = document.getElementById('usableRateHint');
+            if (!hint) return;
+            const inArea = parseFloat(interiorInput.value);
+            const arArea = parseFloat(areaInput.value);
+            if (!inArea || !arArea) { hint.textContent = '得房率 — （填套内面积自动计算）'; return; }
+            if (inArea > arArea) { hint.textContent = '得房率 — 套内面积不能大于建筑面积'; hint.classList.add('text-danger'); return; }
+            const rate = (inArea / arArea * 100);
+            hint.classList.remove('text-danger');
+            hint.classList.toggle('text-success', rate >= 75);
+            hint.textContent = '得房率 ' + rate.toFixed(1) + '%' + (rate >= 75 ? '（高得房率，加分项）' : '');
+        }
+        interiorInput.addEventListener('input', updateUsableRate);
+        areaInput.addEventListener('input', updateUsableRate);
+        updateUsableRate();
+
         // Stepper 点击滚动到对应区域
         document.querySelectorAll('.step').forEach(step => {
             step.addEventListener('click', () => {
@@ -683,15 +869,34 @@
         // 初始化
         updateSummary();
 
-        // ===== 粘贴智能解析（文字 / 截图）=====
+        // ===== 截图智能解析（视觉）=====
         const _fieldNameMap = { community: '小区名称', area_size: '面积', price: '报价' };
 
         function applyFields(fields) {
             let filled = 0;
+            // 兼容文字粘贴解析返回的 floor+total_floors：组合成 "n/m" 填入「楼层情况（已知）」
+            // 只有总楼层数没有所在层 → 楼层未知，不填（走「未知」下拉）
+            fields = Object.assign({}, fields);
+            if (!fields.floor_frac && fields.floor && fields.total_floors) {
+                const fi = parseInt(fields.floor, 10), ti = parseInt(fields.total_floors, 10);
+                if (fi >= 1 && fi <= ti) fields.floor_frac = fi + '/' + ti;
+            }
+            delete fields.floor; delete fields.total_floors;
+            if (fields.room_detail) {
+                // 房间明细驱动动态房间表；户型数量由表行自动统计，忽略 AI 的独立计数字段
+                ['layout_rooms', 'layout_halls', 'layout_baths', 'layout_kitchens', 'layout_balconies',
+                 'layout_terraces', 'layout_gardens', 'layout_storages'].forEach(function (k) { delete fields[k]; });
+            }
             Object.keys(fields).forEach(function (name) {
+                const val = String(fields[name]);
+                if (name === 'room_detail') {
+                    if (val && val !== 'null' && val !== 'undefined') { setRoomsFromDetail(val); filled++; }
+                    return;
+                }
                 const el = document.querySelector('[name="' + name + '"]');
                 if (!el) return;
-                const val = String(fields[name]);
+                if (!val || val === 'null' || val === 'undefined') return;
+                if (el.type === 'checkbox' && val !== '1') return;  // "否"不勾选也不标蓝
                 if (el.type === 'checkbox') {
                     el.checked = (val === '1');
                 } else if (el.tagName === 'SELECT') {
@@ -701,13 +906,188 @@
                 } else {
                     el.value = val;
                 }
-                el.classList.add('border-success', 'border-2');
+                el.classList.add('border-success', 'border-2', 'ai-filled');
+                if (el.type === 'checkbox') {
+                    const fc = el.closest('.form-check');
+                    if (fc && fc.querySelector('label')) fc.querySelector('label').classList.add('ai-filled');
+                }
                 setTimeout(function () { el.classList.remove('border-success', 'border-2'); }, 4000);
                 filled++;
             });
             if (filled && typeof updateSummary === 'function') updateSummary();
             return filled;
         }
+
+        // ===== 动态房间表：户型图上有什么房间就有什么行（格式同链家：房间/面积/朝向/窗型） =====
+        const ORIENTS = ['南', '北', '东', '西', '东南', '西南', '东北', '西北', '南北', '东西', '无'];
+        const WINDOWS = ['普通窗', '落地窗', '飘窗', '无窗'];
+        function escHtml(s) {
+            return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function buildOptions(list, selected) {
+            return [''].concat(list).map(function (o) {
+                return '<option value="' + o + '"' + (o === (selected || '') ? ' selected' : '') + '>' + (o || '—') + '</option>';
+            }).join('');
+        }
+        function addRoomRow(name, area, orient, win) {
+            if (ORIENTS.indexOf(orient) < 0) orient = '';
+            if (WINDOWS.indexOf(win) < 0) win = '';
+            const div = document.createElement('div');
+            div.className = 'row g-2 mb-2 align-items-center room-row';
+            div.innerHTML =
+                '<div class="col-4"><input class="form-control form-control-sm" name="rm_name" placeholder="如 卧室A" value="' + escHtml(name) + '"></div>'
+                + '<div class="col-2"><input type="number" step="0.01" min="0" class="form-control form-control-sm" name="rm_area" placeholder="0.00" value="' + escHtml(area) + '"></div>'
+                + '<div class="col-2"><select class="form-select form-select-sm" name="rm_orient">' + buildOptions(ORIENTS, orient) + '</select></div>'
+                + '<div class="col-3"><select class="form-select form-select-sm" name="rm_win">' + buildOptions(WINDOWS, win) + '</select></div>'
+                + '<div class="col-1 text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" data-rm-del title="删除此房间"><i class="bi bi-x-lg"></i></button></div>';
+            div.querySelector('[data-rm-del]').addEventListener('click', function () {
+                div.remove(); syncRooms();
+            });
+            document.getElementById('roomRows').appendChild(div);
+            return div;
+        }
+        // 解析 "客厅 19.11平米 南 普通窗；卧室A 10.23平米 南 普通窗" → 房间数组
+        function parseRoomDetail(str) {
+            return String(str || '').split(/[；;]/).map(function (s) { return s.trim(); }).filter(Boolean).map(function (seg) {
+                const m = seg.match(/^(.+?)\s*(\d+(?:\.\d+)?)\s*平米\s*(.*)$/);
+                if (!m) return { name: seg, area: '', orient: '', win: '' };
+                let name = m[1].trim(), area = m[2], rest = m[3].trim(), win = '';
+                const wm = rest.match(/(普通窗|落地窗|飘窗|无窗)/);
+                if (wm) {
+                    win = wm[1];
+                    rest = (rest.slice(0, wm.index) + rest.slice(wm.index + wm[1].length)).replace(/\s+/g, ' ').trim();
+                }
+                return { name: name, area: area, orient: rest.replace(/\s+/g, ''), win: win };
+            });
+        }
+        function setRoomsFromDetail(str) {
+            document.getElementById('roomRows').innerHTML = '';
+            parseRoomDetail(str).forEach(function (rm) { addRoomRow(rm.name, rm.area, rm.orient, rm.win); });
+            syncRooms();
+        }
+        // 同步：房间行 → 提交字段（room_detail 串 + 户型数量自动统计）
+        function syncRooms() {
+            const rooms = Array.from(document.querySelectorAll('#roomRows .room-row')).map(function (r) {
+                return {
+                    name: r.querySelector('[name="rm_name"]').value.trim(),
+                    area: r.querySelector('[name="rm_area"]').value.trim(),
+                    orient: r.querySelector('[name="rm_orient"]').value,
+                    win: r.querySelector('[name="rm_win"]').value
+                };
+            }).filter(function (rm) { return rm.name || rm.area; });
+            document.getElementById('roomDetailInput').value = rooms.map(function (rm) {
+                let s = (rm.name || '房间') + (rm.area ? ' ' + rm.area + '平米' : '');
+                if (rm.orient) s += ' ' + rm.orient;
+                if (rm.win) s += ' ' + rm.win;
+                return s;
+            }).join('；');
+            document.getElementById('roomEmpty').classList.toggle('d-none', rooms.length > 0);
+            const c = { layout_rooms: 0, layout_halls: 0, layout_baths: 0, layout_kitchens: 0, layout_balconies: 0, layout_terraces: 0, layout_gardens: 0, layout_storages: 0 };
+            rooms.forEach(function (rm) {
+                const n = rm.name;
+                if (/储藏/.test(n)) c.layout_storages++;
+                else if (/花园/.test(n)) c.layout_gardens++;
+                else if (/露台/.test(n)) c.layout_terraces++;
+                else if (/阳台/.test(n)) c.layout_balconies++;
+                else if (/卫/.test(n)) c.layout_baths++;
+                else if (/厨/.test(n)) c.layout_kitchens++;
+                else if (/厅/.test(n)) c.layout_halls++;
+                else if (/卧|书房|室/.test(n)) c.layout_rooms++;
+            });
+            Object.keys(c).forEach(function (k) {
+                const el = document.querySelector('[name="' + k + '"]');
+                if (el) el.value = c[k] > 0 ? c[k] : '';
+            });
+        }
+        document.getElementById('addRoomBtn').addEventListener('click', function () {
+            addRoomRow('', '', '', '');
+            syncRooms();
+            const rows = document.querySelectorAll('#roomRows .room-row');
+            if (rows.length) rows[rows.length - 1].querySelector('[name="rm_name"]').focus();
+        });
+        ['input', 'change'].forEach(function (evt) {
+            document.getElementById('roomRows').addEventListener(evt, syncRooms);
+        });
+
+        // ===== 图片放大预览 + 户型图指定 =====
+        const lightbox = document.getElementById('imgLightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        function openLightbox(src) {
+            lightboxImg.src = src;
+            lightbox.classList.add('show');
+        }
+        lightbox.addEventListener('click', function () {
+            lightbox.classList.remove('show');
+            lightboxImg.src = '';
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { lightbox.classList.remove('show'); lightboxImg.src = ''; }
+        });
+        document.getElementById('floorPlanImg').addEventListener('click', function () {
+            if (this.src) openLightbox(this.src);
+        });
+        function setFloorPlan(uri, silent) {
+            const fp = document.getElementById('floorPlanImg');
+            fp.src = uri;
+            fp.classList.remove('d-none');
+            document.getElementById('floorPlanEmpty').classList.add('d-none');
+            if (!silent) showResult(true, '已指定户型图，点击户型图可放大查看');
+            trimImageWhitespace(uri, function (trimmed) { if (trimmed) fp.src = trimmed; });
+        }
+
+        // 自动裁掉截图四周的白边，让户型图在卡片内顶格显示
+        function trimImageWhitespace(uri, cb) {
+            const im = new Image();
+            im.onload = function () {
+                try {
+                    const w = im.naturalWidth, h = im.naturalHeight;
+                    const c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    const ctx = c.getContext('2d');
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.drawImage(im, 0, 0);
+                    const d = ctx.getImageData(0, 0, w, h).data;
+                    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+                    for (let y = 0; y < h; y += 2) {
+                        for (let x = 0; x < w; x += 2) {
+                            const i = (y * w + x) * 4;
+                            if (d[i] < 216 || d[i + 1] < 216 || d[i + 2] < 216) {
+                                if (x < x0) x0 = x;
+                                if (x > x1) x1 = x;
+                                if (y < y0) y0 = y;
+                                if (y > y1) y1 = y;
+                            }
+                        }
+                    }
+                    if (x1 < 0) { cb(null); return; }
+                    const pad = 8;
+                    x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad);
+                    x1 = Math.min(w - 1, x1 + pad); y1 = Math.min(h - 1, y1 + pad);
+                    const tw = x1 - x0 + 1, th = y1 - y0 + 1;
+                    if (tw >= w * 0.98 && th >= h * 0.98) { cb(null); return; } // 几乎没白边，不处理
+                    const c2 = document.createElement('canvas');
+                    c2.width = tw; c2.height = th;
+                    c2.getContext('2d').drawImage(c, x0, y0, tw, th, 0, 0, tw, th);
+                    cb(c2.toDataURL('image/jpeg', 0.9));
+                } catch (err) { cb(null); }
+            };
+            im.onerror = function () { cb(null); };
+            im.src = uri;
+        }
+
+        // 用户手动修改后，AI 蓝色标记恢复普通颜色
+        const valuateForm = document.getElementById('valuateForm');
+        ['input', 'change'].forEach(function (evt) {
+            valuateForm.addEventListener(evt, function (e) {
+                const el = e.target;
+                if (!el || !el.name) return;
+                el.classList.remove('ai-filled');
+                const fc = el.closest('.form-check');
+                if (fc && fc.querySelector('label')) fc.querySelector('label').classList.remove('ai-filled');
+            });
+        });
 
         function showResult(ok, msg) {
             const out = document.getElementById('parseResult');
@@ -717,46 +1097,16 @@
 
         function buildMissingMsg(missing) {
             if (!missing || !missing.length) return '。请核对后提交。';
-            return '；还缺：' + missing.map(function (m) { return _fieldNameMap[m] || m; }).join('、') + '（请手动补填）。请核对后提交。';
+            return '；还缺 ' + missing.length + ' 个字段。请核对后提交。';
         }
 
-        // 文字解析
-        document.getElementById('parsePasteBtn').addEventListener('click', async function () {
-            const btn = this;
-            const box = document.getElementById('pasteBox');
-            const text = (box.value || '').trim();
-            if (text.length < 10) {
-                showResult(false, '请先粘贴完整的房源文字信息（至少 10 个字）');
-                return;
-            }
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>解析中…';
-            try {
-                const resp = await fetch('/valuate/parse_paste', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
-                });
-                const data = await resp.json();
-                if (!data.ok) { showResult(false, data.error || '解析失败，请手动填写'); return; }
-                const n = applyFields(data.fields || {});
-                showResult(true, '已填充 ' + n + ' 个字段' + buildMissingMsg(data.missing));
-                box.value = '';
-            } catch (e) {
-                showResult(false, '解析请求失败，请手动填写');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-stars me-1"></i>解析文字';
-            }
-        });
-
-        // 截图解析：选择文件 + Ctrl+V 粘贴截图
+        // 截图解析：仅支持 Ctrl+V 直接粘贴到本区域
         let imgUris = [];
-        const imgInput = document.getElementById('imgInput');
         const preview = document.getElementById('imgPreview');
 
         function refreshPreview() {
             const cnt = document.getElementById('imgCount');
-            cnt.textContent = imgUris.length;
+            if (cnt) cnt.textContent = imgUris.length;
             const btn = document.getElementById('parseImgBtn');
             btn.classList.toggle('d-none', imgUris.length === 0);
             preview.classList.toggle('d-none', imgUris.length === 0);
@@ -764,9 +1114,13 @@
             imgUris.forEach(function (uri, i) {
                 const wrap = document.createElement('div');
                 wrap.className = 'position-relative';
-                wrap.innerHTML = '<img src="' + uri + '" style="height:64px;border-radius:.375rem;border:1px solid #dee2e6;">';
+                wrap.innerHTML = '<img class="preview-img" src="' + uri + '" style="height:120px;border-radius:.375rem;border:1px solid #dee2e6;">'
+                    + '<button type="button" data-fp class="position-absolute" style="bottom:4px;left:4px;font-size:.62rem;line-height:1;padding:.15rem .35rem;border:1px solid #ccd2ee;background:rgba(255,255,255,.9);border-radius:.3rem;color:#555;">设为户型图</button>';
+                wrap.querySelector('img').addEventListener('click', function () { openLightbox(uri); });
+                wrap.querySelector('[data-fp]').addEventListener('click', function () { setFloorPlan(uri); });
                 const x = document.createElement('button');
-                x.type = 'button'; x.className = 'btn-close position-absolute'; x.style.cssText = 'top:-4px;right:-4px;font-size:.55rem;background-color:#fff;border-radius:50%;padding:.2rem;';
+                x.type = 'button'; x.className = 'btn-close position-absolute';
+                x.style.cssText = 'top:-4px;right:-4px;font-size:.55rem;background-color:#fff;border-radius:50%;padding:.2rem;';
                 x.addEventListener('click', function () { imgUris.splice(i, 1); refreshPreview(); });
                 wrap.appendChild(x);
                 preview.appendChild(wrap);
@@ -778,15 +1132,38 @@
             if (file.size > 3 * 1024 * 1024) { showResult(false, '截图「' + file.name + '」超过 3MB，请压缩后重试'); return; }
             if (imgUris.length >= 4) { showResult(false, '一次最多 4 张截图'); return; }
             const reader = new FileReader();
-            reader.onload = function () { imgUris.push(reader.result); refreshPreview(); showResult(true, '已添加截图 ' + imgUris.length + ' 张，点「解析截图」开始识别'); };
+            reader.onload = function () {
+                compressImage(reader.result, function (compressed) {
+                    imgUris.push(compressed); refreshPreview(); showResult(true, '已添加截图 ' + imgUris.length + ' 张，点「解析截图」开始识别');
+                });
+            };
             reader.readAsDataURL(file);
         }
 
-        document.getElementById('selectImgBtn').addEventListener('click', function () { imgInput.click(); });
-        imgInput.addEventListener('change', function () {
-            Array.from(imgInput.files || []).forEach(addImageFile);
-            imgInput.value = '';
-        });
+        // 客户端压缩：长边≤1600px、JPEG 85%，大幅减小上传体积与模型视觉 token，加快识别
+        function compressImage(dataUri, cb) {
+            const img = new Image();
+            img.onload = function () {
+                try {
+                    const MAX = 1280;
+                    let w = img.width, h = img.height;
+                    if (Math.max(w, h) > MAX) {
+                        const r = MAX / Math.max(w, h);
+                        w = Math.round(w * r); h = Math.round(h * r);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#fff';           // 透明底 PNG 转 JPEG 防变黑
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    cb(canvas.toDataURL('image/jpeg', 0.8));
+                } catch (err) { cb(dataUri); }
+            };
+            img.onerror = function () { cb(dataUri); };
+            img.src = dataUri;
+        }
+
         document.getElementById('pasteHelper').addEventListener('paste', function (e) {
             const items = (e.clipboardData && e.clipboardData.items) || [];
             let hit = false;
@@ -801,8 +1178,15 @@
         document.getElementById('parseImgBtn').addEventListener('click', async function () {
             const btn = this;
             if (!imgUris.length) { showResult(false, '请先添加截图'); return; }
+            const timerEl = document.getElementById('parseTimer');
+            const t0 = Date.now();
+            timerEl.textContent = '已用时 0.0 秒';
+            const timer = setInterval(function () {
+                timerEl.textContent = '已用时 ' + ((Date.now() - t0) / 1000).toFixed(1) + ' 秒';
+            }, 100);
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>AI 识别中…';
+            btn.querySelector('.parse-idle').classList.add('d-none');
+            btn.querySelector('.parse-busy').classList.remove('d-none');
             try {
                 const resp = await fetch('/valuate/parse_image', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -811,13 +1195,22 @@
                 const data = await resp.json();
                 if (!data.ok) { showResult(false, data.error || '解析失败'); return; }
                 const n = applyFields(data.fields || {});
-                showResult(true, '已从截图填充 ' + n + ' 个字段' + buildMissingMsg(data.missing));
-                imgUris = []; refreshPreview();
+                const secs = ((Date.now() - t0) / 1000).toFixed(1);
+                showResult(true, '已从截图填充 ' + n + ' 个字段，耗时 ' + secs + ' 秒' + buildMissingMsg(data.missing) + (data.warning ? '；' + data.warning : ''));
+                const fpIdx = (typeof data.floor_plan_index === 'number') ? data.floor_plan_index : -1;
+                const fpUri = (fpIdx >= 0 && imgUris[fpIdx]) ? imgUris[fpIdx] : null;
+                // 缩略图保留不消失，便于核对/重新解析
+                if (fpUri && document.getElementById('floorPlanImg').classList.contains('d-none')) {
+                    setFloorPlan(fpUri, true);  // AI 判定为户型图的那张，自动展示在左侧（不覆盖手动选择，不打扰提示语）
+                }
             } catch (e) {
                 showResult(false, '解析请求失败，请手动填写');
             } finally {
+                clearInterval(timer);
+                timerEl.textContent = '耗时 ' + ((Date.now() - t0) / 1000).toFixed(1) + ' 秒';
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-eye me-1"></i>解析截图（<span id="imgCount">' + imgUris.length + '</span> 张）';
+                btn.querySelector('.parse-busy').classList.add('d-none');
+                btn.querySelector('.parse-idle').classList.remove('d-none');
             }
         });
     </script>

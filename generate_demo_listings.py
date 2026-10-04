@@ -15,9 +15,16 @@ import random
 
 SEED = 20260930
 IMAGE_POOL = [
-    "https://images.unsplash.com/photo-1630699293388-0938c397106a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5jM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDV8&ixlib=rb-4.1.0&q=80&w=1080",
-    "https://images.unsplash.com/photo-1684928365167-e91916573122?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5jM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDd8&ixlib=rb-4.1.0&q=80&w=1080",
-    "https://images.unsplash.com/photo-1562821696-c68d007f943b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5jM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzYwODAzNDl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1589578036109-592d4dadb148?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NDl8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1617104678098-de229db51175?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTB8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTF8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1645109176591-bc977c1aa35c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1723075471552-26781157140e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTN8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1676680071181-0a0b45968d23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTR8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1673119299513-f98a84e4b600?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTV8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1762089424593-c66eb5c51aaa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTZ8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1682888818696-906287d759f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTd8&ixlib=rb-4.1.0&q=80&w=1080",
+    "https://images.unsplash.com/photo-1704457031528-adfa0abf6bba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MjM2NzJ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTExMDU0NTh8&ixlib=rb-4.1.0&q=80&w=1080",
 ]
 
 # 行政区：权重（占比参考北京存量房市场结构）+ 单价区间（万/㎡）+ 商圈词库

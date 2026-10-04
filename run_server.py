@@ -8,7 +8,8 @@ os.environ.setdefault("ADMIN_PASSWORD", "local_dev_pass")
 try:
     import local_secrets  # noqa: F401
 
-    for _k in ("MIMO_API_KEY", "MIMO_BASE_URL", "MIMO_MODEL", "BJ_DATA_USERKEY"):
+    for _k in ("MIMO_API_KEY", "MIMO_BASE_URL", "MIMO_MODEL", "BJ_DATA_USERKEY",
+               "DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL", "DEEPSEEK_VL_MODEL"):
         _v = getattr(local_secrets, _k, None)
         if _v:
             os.environ.setdefault(_k, str(_v))
