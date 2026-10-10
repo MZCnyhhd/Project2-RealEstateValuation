@@ -330,7 +330,7 @@
                                     <span id="aiStatusBadge" class="badge rounded-pill bg-light border text-secondary ms-auto">AI 状态检测中…</span>
                                 </div>
 
-                                <!-- ① 免费文字解析：正则提取，0 密钥，始终可用 -->
+<!-- ① 免费文字解析：正则提取，0 密钥，始终可用 -->
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold mb-1">
                                         <i class="bi bi-tag-fill text-success me-1"></i>① 免费文字解析（粘贴房源文字，正则自动提取 · 无需任何密钥）
@@ -342,13 +342,16 @@
                                             <i class="bi bi-magic me-1"></i>免费解析
                                         </button>
                                     </div>
-                                    <div class="form-text">只提取事实字段、原文不保存；解析后可逐项正确修改再提交。</div>
+                                    <div class="form-text">
+                                        <i class="bi bi-lightbulb text-warning me-1"></i>
+                                        不想手打？手机<b>微信里长截图 → 选「识别文字」→ 复制</b>，或系统截图自带「提取文字」，再粘贴到这里即可。只提取事实字段、原文不保存。
+                                    </div>
                                 </div>
 
-                                <!-- ② 截图 AI 识别：可选增强，无密钥时优雅降级 -->
+                                <!-- ② 截图识别：AI 视觉为可选增强，无密钥时隐藏按钮 -->
                                 <div>
                                     <label class="form-label small fw-bold mb-1">
-                                        <i class="bi bi-eye me-1"></i>② 截图 AI 识别（可选增强 · 粘贴/选择户型图与基本信息截图）
+                                        <i class="bi bi-eye me-1"></i>② 截图 AI 识别（可选增强 · 仅用于自动填户型图几何信息）
                                     </label>
                                     <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
                                         <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="parseImgBtn">
@@ -359,8 +362,9 @@
                                         <span id="parseResult" class="small text-muted"></span>
                                     </div>
                                     <div id="imgPreview" class="d-none d-flex gap-2 mb-2 flex-wrap"></div>
-                                    <div id="aiHint" class="small text-muted d-none">
-                                        <i class="bi bi-info-circle me-1"></i>截图 AI 识别未开启：站长尚未配置免费视觉密钥。您仍可手动填写，或用上方「① 免费文字解析」。
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle text-muted me-1"></i>
+                                        仅在站长配置视觉密钥后开启，用于识别户型图里的房间朝向/窗型等图形信息（文字字段请用上方①）。
                                     </div>
                                 </div>
                             </div>
@@ -1137,7 +1141,7 @@
             const cnt = document.getElementById('imgCount');
             if (cnt) cnt.textContent = imgUris.length;
             const btn = document.getElementById('parseImgBtn');
-            btn.classList.toggle('d-none', imgUris.length === 0);
+            btn.classList.toggle('d-none', imgUris.length === 0 || !aiVision);
             preview.classList.toggle('d-none', imgUris.length === 0);
             preview.innerHTML = '';
             imgUris.forEach(function (uri, i) {
@@ -1163,7 +1167,8 @@
             const reader = new FileReader();
             reader.onload = function () {
                 compressImage(reader.result, function (compressed) {
-                    imgUris.push(compressed); refreshPreview(); showResult(true, '已添加截图 ' + imgUris.length + ' 张，点「解析截图」开始识别');
+                    imgUris.push(compressed); refreshPreview();
+                    showInfo('已添加截图 ' + imgUris.length + ' 张' + (aiVision ? '，点「解析截图」开始 AI 识别' : '。文字字段请用「提取文字」后粘贴到上方①框'));
                 });
             };
             reader.readAsDataURL(file);
@@ -1194,14 +1199,33 @@
         }
 
         document.getElementById('pasteHelper').addEventListener('paste', function (e) {
-            const items = (e.clipboardData && e.clipboardData.items) || [];
+            const cd = e.clipboardData;
+            const items = (cd && cd.items) || [];
             let hit = false;
             for (const it of items) {
                 if (it.type && it.type.startsWith('image/')) {
                     addImageFile(it.getAsFile()); hit = true;
                 }
             }
-            if (hit) e.preventDefault();
+            // 粘贴的是纯文字（已用系统"提取文字"或直接复制房源文案）→ 直接送进解析框
+            if (!hit && cd) {
+                const text = cd.getData('text/plain') || '';
+                if (text.trim().length >= 10) {
+                    const ta = document.getElementById('pasteTextArea');
+                    if (ta && !ta.value.trim()) {
+                        ta.value = text.trim().slice(0, 2000);
+                        showInfo('已检测到文字内容，点「免费解析」即可自动填充字段');
+                        document.getElementById('parsePasteBtn').focus();
+                    }
+                }
+            }
+            if (hit) {
+                e.preventDefault();
+                // 无视觉密钥时给出明确下一步，而不是让用户对着没反应的按钮发呆
+                if (!aiVision) {
+                    showInfo('已添加 ' + imgUris.length + ' 张截图。免费文字字段请用微信/系统截图的「提取文字」后粘贴到上方①框；户型图几何信息需站长开启 AI 视觉。');
+                }
+            }
         });
 
         // ===== AI 状态探测 + 免费文字解析 =====
@@ -1217,16 +1241,14 @@
                 .then(function (d) {
                     aiVision = !!(d && d.vision);
                     const badge = document.getElementById('aiStatusBadge');
-                    const hint = document.getElementById('aiHint');
                     if (aiVision) {
                         badge.className = 'badge rounded-pill bg-success-subtle border border-success text-success ms-auto';
                         badge.textContent = '🤖 截图 AI 识别已开启';
-                        if (hint) hint.classList.add('d-none');
                     } else {
                         badge.className = 'badge rounded-pill bg-light border text-secondary ms-auto';
-                        badge.textContent = '🔑 访客无需任何密钥 · AI 未开启';
-                        if (hint) hint.classList.remove('d-none');
+                        badge.textContent = '🔑 访客无需任何密钥 · 文字解析免费';
                     }
+                    if (typeof refreshPreview === 'function') refreshPreview();
                 })
                 .catch(function () {
                     const badge = document.getElementById('aiStatusBadge');
