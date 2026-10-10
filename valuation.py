@@ -737,6 +737,13 @@ def evaluate_user_input(form_data: dict, version: str = "professional",
     ver_level = VERSIONS.get(version, 3)
     active_dims = [d for d in DIMENSIONS if d["ver"] <= ver_level]
 
+    # 类型防御：线上表单走 request.form 全是 str，但人工录入/JSON/测试可能传进来数字或 None，
+    # 统一归一化为字符串，避免后续字符串拼接与 float() 转换抛 TypeError
+    form_data = {
+        k: ("" if v is None else str(v).strip())
+        for k, v in (form_data or {}).items()
+    }
+
     values, direct_keys = _collect_dim_values(form_data)
     typical_values, _typical_direct = _collect_dim_values(_TYPICAL_FORM)
 
